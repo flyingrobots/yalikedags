@@ -1,0 +1,104 @@
+# Plan and receipt JSON
+
+A plan is written by `plan --out <file>` or `plan --json`, and read by `apply --plan <file>`. Schema id `yalikedags/plan/1`. Encoded and decoded in `src/adapters/plan/PlanJsonCodec.ts`; the mutation classes are in `src/core/domain/Mutation.ts`.
+
+## Plan
+
+```json
+{
+  "schema": "yalikedags/plan/1",
+  "desiredSource": "dag:plan.json",
+  "currentSource": "linear:example-project",
+  "createdAt": "2026-09-23",
+  "labels": { "<source id>": "PRO-1" },
+  "mutations": [
+    { "kind": "add-blocking-relation", "blockerId": "<id>", "blockedId": "<id>" },
+    { "kind": "remove-blocking-relation", "blockerId": "<id>", "blockedId": "<id>" },
+    { "kind": "set-estimate", "taskId": "<id>", "from": null, "to": 2 },
+    { "kind": "set-milestone", "taskId": "<id>", "from": null, "to": "Stream One" }
+  ],
+  "unmatched": [
+    { "desiredId": "<id>", "desiredKey": "<key>", "reason": "no task at the source has this id or key" }
+  ]
+}
+```
+
+| Field | Meaning |
+|---|---|
+| `desiredSource`, `currentSource` | the `kind:value` specs the plan was computed from. `apply` refuses a `--current` that disagrees with `currentSource`. |
+| `createdAt` | the day the plan was computed, from the clock port |
+| `labels` | source-side id to human key, so a plan reads without fetching anything |
+| `mutations` | performed in this order; ordering is deterministic for the same inputs |
+| `unmatched` | desired tasks with no counterpart. Nothing is written for these. |
+
+All ids in `mutations` are **source-side** ids, so a plan is meaningless against a different project. That is what `currentSource` guards.
+
+`from` records what the source held when the plan was computed. It is there so a reviewer can see what is being replaced, so a mutation that overwrites a value can be classified as destructive, and so `apply` can tell whether the source has moved since (see **Stale mutations** below).
+
+## A plan that would not schedule is never written
+
+`plan` builds the graph the plan would leave behind and refuses to emit it if that graph has a cycle the source did not already have. Exit code `10`, `PLAN_WOULD_CYCLE`, and the message names the cards.
+
+Each edge in such a plan is individually reasonable, which is why this is checked on the set rather than one at a time, and why it is checked here rather than trusted to the source: Linear will accept every one of those writes in turn and leave you with a project that no longer schedules.
+
+A cycle the source *already* has is not the plan's doing. Those are left alone, reported by `audit`, and do not block a plan.
+
+## Which mutations are destructive
+
+| Mutation | Destructive when |
+|---|---|
+| `add-blocking-relation` | never |
+| `remove-blocking-relation` | always |
+| `set-estimate` | `from` is not `null` |
+| `set-milestone` | `from` is not `null` |
+
+`apply` skips every destructive mutation unless `--allow-destructive` is passed. Removals are only ever put in a plan when `--prune` was passed.
+
+## Stale mutations
+
+The table above is decided when the plan is made. `apply` re-reads the source first and checks each mutation against it, because otherwise that verdict is frozen against a world that moves.
+
+Plan while a card has no estimate and the plan calls the write non-destructive. If a teammate sets an estimate in the meantime, performing it would clobber their value as a change nobody reviewed. So `apply` reports that mutation as `stale`, writes nothing for it, and leaves the receipt incomplete, which exits `8`.
+
+| Mutation | Its precondition |
+|---|---|
+| `add-blocking-relation` | both tasks still exist |
+| `remove-blocking-relation` | the blocked task still exists |
+| `set-estimate` | the estimate is still `from` |
+| `set-milestone` | the milestone is still `from` |
+
+`--allow-destructive` does not waive this. The two gates answer different questions: one is whether you accept losing a value you saw, the other is whether the value is still the one you saw.
+
+A mutation whose effect is *already* in place is `confirmed` without a write, and that check runs first, so re-running a half-applied plan stays free.
+
+## Decoding refuses rather than skips
+
+An unknown `kind`, a missing required field, or the wrong `schema` is a refusal for the whole document. A plan that silently dropped a mutation would make `apply` do less than the plan a person reviewed said it would.
+
+## Receipt
+
+Written by `apply --confirm --receipt <file>`.
+
+```json
+{
+  "target": "Linear project example-project",
+  "at": "2026-09-23",
+  "verified": true,
+  "complete": true,
+  "counts": { "confirmed": 12, "unconfirmed": 0, "failed": 0, "skipped": 0, "stale": 0 },
+  "results": [
+    { "kind": "add-blocking-relation", "blockerId": "<id>", "blockedId": "<id>", "outcome": "confirmed", "detail": "" }
+  ]
+}
+```
+
+| Field | Meaning |
+|---|---|
+| `verified` | the source was read again after writing. When `false`, no outcome below it is trustworthy. |
+| `complete` | `verified`, and every result is `confirmed` or `skipped` |
+| `outcome` | one of `confirmed`, `unconfirmed`, `failed`, `skipped`, `stale` |
+| `detail` | the refusal for `failed`, the reason for `skipped` or `stale`, and for `unconfirmed` the note that a fresh read does not show the write |
+
+`stale` is not `skipped`: nobody chose it, and it means the plan no longer describes the source. Plan again rather than passing another flag.
+
+`apply --confirm` exits `0` when `complete` is true and `8` otherwise.

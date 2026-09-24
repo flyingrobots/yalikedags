@@ -1,0 +1,10 @@
+- [ ] Build Authentication System
+  - [x] Create user database schema
+  - [x] Implement password hashing
+  - [x] Add login endpoint
+  - [x] Add logout endpoint
+- [ ] Setup Frontend
+  - [ ] Install React dependencies
+  - [ ] Create login form component
+- [x] Write documentation
+- [ ] Deploy to production

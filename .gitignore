@@ -1,0 +1,17 @@
+node_modules/
+dist/
+coverage/
+/output/
+.live-fixture.json
+*.log
+.env
+.env.*
+.claude/
+.DS_Store
+._*
+.Spotlight-V100
+.Trashes
+.obsidian/
+
+# Local clean-room terms: names that must never be committed here.
+.clean-room.local

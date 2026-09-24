@@ -1,0 +1,37 @@
+{
+  "name": "@flyingrobots/yalikedags",
+  "version": "0.1.0",
+  "description": "Ya like dags? Turn a Linear project into a dependency DAG, find the frontier, the workstreams and the critical path, audit the cards, and look at it in a local viewer.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "private": true,
+  "bin": {
+    "yalikedags": "./src/cli.ts"
+  },
+  "scripts": {
+    "test": "bun test test/",
+    "lint": "bunx eslint . && bunx tsc --noEmit",
+    "typecheck": "bunx tsc --noEmit",
+    "check": "bun run lint && bun run docs:lint && bun run clean-room && bun test",
+    "docs:lint": "bun scripts/docs-lint.ts",
+    "clean-room": "bun scripts/clean-room.ts",
+    "test:live": "bun run fixture:provision && YALIKEDAGS_LIVE=1 bun test test/live/",
+    "fixture:provision": "bun scripts/live-fixture.ts provision",
+    "fixture:verify": "bun scripts/live-fixture.ts verify",
+    "fixture:plan": "bun scripts/live-fixture.ts provision --dry-run"
+  },
+  "engines": {
+    "bun": ">=1.2"
+  },
+  "dependencies": {
+    "@git-stunts/vault": "^1.0.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9",
+    "@types/bun": "latest",
+    "eslint": "^9",
+    "jiti": "^2.7.0",
+    "typescript": "^5",
+    "typescript-eslint": "^8"
+  }
+}

@@ -1,0 +1,12 @@
+- [x] Setup project repository
+- [x] Create basic project structure
+- [ ] Implement core DAG builder (depends on: Create basic project structure)
+- [ ] Add GitHub issue parser (depends on: Implement core DAG builder)
+- [ ] Add task list parser (depends on: Implement core DAG builder)
+- [ ] Implement state determination logic [WIP] (depends on: Implement core DAG builder)
+- [ ] Create GraphViz DOT generator (depends on: Implement state determination logic)
+- [ ] Add CLI interface (depends on: Add GitHub issue parser, Add task list parser, Create GraphViz DOT generator)
+- [ ] Write documentation
+- [ ] Add unit tests (depends on: Add CLI interface)
+- [ ] Create example files (depends on: Write documentation)
+- [ ] Deploy to production (depends on: Add unit tests, Create example files)

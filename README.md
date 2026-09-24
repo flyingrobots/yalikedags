@@ -1,0 +1,79 @@
+# yalikedags
+
+![Do ya like dags?](dags.png)
+
+> "Ya like dags?"
+> "Dags?"
+> "Dags. Ya like dags?"
+> "Oh, dogs. Sure, I like dags. I like caravans more."
+>
+> Mickey O'Neil, *Snatch* (2000). This tool is about the other kind.
+
+Right. So you've got a Linear project, yeah? Two hundred-odd cards, all sat there like they're waiting for a fight what's never gonna happen. And nobody can tell ya which one comes first, which one's holding up the rest, or which ones are the same job wearing two hats. That's what this is for. yalikedags reads your Linear project, builds the dependency DAG out of it, tells ya what's ready, what's blocked, where the long chain is, and which cards are talking rubbish. Then it draws the whole thing so ya can look at it proper.
+
+Now, if the dependencies live in a file on your machine and not in Linear where everyone can see 'em, that's no good to anybody, is it. So there's a write path an' all: it works out the difference, writes ya a plan, and ya read the plan. Nothing moves till ya say `--confirm`. Then it does the job and goes back and checks the job got done. Every other command in here touches nothing. Read only, like a good dag on a lead.
+
+It's for the whole team. Everyone's got their own Linear key in their own keychain, everyone points it at the same project, everyone sees the same graph. Linear is the source of truth; this just has the good sense to draw it.
+
+And when ya want someone else to see it who hasn't got the tool, or the key, or the first idea what a terminal is: `render --format html --out dag.html`. One file. Whole viewer in it, graph and all. Opens by double-clicking, asks the internet for nothing, works on a plane. Send it to whoever ya like.
+
+## Start here
+
+Get a graph on screen in about two minutes, off the bundled example, no key needed: [See your first DAG](docs/tutorials/first-dag.md).
+
+## Common jobs
+
+- [Store your Linear key in the keychain](docs/how-to/store-the-linear-key.md) (once, then forget it)
+- [Sync a Linear project to a snapshot](docs/how-to/sync-a-project.md)
+- [Audit a project for missing dependencies and cards that want splitting](docs/how-to/audit-a-project.md)
+- [Open the local viewer](docs/how-to/open-the-viewer.md), or write it out as one file ya can send someone
+- [Reconcile a graph into Linear](docs/how-to/reconcile-into-linear.md), which is the one thing here that writes
+
+## Look things up
+
+- [CLI commands and options](docs/reference/cli.md)
+- [Exit codes](docs/reference/exit-codes.md)
+- [The snapshot JSON](docs/reference/snapshot.md)
+- [The plan and receipt JSON](docs/reference/plan.md)
+- [The viewer's screen and controls](docs/reference/viewer.md)
+
+## Understand it
+
+- [How the frontier, the workstreams and the critical path are derived](docs/explanation/derived-views.md)
+- [What Linear owns and what this tool derives](docs/explanation/source-of-truth.md)
+
+## When it goes wrong
+
+- [Troubleshooting](docs/troubleshooting/index.md): the sync refused, the graph has a cycle, a relation points somewhere odd
+
+## What ya need
+
+- [bun](https://bun.sh) 1.2 or newer. That's the runtime. There is no Python in here; the Python that used to be here is in the first commit if ya want to look at it, but ya don't.
+- A Linear personal API key, stored once in your OS keychain through [`@git-stunts/vault`](https://github.com/git-stunts/vault). Or `LINEAR_API_KEY` in the environment if ya must.
+- GraphViz `dot` only if ya want to render the `.dot` output yourself. The built-in SVG and the viewer need nothing.
+
+```bash
+bun install
+bun src/cli.ts render --tasklist examples/example-tasklist.txt
+```
+
+Expected output, abridged:
+
+```text
+loaded 12 tasks from task list examples/example-tasklist.txt
+task list examples/example-tasklist.txt, as of <today>: 12 tasks (2 done, 2 ready, 7 blocked, 1 in-progress)
+
+frontier (2 ready tasks, most urgent first):
+  implement-core-dag-builder  Implement core DAG builder  unlocks:7
+  write-documentation  Write documentation  unlocks:2
+...
+critical path by depth: 6 tasks: implement-core-dag-builder then ... then deploy-to-production
+```
+
+## For them what want to change it
+
+Ports and adapters, TypeScript on bun, tests first, standards before code. There's a live test tier an' all, with its own fixture and its own token, fenced off so it can't wander into anything real: [live testing](docs/contributing/live-testing.md). Read these in order and don't skip: [docs/standards/typescript.md](docs/standards/typescript.md), [docs/standards/testing.md](docs/standards/testing.md), [docs/standards/documentation.md](docs/standards/documentation.md). Then [the contributor guide](docs/contributing/architecture.md) and [CONTRIBUTING.md](CONTRIBUTING.md). Run `bun run check` before ya push or the hooks'll have ya.
+
+## Licence
+
+Apache 2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE). Dag not included.
