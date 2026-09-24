@@ -12,10 +12,10 @@ html,body{margin:0;height:100%;font:13px Helvetica,Arial,sans-serif;color:#111;b
 #graph svg{width:100%;height:100%}
 #grid{flex:1;min-height:0;overflow:auto;padding:12px;background:#fff}
 #wrap[data-view=graph] #grid{display:none}#wrap[data-view=grid] #graph{display:none}
-#grid-table{border-collapse:collapse}#grid-table th,#grid-table td{border:1px solid #ddd;vertical-align:top;padding:4px;min-width:150px;text-align:left}
-#grid-table thead th{position:sticky;top:0;background:#f6f6f6}#grid-table tbody th{position:sticky;left:0;background:#f6f6f6;font-weight:600;white-space:nowrap}
+#grid-table{border-collapse:collapse;width:100%;table-layout:fixed}#grid-table th,#grid-table td{border:1px solid #ddd;vertical-align:top;padding:4px;text-align:left;overflow-wrap:anywhere}
+#grid-table thead th{position:sticky;top:0;background:#f6f6f6}#grid-table tbody th{background:#f6f6f6;font-weight:600}
 #grid-table tr.shared th{font-style:italic}
-.card{display:block;max-width:240px;padding:2px 6px;margin:2px 0;border:1.5px solid #333;border-radius:4px;cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card{display:block;padding:2px 6px;margin:2px 0;border:1.5px solid #333;border-radius:4px;cursor:pointer}
 .card.ready{background:#d1ecf1}.card.blocked{background:#f8d7da}.card.in-progress{background:#fff3cd}
 .card.critical{border-width:3px}.card.gatekeeper{border-style:dashed}.card.dim{opacity:.18}.card.selected{outline:3px solid #06c}
 #side{border-left:1px solid #ddd;padding:12px;overflow:auto;background:#f6f6f6}
