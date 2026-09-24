@@ -1,6 +1,5 @@
 import type { Analysis } from "../core/services/Analysis.ts";
 import { escapeXml } from "../adapters/output/SvgRendererAdapter.ts";
-import { gridTable } from "./GridTable.ts";
 
 const STYLE = `
 html,body{margin:0;height:100%;font:13px Helvetica,Arial,sans-serif;color:#111;background:#fafafa}
@@ -55,6 +54,14 @@ const SCRIPT = `
     if (t.description) { html += '<pre style="white-space:pre-wrap;font:12px monospace">' + esc(t.description) + '</pre>'; }
     document.getElementById('detail').innerHTML = html;
   }
+  function card(id){ var t = byId[id]; var cls = ['card', t.state, t.critical ? 'critical' : '', snap.gatekeepers.indexOf(id) >= 0 ? 'gatekeeper' : ''].filter(Boolean).join(' '); return '<span class="' + cls + '" data-id="' + esc(id) + '" title="' + esc(t.title) + '"><b>' + esc(t.key) + '</b> ' + esc(t.title) + '</span>'; }
+  function gridHtml(g){
+    if (!g || g.waves === 0) return '<p>Nothing open.</p>';
+    var heads = ''; for (var i = 0; i < g.waves; i++) { heads += '<th>Wave ' + (i + 1) + '</th>'; }
+    var rows = g.rows.map(function(r){ var label = r.workstream === null ? 'shared prerequisites' : 'workstream ' + (byId[r.workstream] ? byId[r.workstream].key : r.workstream); return '<tr' + (r.workstream === null ? ' class="shared"' : '') + '><th>' + esc(label) + '</th>' + r.cells.map(function(c){ return '<td>' + c.map(card).join('') + '</td>'; }).join('') + '</tr>'; }).join('');
+    return '<table id="grid-table"><thead><tr><th></th>' + heads + '</tr></thead><tbody>' + rows + '</tbody></table>';
+  }
+  document.getElementById('grid').innerHTML = gridHtml(snap.grid);
   document.querySelectorAll('.node,.card').forEach(function(n){ n.addEventListener('click', function(e){ e.stopPropagation(); select(n.getAttribute('data-id')); }); });
   document.addEventListener('keydown', function(e){ if (e.key === 'Escape') clear(); });
   document.getElementById('frontier').innerHTML = snap.frontier.map(function(f){ var t = byId[f.task]; return '<li><a href="#" data-id="' + esc(f.task) + '">' + esc(t.key) + '</a> ' + esc(t.title) + ' <small>unlocks ' + f.unlocks + (f.conflicts.length ? ' CONFLICT ' + esc(f.conflicts.join('; ')) : '') + '</small></li>'; }).join('');
@@ -64,9 +71,10 @@ const SCRIPT = `
 `;
 
 /**
- * The viewer page: inline CSS, the server-rendered SVG and grid table, the
- * snapshot JSON in a data block, and one inline script for the view switch,
- * pan, zoom, selection, and ancestor/descendant highlighting. Nothing is
+ * The viewer page: inline CSS, the server-rendered SVG, the snapshot JSON in a
+ * data block, and one inline script that draws the grid, the frontier and the
+ * findings from that data and handles the view switch, pan, zoom, selection,
+ * and ancestor/descendant highlighting. The server ships data; the page draws. Nothing is
  * fetched. The token never reaches this page; the local process talks to
  * Linear.
  *
@@ -83,7 +91,7 @@ export function viewerPage(a: Analysis, svg: string, snapshotJson: string): stri
 <div id="wrap" data-view="graph"><div id="main">
 <nav id="views"><button type="button" data-view="graph" class="on">Graph</button><button type="button" data-view="grid">Grid</button></nav>
 <div id="graph">${svg}</div>
-<div id="grid">${gridTable(a)}</div>
+<div id="grid"></div>
 </div>
 <aside id="side"><h1>${escapeXml(title)}</h1>
 <div class="legend"><span class="ready">ready</span><span class="blocked">blocked</span><span class="in-progress">in progress</span><span class="done">done</span> thick border: critical path; dashed: gatekeeper</div>

@@ -113,8 +113,9 @@ describe("HtmlRendererAdapter", () => {
 
 /**
  * The grid view: workstreams down the side, waves across the top, one card
- * per open task. Rendered by the server into the same page, so the exported
- * file has it too and the assertions here are on markup.
+ * per open task. The server ships the grid as data in the snapshot; the
+ * page draws it. So the contract under test is the snapshot's `grid`, and
+ * the page's part is an empty container and the switch to show it.
  */
 describe("viewer grid", () => {
   const withGate = new AnalysisService(new FixedClockAdapter("2026-09-23")).analyse(
@@ -126,30 +127,31 @@ describe("viewer grid", () => {
     ],
     "inline",
   );
-  const body = new ViewerRequestHandler(() => withGate).handle("/").body;
-  const cards = [...body.matchAll(/<[a-z]+ class="card[^"]*"[^>]*data-id="([^"]+)"/g)].map((m) => m[1]);
+  const handler = new ViewerRequestHandler(() => withGate);
+  const page = handler.handle("/").body;
+  const snapshot: unknown = JSON.parse(handler.handle("/snapshot.json").body);
 
-  // oracle: specified. One card per open task, none for a done one, one column heading per wave.
-  test("carries a grid with one column per wave and one card per open task", () => {
-    expect(body).toContain('id="grid"');
-    expect(body).toMatch(/<th[^>]*>Wave 1<\/th>/);
-    expect(body).toMatch(/<th[^>]*>Wave 2<\/th>/);
-    expect(body).not.toMatch(/<th[^>]*>Wave 3<\/th>/);
-    expect([...cards].sort()).toEqual(["a", "b", "g"]);
+  // oracle: specified. One column per wave, a shared row first for the gatekeepers, then one row per workstream.
+  test("the snapshot carries the grid as data: one column per wave, gatekeepers in a shared row first", () => {
+    expect(snapshot).toMatchObject({
+      grid: {
+        waves: 2,
+        rows: [
+          { workstream: null, cells: [["g"], []] },
+          { workstream: "a", cells: [[], ["a"]] },
+          { workstream: "b", cells: [[], ["b"]] },
+        ],
+      },
+    });
   });
 
-  test("a gatekeeper sits in a shared row that belongs to no workstream", () => {
-    expect(body).toMatch(/<tr class="shared">\s*<th[^>]*>shared prerequisites<\/th>/);
+  test("the page ships an empty grid container for the script to fill, not a rendered table", () => {
+    expect(page).toMatch(/<div id="grid"><\/div>/);
+    expect(page).toContain("snap.grid");
   });
 
-  test("cards carry the same state, critical and gatekeeper classes as the graph nodes", () => {
-    expect(body).toMatch(/class="card ready[^"]*gatekeeper[^"]*"[^>]*data-id="g"/);
-    expect(body).toMatch(/class="card blocked[^"]*"[^>]*data-id="a"/);
-  });
-
-  test("offers a switch between the graph and the grid, and titles are escaped in the grid too", () => {
-    expect(body).toMatch(/<button[^>]*data-view="graph"/);
-    expect(body).toMatch(/<button[^>]*data-view="grid"/);
-    expect(body).not.toContain("Gate <i>");
+  test("offers a switch between the graph and the grid", () => {
+    expect(page).toMatch(/<button[^>]*data-view="graph"/);
+    expect(page).toMatch(/<button[^>]*data-view="grid"/);
   });
 });

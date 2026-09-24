@@ -13,6 +13,7 @@ Written by `sync` and `render --format json`; read by `--snapshot` and served at
   "waves": [ ["..."], ["..."] ],
   "gatekeepers": ["..."],
   "workstreams": [ { "id": "...", "tasks": ["..."] } ],
+  "grid": { "waves": 2, "rows": [ { "workstream": null, "cells": [ ["..."], [] ] }, { "workstream": "...", "cells": [ [], ["..."] ] } ] },
   "criticalPath": { "byDepth": { "tasks": ["..."], "length": 3 }, "byEffort": { "tasks": ["..."], "length": 5 } },
   "findings": [ { "kind": "isolated", "task": "...", "detail": "...", "wouldKill": "..." } ]
 }
@@ -34,5 +35,7 @@ Written by `sync` and `render --format json`; read by `--snapshot` and served at
 | `state` | `done`, `in-progress`, `blocked`, `ready` | derived | not read back |
 | `workstream` | string or null | derived | not read back |
 | `critical` | boolean | derived | on either critical path |
+
+`grid` is waves by workstreams: `waves` is the number of columns, each row is one workstream (`workstream` is its id, or `null` for the shared gatekeepers row, which comes first when there are any), and `cells[i]` lists the row's tasks in wave `i`. Every open task appears in exactly one cell. The viewer draws its Grid view from this field.
 
 Only the stored fields are read back by `--snapshot`; derived fields are recomputed. `daysUntilDue` is `9999` for undated tasks.

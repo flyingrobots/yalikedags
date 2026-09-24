@@ -19,7 +19,7 @@ The graph: to follow a chain upstream or downstream, to see which cards sit on t
 
 - **View switch**: two buttons above the main pane, Graph and Grid. The sidebar and the selection are the same under both.
 - **Graph**: one rounded box per task showing the key and a truncated title. Fill colour is the state (legend in the sidebar); a thick border marks the critical path; a dashed border marks a gatekeeper. Edges run from blocker to dependent; red edges join two critical tasks.
-- **Grid**: a table with one column per wave (`Wave 1` is now) and one row per workstream, the shared prerequisites row first. Each cell holds cards for that row's tasks in that wave. A card carries the same fill, thick border and dashed border as its node in the graph. Column headings and row labels stay put while the table scrolls.
+- **Grid**: a table, drawn by the page from the snapshot's `grid` field, with one column per wave (`Wave 1` is now) and one row per workstream, the shared prerequisites row first. Each cell holds cards for that row's tasks in that wave. A card carries the same fill, thick border and dashed border as its node in the graph. Column headings and row labels stay put while the table scrolls.
 - **Sidebar**: legend; the selected card (key, title, state, status, priority, effort, assignee, milestone, workstream, due, blocked by, blocks, labels, a link to Linear when the source was Linear, the description); the frontier as a numbered list; the findings.
 
 ## Controls and keybindings

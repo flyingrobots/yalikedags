@@ -27,6 +27,7 @@ export class JsonSnapshotAdapter implements RendererPort {
       waves: a.waves,
       gatekeepers: a.gatekeepers,
       workstreams: a.workstreams.map((w) => ({ id: w.id, tasks: w.tasks })),
+      grid: { waves: a.grid.waves, rows: a.grid.rows.map((r) => ({ workstream: r.workstream ?? null, cells: r.cells })) },
       criticalPath: {
         byDepth: { tasks: a.criticalByDepth.tasks, length: a.criticalByDepth.length },
         byEffort: { tasks: a.criticalByEffort.tasks, length: a.criticalByEffort.length },
