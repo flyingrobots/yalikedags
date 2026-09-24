@@ -16,6 +16,7 @@ FOLDS:   done ─┐
                ├─ frontier (ready, ordered)
                ├─ waves (Kahn layers over open tasks)
                ├─ gatekeepers and workstreams
+               ├─ grid (waves by workstreams)
                └─ critical path (depth, effort)
 ```
 
@@ -31,11 +32,14 @@ FOLDS:   done ─┐
 
 **Gatekeepers and workstreams.** A gatekeeper is an open task with two or more open dependents: a shared prerequisite. Cut the gatekeepers out of the open graph and the connected pieces that remain are the workstreams. Every open non-gatekeeper task is in exactly one workstream, so the decomposition is mutually exclusive and collectively exhaustive by construction.
 
+**Grid.** Waves cut the open graph by time and workstreams cut it by topology, and both partition the same open tasks, so their product is a grid in which every open task has exactly one cell. One row per workstream, one column per wave, and a shared row first for the gatekeepers, which belong to a wave but to no workstream. This is what the viewer's Grid view draws.
+
 **Critical path.** The longest chain of open tasks, computed twice: by depth (number of hand-offs) and by effort (summed estimate, unestimated tasks weighing 1 as Linear counts them). The two can disagree, and both are reported. There is no float, no forward or backward pass: those need durations, and this graph carries effort.
 
 ## Important invariants
 
-- Done tasks never block and belong to no wave or workstream.
+- Done tasks never block and belong to no wave, workstream, or grid cell.
+- Every open task is in exactly one wave and, unless it is a gatekeeper, exactly one workstream; the grid inherits both.
 - `dependents` is derived; storing both directions would be two sources of truth for one edge.
 - The layout used by the SVG and the viewer is the same pure service, so what you see is what the report computed.
 

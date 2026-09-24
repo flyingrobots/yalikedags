@@ -26,7 +26,7 @@ export class ViewerRequestHandler {
     switch (path) {
       case "/":
       case "/index.html":
-        return { status: 200, contentType: "text/html; charset=utf-8", body: viewerPage(this.svg.render(a), this.json.render(a), `${a.source} as of ${a.asOf}`) };
+        return { status: 200, contentType: "text/html; charset=utf-8", body: viewerPage(a, this.svg.render(a), this.json.render(a)) };
       case "/snapshot.json":
         return { status: 200, contentType: this.json.contentType, body: this.json.render(a) };
       case "/graph.svg":

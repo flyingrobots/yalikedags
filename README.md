@@ -9,7 +9,7 @@
 >
 > Mickey O'Neil, *Snatch* (2000). This tool is about the other kind.
 
-Right. So you've got a Linear project, yeah? Two hundred-odd cards, all sat there like they're waiting for a fight what's never gonna happen. And nobody can tell ya which one comes first, which one's holding up the rest, or which ones are the same job wearing two hats. That's what this is for. yalikedags reads your Linear project, builds the dependency DAG out of it, tells ya what's ready, what's blocked, where the long chain is, and which cards are talking rubbish. Then it draws the whole thing so ya can look at it proper.
+Right. So you've got a Linear project, yeah? Two hundred-odd cards, all sat there like they're waiting for a fight what's never gonna happen. And nobody can tell ya which one comes first, which one's holding up the rest, or which ones are the same job wearing two hats. That's what this is for. yalikedags reads your Linear project, builds the dependency DAG out of it, tells ya what's ready, what's blocked, where the long chain is, and which cards are talking rubbish. Then it draws the whole thing so ya can look at it proper. Two ways an' all: the graph, for how it all hangs together, and the grid, workstreams down the side and waves across the top, for who could be doing what this round.
 
 Now, if the dependencies live in a file on your machine and not in Linear where everyone can see 'em, that's no good to anybody, is it. So there's a write path an' all: it works out the difference, writes ya a plan, and ya read the plan. Nothing moves till ya say `--confirm`. Then it does the job and goes back and checks the job got done. Every other command in here touches nothing. Read only, like a good dag on a lead.
 

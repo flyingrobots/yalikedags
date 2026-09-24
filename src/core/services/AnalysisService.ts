@@ -8,6 +8,7 @@ import { FrontierService } from "./FrontierService.ts";
 import { WavesService } from "./WavesService.ts";
 import { CriticalPathService } from "./CriticalPathService.ts";
 import { AuditService } from "./AuditService.ts";
+import { GridService } from "./GridService.ts";
 
 /** Composition of the graph services. The one place they are all called. */
 export class AnalysisService {
@@ -16,6 +17,7 @@ export class AnalysisService {
   private readonly waves = new WavesService();
   private readonly critical = new CriticalPathService();
   private readonly audit = new AuditService();
+  private readonly grid = new GridService();
 
   constructor(
     private readonly clock: ClockPort,
@@ -26,6 +28,9 @@ export class AnalysisService {
 
   analyse(tasks: readonly Task[], source: string): Analysis {
     const dag = new Dag(tasks);
+    const waves = this.waves.waves(dag);
+    const gatekeepers = this.waves.gatekeepers(dag);
+    const workstreams = this.waves.workstreams(dag);
     return new Analysis({
       dag,
       source,
@@ -33,12 +38,13 @@ export class AnalysisService {
       states: this.state.states(dag),
       frontier: this.frontier.frontier(dag),
       conflicts: this.frontier.resourceConflicts(dag, this.policy),
-      waves: this.waves.waves(dag),
-      gatekeepers: this.waves.gatekeepers(dag),
-      workstreams: this.waves.workstreams(dag),
+      waves,
+      gatekeepers,
+      workstreams,
       criticalByDepth: this.critical.byDepth(dag),
       criticalByEffort: this.critical.byEffort(dag),
       findings: this.audit.audit(dag),
+      grid: this.grid.grid(waves, gatekeepers, workstreams),
     });
   }
 }

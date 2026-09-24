@@ -4,6 +4,7 @@ import type { FrontierEntry } from "./FrontierService.ts";
 import type { Workstream } from "./WavesService.ts";
 import type { CriticalPath } from "./CriticalPathService.ts";
 import type { Finding } from "./AuditService.ts";
+import type { Grid } from "./GridService.ts";
 
 export interface AnalysisFields {
   dag: Dag;
@@ -18,6 +19,7 @@ export interface AnalysisFields {
   criticalByDepth: CriticalPath;
   criticalByEffort: CriticalPath;
   findings: readonly Finding[];
+  grid: Grid;
 }
 
 /** Everything the renderers and the viewer need, computed once from a Dag. Read-only. */
@@ -34,6 +36,7 @@ export class Analysis {
   readonly criticalByDepth: CriticalPath;
   readonly criticalByEffort: CriticalPath;
   readonly findings: readonly Finding[];
+  readonly grid: Grid;
 
   constructor(f: AnalysisFields) {
     this.dag = f.dag;
@@ -48,6 +51,7 @@ export class Analysis {
     this.criticalByDepth = f.criticalByDepth;
     this.criticalByEffort = f.criticalByEffort;
     this.findings = f.findings;
+    this.grid = f.grid;
     Object.freeze(this);
   }
 

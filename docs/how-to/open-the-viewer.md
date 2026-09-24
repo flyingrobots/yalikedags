@@ -26,7 +26,7 @@ Open the address. To pick the port yourself, add `--port 8787`.
 
 ## Verify
 
-The page shows the graph left to right and the sidebar lists the frontier. Click a node: everything not upstream or downstream dims. The page makes no network request of its own; the key never reaches it.
+The page shows the graph left to right and the sidebar lists the frontier. Click a node: everything not upstream or downstream dims. Press **Grid**: the same tasks appear as a table, workstreams down the side and waves across the top, with the selection still highlighted. The page makes no network request of its own; the key never reaches it.
 
 ## Common variations
 

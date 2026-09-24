@@ -110,3 +110,46 @@ describe("HtmlRendererAdapter", () => {
     expect(new HtmlRendererAdapter().contentType).toBe("text/html; charset=utf-8");
   });
 });
+
+/**
+ * The grid view: workstreams down the side, waves across the top, one card
+ * per open task. Rendered by the server into the same page, so the exported
+ * file has it too and the assertions here are on markup.
+ */
+describe("viewer grid", () => {
+  const withGate = new AnalysisService(new FixedClockAdapter("2026-09-23")).analyse(
+    [
+      new Task({ id: "gone", key: "PRO-0", title: "Done", status: "done" }),
+      new Task({ id: "g", key: "PRO-1", title: "Gate <i>", blockedBy: ["gone"] }),
+      new Task({ id: "a", key: "PRO-2", title: "Left", blockedBy: ["g"] }),
+      new Task({ id: "b", key: "PRO-3", title: "Right", blockedBy: ["g"] }),
+    ],
+    "inline",
+  );
+  const body = new ViewerRequestHandler(() => withGate).handle("/").body;
+  const cards = [...body.matchAll(/<[a-z]+ class="card[^"]*"[^>]*data-id="([^"]+)"/g)].map((m) => m[1]);
+
+  // oracle: specified. One card per open task, none for a done one, one column heading per wave.
+  test("carries a grid with one column per wave and one card per open task", () => {
+    expect(body).toContain('id="grid"');
+    expect(body).toMatch(/<th[^>]*>Wave 1<\/th>/);
+    expect(body).toMatch(/<th[^>]*>Wave 2<\/th>/);
+    expect(body).not.toMatch(/<th[^>]*>Wave 3<\/th>/);
+    expect([...cards].sort()).toEqual(["a", "b", "g"]);
+  });
+
+  test("a gatekeeper sits in a shared row that belongs to no workstream", () => {
+    expect(body).toMatch(/<tr class="shared">\s*<th[^>]*>shared prerequisites<\/th>/);
+  });
+
+  test("cards carry the same state, critical and gatekeeper classes as the graph nodes", () => {
+    expect(body).toMatch(/class="card ready[^"]*gatekeeper[^"]*"[^>]*data-id="g"/);
+    expect(body).toMatch(/class="card blocked[^"]*"[^>]*data-id="a"/);
+  });
+
+  test("offers a switch between the graph and the grid, and titles are escaped in the grid too", () => {
+    expect(body).toMatch(/<button[^>]*data-view="graph"/);
+    expect(body).toMatch(/<button[^>]*data-view="grid"/);
+    expect(body).not.toContain("Gate <i>");
+  });
+});
