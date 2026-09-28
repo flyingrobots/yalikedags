@@ -154,6 +154,50 @@ test("task table sorts and filters while retaining the wave grid", async ({ page
   await expect(page.locator("#grid")).toBeVisible();
 });
 
+test("served refresh preserves selection, filters, sorting and docked layout; failure preserves the page", async ({ page }) => {
+  await page.addInitScript(() => { Object.defineProperty(window, "localStorage", { get: () => { throw new Error("Storage denied"); } }); });
+  await page.goto("http://127.0.0.1:4178");
+  await page.getByRole("button", { name: "Show task table", exact: true }).click();
+  await page.getByRole("searchbox", { name: "Filter tasks", exact: true }).fill("parser");
+  await page.getByRole("button", { name: "Sort by Title", exact: true }).click();
+  await page.locator("#task-table tbody tr button").first().click();
+  const selection = await page.locator("#detail h2").textContent();
+  await page.getByRole("button", { name: "Split views", exact: true }).click();
+  const capture = await page.locator("#captured-at").textContent();
+  await page.route("**/refresh", (route) => route.fulfill({ status: 502, body: "unavailable" }));
+  await page.getByRole("button", { name: "Refresh source", exact: true }).click();
+  await expect(page.locator("#refresh-status")).toContainText("previous snapshot");
+  await expect(page.locator("#detail h2")).toHaveText(selection ?? "");
+  await page.unroute("**/refresh");
+  await page.getByRole("button", { name: "Refresh source", exact: true }).click();
+  await expect(page.locator("#captured-at")).not.toHaveText(capture ?? "");
+  await expect(page.locator("#detail h2")).toHaveText(selection ?? "");
+  await expect(page.locator("#graph")).toBeVisible();
+  await expect(page.locator("#grid")).toBeVisible();
+  await page.getByRole("button", { name: "Show task table", exact: true }).click();
+  await expect(page.getByRole("searchbox", { name: "Filter tasks", exact: true })).toHaveValue("parser");
+  await expect(page.locator('#task-table th[aria-sort="ascending"]')).toHaveText("Title");
+  await expect(page.locator("#task-table tbody tr")).toHaveCount(2);
+});
+
+test("offline comparison explains added blockers without sending the selected file anywhere", async ({ page }) => {
+  const requests: string[] = [];
+  await page.goto(exported);
+  page.on("request", (request) => requests.push(request.url()));
+  await expect(page.getByRole("button", { name: "Refresh source", exact: true })).toBeDisabled();
+  await page.getByRole("button", { name: "Changes", exact: true }).click();
+  await page.getByLabel("Compare snapshot JSON").setInputFiles({
+    name: "earlier.json", mimeType: "application/json", buffer: Buffer.from(JSON.stringify({
+      schema: "yalikedags/snapshot/1", capturedAt: "2026-09-20T10:00:00.000Z",
+      tasks: [{ id: "implement-core-dag-builder", title: "Implement core DAG builder", blockedBy: ["old-external"] }],
+    })),
+  });
+  await expect(page.locator("#changes-status")).toContainText("2026-09-20T10:00:00.000Z");
+  await expect(page.locator("#changes-list")).toContainText("blocker removed: old-external");
+  await expect(page.locator("#changes-list")).toContainText("blocker added:");
+  expect(requests).toEqual([]);
+});
+
 test("closing the task table preserves filters and does not break selection elsewhere", async ({ page }) => {
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));

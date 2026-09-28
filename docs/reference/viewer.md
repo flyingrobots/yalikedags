@@ -1,13 +1,81 @@
 # The viewer
 
-The viewer uses dockable DAG, wave grid, task details, ready work, and findings panels. Drag tabs or dividers to arrange them. Close tabs you do not need and reopen them from the toolbar. **Split views** places the DAG above the wave grid; **Reset layout** restores the default arrangement.
+## Open a workspace
 
-Search by task key, title, or assignee. Select a result, node, or card to open its details and highlight its dependency chain across views. Keyboard selection and Escape are supported. Use **Fit all**, **Focus selection**, and zoom controls to navigate the graph; drag its background to pan.
+`serve` hosts the viewer on `127.0.0.1`. `render --format html --out dag.html` writes the same workspace as a self-contained file. Both include the styles, Dockview code, graph, and task data; neither fetches assets or sends task data anywhere. The export opens from disk without a key or running server.
 
-Docked layout and sizes are saved in local storage. Invalid or unavailable storage falls back to the default layout. Closing a panel preserves selection. Narrow screens default to one tab group.
+![DAG workspace with ready work alongside it](../images/viewer-overview.png)
 
-HTML exports bundle the workspace, styles, graph and data in one offline file. No runtime assets or credentials are required. An empty project, unschedulable grid, and startup errors have explicit messages.
+## Views
 
-See [Open the local viewer](../how-to/open-the-viewer.md) and [Audit a project](../how-to/audit-a-project.md).
+| View | Use it to |
+|---|---|
+| **DAG** | Trace blockers and dependents. Arrows point from blocker to dependent. The graph opens at a readable scale; use **Fit all** for the whole graph. |
+| **Wave grid** | Compare workstreams across waves. Each open, schedulable task appears in one cell. Shared prerequisites appear first. Columns keep their width and scroll horizontally. |
+| **Task table** | Search and sort all tasks; filter by state, assignee, milestone, or label. Filter matches are also highlighted in the DAG and wave grid. |
+| **Changes** | See changes since refresh, or compare an earlier snapshot JSON locally. |
+| **Task details** | Read the selected task and follow clickable blocker/dependent keys. Descriptions are displayed as text. |
+| **Ready work** | Find tasks that can start, ordered by urgency, with separate immediate-unblocking and downstream-impact counts. Resource warnings count in-progress holders as well as ready contenders. |
+| **Findings** | Review audit findings and the evidence that would invalidate each finding. Select a card to inspect it. |
 
-**Task table** lists all tasks with sortable columns and search by key, title, or assignee. Filter by state, assignee, milestone, or label; the graph and wave grid dim nonmatches while keeping dependency context. Selection is shared across views, including when the table is closed and reopened. **Clear filters** restores all tasks.
+A wave is a forecast of parallel work, not a deadline or a scheduling barrier. Tasks with unknown statuses, unresolved external blockers, cycles, or dependencies on such work have no wave; check Findings and the partial-analysis notice. An external blocker is a task outside the loaded project: for example, “Launch checkout” depending on another project’s “Provision payment credentials.” Its status is unknown here, so readiness cannot be established.
+
+## Arrange your views
+
+Drag a tab to dock it beside or beneath another view, or keep several views together as tabs. Drag dividers to resize. **Split views** puts the DAG above the wave grid. Close tabs you do not need; the toolbar reopens them.
+
+Docked layout and sizes are saved locally in the browser, shared between snapshots on the same origin. Storage contains panel layout, not task data or selection. File URL storage behavior depends on the browser. When storage is unavailable or invalid, the viewer starts with its default layout. **Reset layout** restores the default arrangement without clearing the selection.
+
+On narrow screens, the default layout puts the views in one tab group. Floating and separate popout windows are not offered.
+
+![DAG and wave grid docked together, with a shared task selection](../images/viewer-split.png)
+
+## Find and inspect a task
+
+1. Enter a task key, title, or assignee in **Find a task**.
+2. Choose a result, or press Enter to choose the first match. Arrow Down moves focus into the results.
+3. Task details opens and the graph focuses on the selected task.
+4. Follow the blocker or dependent buttons in the details panel, or switch to Wave grid. The selection stays shared across views.
+5. Press Escape to clear the selection and dismiss search results.
+
+Selecting a task dims unrelated nodes, cards, and edges. Its ancestors and descendants remain visible. Search displays up to 30 results and tells you when to narrow the query. Selection is kept when a panel is closed and reopened, and preserved across **Refresh source** along with filters, sorting, and layout. Ordinary reloads without a saved refresh session reset selection.
+
+![Selected task with its dependency chain emphasized and details visible](../images/viewer-selection.png)
+
+## Controls and visual cues
+
+| Action | Control |
+|---|---|
+| open or reopen a view | toolbar button |
+| arrange views | drag tabs or dividers |
+| show DAG and grid together | **Split views** |
+| restore the default arrangement | **Reset layout** |
+| pan | drag inside the graph; dragging does not select a node |
+| zoom | mouse wheel over the graph, or **+** / **−** |
+| show the whole graph | **Fit all** |
+| center the selected task | **Focus selection** |
+| select a task | click a node/card/key, or focus it and press Enter or Space |
+| clear selection | Escape |
+
+Task state appears as text as well as color. Ready tasks are green, blocked tasks peach, in-progress tasks blue, and closed tasks gray. A bold border marks the critical path; a dashed border marks a shared prerequisite. The selected task has a stronger green outline. Full node titles are available on hover and in Task details.
+
+## Empty and error states
+
+An empty snapshot says **No tasks in this snapshot**. A grid with no schedulable open work explains that tasks may be closed or have cycles or unresolved dependencies. Ready work and Findings each have explicit empty states.
+
+The snapshot is loaded before the page opens. **Refresh source** explicitly rereads it through the local server, then reloads the page with the workspace state restored. There is no polling. A failed read keeps the previous snapshot and displays an error; concurrent refresh requests share one read. Offline exports disable refresh. Invalid embedded data produces a visible startup error. Closing every panel leaves the toolbar available to reopen views or reset the layout. An unknown server path returns `404 not found`.
+
+## Freshness and comparison
+
+The banner displays an exact capture timestamp, or **Capture time unknown** for legacy snapshots. Reading or refreshing a snapshot file preserves that file’s capture time; it does not refresh the original tracker. Partial-analysis notices identify missing blocker references, unknown statuses, cycles, and source warnings.
+
+**Changes** reports added and removed tasks, completed tasks, status changes, added/removed blockers, and changes in critical-chain membership. After a successful refresh it compares the previous successful read. **Compare snapshot JSON** instead compares a chosen earlier file against the current view; the file stays in the browser. This comparison uses stable task ids. It is not a full field-by-field audit, and different projects can produce misleading comparisons.
+
+Local storage holds only panel layout. A refresh session uses browser history state to retain selected task id, search/filter values, sorting, and layout.
+
+![Task table alongside the wave grid and task details](../images/viewer-table.png)
+
+## Related workflows
+
+- [Open the local viewer](../how-to/open-the-viewer.md)
+- [Audit a project](../how-to/audit-a-project.md)

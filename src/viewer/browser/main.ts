@@ -8,13 +8,18 @@ import { SelectionController } from "./SelectionController.ts";
 import { GraphController } from "./GraphController.ts";
 import { SearchController } from "./SearchController.ts";
 
-
 import { TableController } from "./TableController.ts";
+import { SessionState } from "./SessionState.ts";
+import { RefreshController } from "./RefreshController.ts";
+import { ChangesController } from "./ChangesController.ts";
 
 async function start(): Promise<void> {
   const state = new ViewerState(await new JsonSnapshotRepositoryAdapter(element("snapshot").textContent, "embedded").load());
-  const workspace = new Workspace();
+  const session = new SessionState();
+  const workspace = new Workspace(session.layout());
   new TableController(state);
+  new ChangesController(state);
+  new RefreshController(state, workspace, session);
   const svg = element("graph").querySelector("svg");
   if (svg === null) { throw new Error("Missing graph SVG"); }
   const graph = new GraphController(svg);
@@ -34,6 +39,7 @@ async function start(): Promise<void> {
     if (panel !== undefined) { workspace.show(panel); }
     actions.get(control?.dataset["action"] ?? "")?.();
   });
+  session.restore(state);
   document.body.dataset["ready"] = "true";
 }
 

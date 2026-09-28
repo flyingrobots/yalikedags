@@ -73,7 +73,7 @@ Print only the frontier section of the report.
 
 `dot` is GraphViz input (`dot -Tsvg graph.dot > graph.svg`). `svg` is standalone and needs nothing. `text` is the report `audit` prints.
 
-`html` is the whole viewer as one file: the same page `serve` returns, with the CSS, the graph, the snapshot and the script inline. It opens from disk with no process behind it and fetches nothing, so it travels — to a laptop with no key on it, to somebody who does not have this tool, into a directory beside last week's copy. Its only outbound links are the per-card "Open in Linear" ones, which come from the source data. The page is a reading, fixed at the moment you rendered it; `serve` is the same page for as long as the process runs.
+`html` is the whole viewer as one file: the same page `serve` returns, with the CSS, the graph, the snapshot and the script inline. It opens from disk with no process behind it and fetches nothing, so it travels — to a laptop with no key on it, to somebody who does not have this tool, into a directory beside last week's copy. Its only outbound links are the per-card "Open in Linear" ones, which come from the source data. The page is a reading, fixed at the moment you rendered it; `serve` offers explicit source refresh.
 
 ## `serve`
 
@@ -81,7 +81,7 @@ Print only the frontier section of the report.
 |---|---|
 | `--port <n>` | default `0`, which lets the OS pick; the chosen URL is printed |
 
-Binds `127.0.0.1` only. Routes: `/`, `/snapshot.json`, `/graph.svg`, `/graph.dot`. Stop with Ctrl-C.
+Binds `127.0.0.1` only. Read routes: `/`, `/snapshot.json`, `/graph.svg`, `/graph.dot`. The viewer sends an explicit same-origin `POST /refresh` to reread the source; it does not poll or write to the tracker. Stop with Ctrl-C.
 
 ## `key`
 

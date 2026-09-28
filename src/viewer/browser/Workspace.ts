@@ -10,11 +10,11 @@ export class Workspace {
   private readonly storage = new LayoutStorage();
   private resetting = false;
 
-  constructor() {
+  constructor(saved?: unknown) {
     for (const id of PANEL_TITLES.keys()) { this.panels.set(id, element(`${id}-panel`)); }
     this.api = this.createApi();
     this.size();
-    if (!this.storage.restore(this.api)) { this.reset(); }
+    if (!this.storage.restore(this.api, saved)) { this.reset(); }
   }
 
   private createApi(): DockviewApi {
@@ -36,6 +36,8 @@ export class Workspace {
     const host = element("workspace");
     this.api.layout(host.clientWidth, host.clientHeight);
   }
+
+  layout(): ReturnType<DockviewApi["toJSON"]> { return this.api.toJSON(); }
 
   show(id: string): void {
     const title = PANEL_TITLES.get(id);
@@ -64,6 +66,7 @@ export class Workspace {
     this.api.addPanel({ id: "details", component: "details", title: "Task details", initialWidth: 340, position: { referencePanel: "graph", direction } });
     this.api.addPanel({ id: "ready", component: "ready", title: "Ready work", position: { referencePanel: "details" } });
     this.api.addPanel({ id: "findings", component: "findings", title: "Findings", position: { referencePanel: "details" } });
+    this.api.addPanel({ id: "changes", component: "changes", title: "Changes", position: { referencePanel: "details" } });
     this.api.getPanel("ready")?.api.setActive();
     this.api.getPanel("graph")?.api.setActive();
     this.resetting = false;

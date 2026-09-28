@@ -5,7 +5,7 @@ import { isRec, list, rec, str, num } from "../../adapters/linear/GraphqlJson.ts
 type Layout = ReturnType<DockviewApi["toJSON"]>;
 type GridNode = Layout["grid"]["root"];
 export const PANEL_TITLES = new Map([
-  ["graph", "DAG"], ["table", "Task table"], ["grid", "Wave grid"], ["details", "Task details"], ["ready", "Ready work"], ["findings", "Findings"],
+  ["graph", "DAG"], ["table", "Task table"], ["changes", "Changes"], ["grid", "Wave grid"], ["details", "Task details"], ["ready", "Ready work"], ["findings", "Findings"],
 ]);
 
 /** Untrusted local storage is decoded into a bounded, docked-only layout. No URLs or task data. */
@@ -16,9 +16,9 @@ export class LayoutStorage {
     try { localStorage.setItem(this.key, JSON.stringify(api.toJSON())); } catch { /* file URLs and private mode may deny storage */ }
   }
 
-  restore(api: DockviewApi): boolean {
+  restore(api: DockviewApi, saved?: unknown): boolean {
     try {
-      const raw: unknown = JSON.parse(localStorage.getItem(this.key) ?? "null");
+      const raw: unknown = saved ?? JSON.parse(localStorage.getItem(this.key) ?? "null");
       const layout = this.decode(raw);
       if (layout === undefined) { return false; }
       api.fromJSON(layout);

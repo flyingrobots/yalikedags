@@ -12,6 +12,7 @@
     "postinstall": "bun run build:viewer",
     "build:viewer": "bun scripts/build-viewer.ts",
     "test:browser": "bun run build:viewer && playwright test -c e2e/playwright.config.ts",
+    "viewer:screenshots": "bun run build:viewer && bun scripts/viewer-screenshots.ts",
     "test": "bun test test/",
     "lint": "bunx eslint . && bunx tsc --noEmit",
     "typecheck": "bunx tsc --noEmit",

@@ -4,6 +4,8 @@ All notable changes to this project are documented here. The format follows Keep
 
 ## [Unreleased]
 
+- Add capture and partial-analysis notices, manual refresh preserving workspace state, and local snapshot comparison for task status, blockers, and critical chains.
+
 - Add a sortable, searchable task table with state, assignee, milestone, and label filters while retaining the wave grid.
 
 - Add a Dockview workspace with shared selection, search, keyboard navigation, graph controls, persistent layouts, and offline browser coverage.

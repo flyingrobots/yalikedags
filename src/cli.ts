@@ -19,6 +19,7 @@ import { VaultSecretsAdapter } from "./adapters/secrets/VaultSecretsAdapter.ts";
 import { ChainSecretsAdapter } from "./adapters/secrets/ChainSecretsAdapter.ts";
 import { LinearTaskRepositoryAdapter } from "./adapters/input/LinearTaskRepositoryAdapter.ts";
 import { ViewerRequestHandler } from "./viewer/ViewerRequestHandler.ts";
+import { RefreshingAnalysis } from "./viewer/RefreshingAnalysis.ts";
 import { ViewerServerAdapter } from "./viewer/ViewerServerAdapter.ts";
 import { Args } from "./cli/Args.ts";
 import { ExitCode, exitCodeFor } from "./cli/ExitCode.ts";
@@ -132,9 +133,10 @@ function auditCommand(a: Analysis, args: Args): ExitCodeValue {
   return args.has("strict") && a.findings.length > 0 ? ExitCode.FINDINGS : ExitCode.OK;
 }
 
-async function serveCommand(a: Analysis, args: Args): Promise<ExitCodeValue> {
-  const handler = new ViewerRequestHandler(() => a);
-  const handle = new ViewerServerAdapter(handler).start(Number(args.get("port") ?? "0"));
+async function serveCommand(args: Args, read: () => Promise<Analysis>): Promise<ExitCodeValue> {
+  const live = new RefreshingAnalysis(await read(), read);
+  const handler = new ViewerRequestHandler(() => live.current, () => ({ refresh: true, changes: live.changes }));
+  const handle = new ViewerServerAdapter(handler, () => live.refresh()).start(Number(args.get("port") ?? "0"));
   console.error(`viewer at ${handle.url}  (127.0.0.1 only; Ctrl-C to stop)`);
   await new Promise<void>((resolve) => {
     process.on("SIGINT", () => {
@@ -157,8 +159,6 @@ async function dispatch(args: Args, a: Analysis): Promise<ExitCodeValue> {
       return ExitCode.OK;
     case "render":
       return renderCommand(a, args);
-    case "serve":
-      return serveCommand(a, args);
     default:
       throw new Error(`usage: unknown command ${args.command ?? ""}`);
   }
@@ -213,10 +213,12 @@ async function main(argv: readonly string[]): Promise<ExitCodeValue> {
     });
     return args.command === "plan" ? commands.plan(args) : commands.apply(args);
   }
-  const repo = await resolver.resolve(args);
-  const policy = repo instanceof TaskDagJsonRepositoryAdapter ? repo.policy() : new ResourcePolicy();
-  const a = await load(repo, new AnalysisService(clock, policy));
-  return dispatch(args, a);
+  const read = async (): Promise<Analysis> => {
+    const repo = await resolver.resolve(args);
+    const policy = repo instanceof TaskDagJsonRepositoryAdapter ? repo.policy() : new ResourcePolicy();
+    return load(repo, new AnalysisService(clock, policy));
+  };
+  return args.command === "serve" ? serveCommand(args, read) : dispatch(args, await read());
 }
 
 main(process.argv.slice(2)).then(

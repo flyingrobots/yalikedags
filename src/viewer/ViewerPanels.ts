@@ -2,12 +2,12 @@ import type { Analysis } from "../core/services/Analysis.ts";
 import type { Task } from "../core/domain/Task.ts";
 import { escapeXml as esc } from "../adapters/output/SvgRendererAdapter.ts";
 
-
 import { taskTableMarkup } from "./TaskTableMarkup.ts";
+import type { SnapshotChange } from "../core/services/SnapshotChangesService.ts";
 
 /** Static, escaped panel content. Browser controllers own interaction, never tracker writes. */
 export class ViewerPanels {
-  constructor(private readonly analysis: Analysis) {}
+  constructor(private readonly analysis: Analysis, private readonly changes: readonly SnapshotChange[] = []) {}
 
   render(svg: string): string {
     return `<div id="panel-staging" hidden>
@@ -18,11 +18,17 @@ export class ViewerPanels {
       ${this.analysis.dag.size === 0 ? '<p class="empty">No tasks in this snapshot.</p>' : ""}
       <div class="graph-legend"><span>→ blocker to dependent</span><span>Bold: critical path</span><span>Dashed: shared prerequisite</span></div></section>
       ${taskTableMarkup()}
+      ${this.changePanel()}
       <section id="grid-panel" class="panel scroll-panel"><p class="panel-intro">Workstreams × waves. A forecast of parallel work, not a schedule.</p><div id="grid">${this.grid()}</div></section>
       <section id="details-panel" class="panel scroll-panel"><div id="detail"><p class="empty">Select a task to see its details and dependencies.</p></div></section>
       <section id="ready-panel" class="panel scroll-panel"><p class="panel-intro">Ready to start, most urgent first.</p><ol id="frontier" class="task-list">${this.frontier()}</ol></section>
       <section id="findings-panel" class="panel scroll-panel"><p class="panel-intro">${String(this.analysis.findings.length)} findings in this snapshot.</p><ul id="findings" class="task-list">${this.findings()}</ul></section>
       </div>${this.analysis.dag.tasks.map((task) => this.detail(task)).join("")}`;
+  }
+
+  private changePanel(): string {
+    const rows = this.changes.map((c) => `<li>${esc(c.key)} · ${esc(c.kind)}: ${esc(c.detail)}</li>`).join("");
+    return `<section id="changes-panel" class="panel scroll-panel"><label>Compare snapshot JSON<input id="compare-snapshot" type="file" accept=".json,application/json"></label><p id="changes-status" role="status">${this.changes.length ? "Changes since the previous successful refresh." : "Choose an earlier snapshot to compare with this one. Files stay in your browser."}</p><ul id="changes-list">${rows}</ul></section>`;
   }
 
   private card(id: string): string {

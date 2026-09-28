@@ -69,6 +69,8 @@ Live check against a real project (read-only, needs the key): `bun src/cli.ts sy
 
 Install the test browser with `bunx playwright install chromium`, then run `bun run test:browser`. CI installs Chromium and runs this separately from the offline Bun suite. The browser suite exercises both `file://` export and loopback serving, storage fallback, shared selection, panel lifecycle, graph navigation, escaping, and crowded/empty graphs.
 
+`bun run viewer:screenshots` regenerates the four viewer documentation screenshots using only the bundled public example and a fixed date.
+
 ## Known gaps
 
 - Resources are read only from a `--dag` source; every other source leaves the policy empty.

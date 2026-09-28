@@ -18,17 +18,17 @@ The name lookup is exact and case-insensitive and needs exactly one hit. Copy th
 
 Linear caps GraphQL complexity at 10000; this tool pages at 50 issues, which fit on 2026-09-23. If Linear lowers the cap or adds cost to a field, this returns. Evidence to include when reporting: the full message, which carries the computed complexity.
 
-## `warning: PRO-123: estimate 5 is above the 0 to 3 scale; recorded as 3`
+## `linear_incomplete: ...`
 
-The team's estimate scale allows values above 3. The card is recorded at 3 and the critical path by effort is a lower bound for it. Either move the team to a 0 to 3 practice or read the warning as a flag on that card.
+The source response is missing required connection data, repeats a pagination cursor, or has more nested labels/children/relations than were returned. The read fails instead of presenting a partial graph as complete. Retry and inspect the affected source response; nested connection pagination is not implemented yet. During viewer refresh, the previous successful snapshot stays visible.
 
-## `warning: PRO-123: unknown state type "..."; recorded as open`
+## `warning: PRO-123: unknown state type "..."; readiness is unresolved`
 
-Linear introduced a workflow state type this tool does not map. The card is treated as open, which is the conservative reading. Report the type name.
+The workflow state type is not mapped. The task keeps status `unknown` and is excluded from ready work and waves until the type is understood. Report the type name.
 
 ## The graph has a cycle (exit 6)
 
-The report's findings name every member: `cycle among PRO-1, PRO-2, PRO-3`. Open one of them in Linear and remove the relation that closes the loop. Until then, waves and the critical path are computed with the back edge ignored and should not be planned from.
+The report's findings name every member: `cycle among PRO-1, PRO-2, PRO-3`. Open one of them in Linear and remove the relation that closes the loop. Until then, cyclic work and its downstream dependents receive no wave. Critical paths are advisory on an invalid graph and should not be planned from.
 
 ## `vault_unavailable` or a keychain prompt loop
 
@@ -36,7 +36,7 @@ The report's findings name every member: `cycle among PRO-1, PRO-2, PRO-3`. Open
 
 ## The viewer shows an old graph
 
-The page is rendered from the source as loaded when `serve` started. Stop it with Ctrl-C and run it again; there is no live refresh in phase 1.
+Check the capture timestamp. In `serve`, use **Refresh source** to read again. A failed refresh retains the old graph and shows an error. With `--snapshot`, refresh rereads that file; it does not contact the original tracker. Offline exports must be regenerated.
 
 ## `apply` reported some mutations as `unconfirmed` (exit 8)
 

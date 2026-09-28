@@ -21,7 +21,8 @@ describe("ViewerRequestHandler", () => {
     expect(res.body).toContain('"schema": "yalikedags/snapshot/1"');
     expect(res.body).not.toMatch(/src="https?:/);
     expect(res.body).not.toMatch(/href="https?:/);
-    expect(res.body).not.toMatch(/@import|fetch\(/);
+    expect(res.body).not.toMatch(/@import/);
+    expect(res.body).toContain('id="refresh" disabled');
   });
   test("GET /snapshot.json returns the snapshot as JSON", () => {
     const res = new ViewerRequestHandler(() => analysis).handle("/snapshot.json");

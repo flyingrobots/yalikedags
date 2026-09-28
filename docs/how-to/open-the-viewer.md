@@ -26,19 +26,21 @@ Open the address. To pick the port yourself, add `--port 8787`.
 
 ## Verify
 
-The page shows the graph left to right and the sidebar lists the frontier. Click a node: everything not upstream or downstream dims. Press **Grid**: the same tasks appear as a table, workstreams down the side and waves across the top, with the selection still highlighted. The page makes no network request of its own; the key never reaches it.
+The page opens with a DAG and Ready work. Search for a task or click a node: Task details opens and unrelated work dims. Press **Wave grid** to inspect the same selection in a table, or **Split views** to see both at once. Drag tabs and dividers to arrange the workspace; **Reset layout** restores the default. The page loads without further network requests. **Refresh source** explicitly rereads the source through the local server; the key stays on the server.
 
 ## Common variations
 
 - `/snapshot.json`, `/graph.svg`, `/graph.dot` on the same host return the raw artifacts.
-- The page reflects the source as loaded at start. Restart `serve` to pick up changes; there is no live refresh in phase 1.
+- **Task table** adds sorting, search, and state/assignee/milestone/label filters while keeping the wave grid.
+- **Refresh source** preserves layout, selection, filters, and sorting. It shows the exact capture time and retains the previous snapshot on failure.
+- **Changes** shows changes since the last successful refresh or compares a chosen snapshot JSON locally.
 - **Keep it, or send it to somebody**: `render --format html --out dag.html` writes the same page as one file. It opens by double-clicking, needs no process and no key, and fetches nothing. Use it for a graph somebody else should look at, or for a copy of today you can put beside a copy of last week.
 
   ```bash
   bun src/cli.ts render --project "My Project" --format html --out dag.html
   ```
 
-  A file is a reading, taken when you rendered it. `serve` re-reads nothing either, so the difference is not freshness; it is that one of them survives the process ending.
+  An export embeds the source capture time. It stays fixed until regenerated. Serving `--snapshot` rereads that snapshot file on refresh and preserves its capture time.
 
 ## Related reference
 
