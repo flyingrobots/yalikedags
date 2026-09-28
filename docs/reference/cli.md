@@ -6,6 +6,8 @@ yalikedags <command> [--project <name|id> | --tasklist <file> | --snapshot <file
 
 Every command except `key`, `help`, `plan` and `apply` takes exactly one source flag. Only `apply --confirm` writes anything.
 
+Boolean switches take no value: use `--confirm`, never `--confirm false` or `--confirm=false`. Omit a switch to leave it off. Value-taking flags require a value, and repeated flags are rejected.
+
 An unrecognised flag is a usage error, exit 2, and the parser suggests the flag you meant when one is obviously close. This matters most for the flags whose absence is the quiet answer: a mistyped `--allow-destructive` or `--prune` would otherwise read to the parser as a decision you never made.
 
 | Command | Purpose |
