@@ -1,3 +1,4 @@
+import { dockWaveGrid } from "../e2e/workspace.ts";
 import { mkdir } from "node:fs/promises";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
@@ -21,7 +22,7 @@ try {
   await page.getByRole("searchbox", { name: "Find a task" }).fill("Implement core DAG");
   await page.locator("#search-results button").first().click();
   await page.screenshot({ path: "docs/images/viewer-selection.png" });
-  await page.getByRole("button", { name: "Split views", exact: true }).click();
+  await dockWaveGrid(page);
   await page.getByRole("button", { name: "Focus selection", exact: true }).click();
   await page.screenshot({ path: "docs/images/viewer-split.png" });
   await page.getByRole("button", { name: "Show task table", exact: true }).click();

@@ -22,7 +22,7 @@ A wave is a forecast of parallel work, not a deadline or a scheduling barrier. T
 
 ## Arrange your views
 
-Drag a tab to dock it beside or beneath another view, or keep several views together as tabs. Drag dividers to resize. **Split views** puts the DAG above the wave grid. Close tabs you do not need; the toolbar reopens them.
+Drag a tab to dock it beside or beneath another view, or keep several views together as tabs. Drag dividers to resize. Close tabs you do not need; the toolbar reopens them.
 
 Docked layout and sizes are saved locally in the browser, shared between snapshots on the same origin. Storage contains panel layout, not task data or selection. File URL storage behavior depends on the browser. When storage is unavailable or invalid, the viewer starts with its default layout. **Reset layout** restores the default arrangement without clearing the selection.
 
@@ -48,7 +48,7 @@ Selecting a task dims unrelated nodes, cards, and edges. Its ancestors and desce
 |---|---|
 | open or reopen a view | toolbar button |
 | arrange views | drag tabs or dividers |
-| show DAG and grid together | **Split views** |
+| show DAG and grid together | drag the Wave grid tab to the bottom edge of the DAG group |
 | restore the default arrangement | **Reset layout** |
 | pan | drag inside the graph; dragging does not select a node |
 | zoom | mouse wheel over the graph, or **+** / **−** |

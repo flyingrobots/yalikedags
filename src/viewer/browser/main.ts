@@ -30,7 +30,7 @@ async function start(): Promise<void> {
   const actions = new Map<string, () => void>([
     ["fit", (): void => { graph.fit(); }], ["focus", (): void => { graph.focus(); }],
     ["zoom-in", (): void => { graph.zoom(1 / 1.25); }], ["zoom-out", (): void => { graph.zoom(1.25); }],
-    ["split", (): void => { workspace.split(); }], ["reset", (): void => { workspace.reset(); graph.readable(); }],
+    ["reset", (): void => { workspace.reset(); graph.readable(); }],
   ]);
   document.addEventListener("click", (event) => {
     if (!(event.target instanceof Element)) { return; }

@@ -47,13 +47,6 @@ export class Workspace {
     this.api.addPanel({ id, component: id, title });
   }
 
-  split(): void {
-    this.show("graph"); this.show("grid");
-    const graph = this.api.getPanel("graph");
-    if (graph === undefined) { return; }
-    this.api.getPanel("grid")?.api.moveTo({ group: graph.group, position: "bottom" });
-  }
-
   reset(): void {
     this.resetting = true;
     this.api.dispose();

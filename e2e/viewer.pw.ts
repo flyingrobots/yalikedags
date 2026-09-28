@@ -1,3 +1,4 @@
+import { dockWaveGrid } from "./workspace.ts";
 import { test, expect } from "@playwright/test";
 import { pathToFileURL } from "node:url";
 import { resolve } from "node:path";
@@ -46,7 +47,8 @@ test("panels can be rearranged, restored and reset without losing selection", as
   await page.goto(exported);
   await page.getByRole("searchbox", { name: "Find a task" }).fill("Implement core DAG");
   await page.locator("#search-results button").first().click();
-  await page.getByRole("button", { name: "Split views", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Split views", exact: true })).toHaveCount(0);
+  await dockWaveGrid(page);
   await expect(page.locator("#graph")).toBeVisible();
   await expect(page.locator("#grid")).toBeVisible();
   await expect(page.locator("#grid .card.selected")).toHaveCount(1);
@@ -162,7 +164,8 @@ test("served refresh preserves selection, filters, sorting and docked layout; fa
   await page.getByRole("button", { name: "Sort by Title", exact: true }).click();
   await page.locator("#task-table tbody tr button").first().click();
   const selection = await page.locator("#detail h2").textContent();
-  await page.getByRole("button", { name: "Split views", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Split views", exact: true })).toHaveCount(0);
+  await dockWaveGrid(page);
   const capture = await page.locator("#captured-at").textContent();
   await page.route("**/refresh", (route) => route.fulfill({ status: 502, body: "unavailable" }));
   await page.getByRole("button", { name: "Refresh source", exact: true }).click();
