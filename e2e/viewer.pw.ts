@@ -168,11 +168,11 @@ test("served refresh preserves selection, filters, sorting and docked layout; fa
   await dockWaveGrid(page);
   const capture = await page.locator("#captured-at").textContent();
   await page.route("**/refresh", (route) => route.fulfill({ status: 502, body: "unavailable" }));
-  await page.getByRole("button", { name: "Refresh source", exact: true }).click();
+  await workspaceAction(page, "Refresh source");
   await expect(page.locator("#refresh-status")).toContainText("previous snapshot");
   await expect(page.locator("#detail h2")).toHaveText(selection ?? "");
   await page.unroute("**/refresh");
-  await page.getByRole("button", { name: "Refresh source", exact: true }).click();
+  await workspaceAction(page, "Refresh source");
   await expect(page.locator("#captured-at")).not.toHaveText(capture ?? "");
   await expect(page.locator("#detail h2")).toHaveText(selection ?? "");
   await expect(page.locator("#graph")).toBeVisible();
@@ -187,6 +187,7 @@ test("offline comparison explains added blockers without sending the selected fi
   const requests: string[] = [];
   await page.goto(exported);
   page.on("request", (request) => requests.push(request.url()));
+  await page.getByRole("button", { name: "Views menu", exact: true }).click();
   await expect(page.getByRole("button", { name: "Refresh source", exact: true })).toBeDisabled();
   await workspaceAction(page, "Changes");
   await page.getByLabel("Compare snapshot JSON").setInputFiles({
@@ -282,4 +283,19 @@ test("the banner can be hidden and restored without losing access to Views", asy
   await workspaceAction(page, "Show banner");
   await expect(page.locator("header")).toBeVisible();
   await expect(page.locator("header").getByRole("button", { name: "Views menu", exact: true })).toBeVisible();
+});
+
+test("snapshot metadata and refresh live in Views instead of a page status strip", async ({ page }) => {
+  await page.goto("http://127.0.0.1:4178");
+  await expect(page.locator(".snapshot-status")).toHaveCount(0);
+  await page.getByRole("button", { name: "Views menu", exact: true }).click();
+  await expect(page.locator("#workspace-menu").getByRole("button", { name: "Reset layout", exact: true })).toBeVisible();
+  await expect(page.locator("#workspace-menu").getByRole("button", { name: "Refresh source", exact: true })).toBeVisible();
+  await page.getByText("Snapshot details", { exact: true }).click();
+  await expect(page.locator("#workspace-menu #captured-at")).toContainText("Captured");
+  await page.route("**/refresh", (route) => route.fulfill({ status: 502, body: "unavailable" }));
+  await workspaceAction(page, "Refresh source");
+  await expect(page.locator("#workspace-menu")).toBeHidden();
+  await expect(page.locator("#viewer-notice")).toBeVisible();
+  await expect(page.locator("#viewer-notice")).toContainText("Refresh failed");
 });

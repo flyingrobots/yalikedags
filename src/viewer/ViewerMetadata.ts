@@ -11,8 +11,9 @@ export function viewerMetadata(a: Analysis, options: ViewerOptions): string {
   const partial = missing + unknown + cycles + a.warnings.length > 0;
   const quality = partial ? `Partial analysis: ${String(missing)} unresolved dependency references · ${String(unknown)} unknown statuses · ${String(cycles)} cycles. Readiness and forecasts may be incomplete.` : "No unresolved dependencies or unknown statuses detected.";
   const captured = a.capturedAt === null ? "Capture time unknown" : `Captured ${esc(a.capturedAt)}`;
-  return `<aside class="snapshot-status${partial ? " partial" : ""}"><span id="captured-at">${captured}</span>
-    <span>${quality}</span>${a.warnings.length ? `<details><summary>${String(a.warnings.length)} source warnings</summary><ul>${a.warnings.map((warning) => `<li>${esc(warning)}</li>`).join("")}</ul></details>` : ""}
-    <button id="refresh" ${options.refresh ? "" : 'disabled title="Offline export: regenerate from the source to refresh"'}>Refresh source</button>
-    <span id="refresh-status" role="status">${options.refresh ? "Manual refresh · reads source only" : "Offline snapshot"}</span></aside>`;
+  return `<button id="refresh" ${options.refresh ? "" : 'disabled title="Offline export: regenerate from the source to refresh"'}>Refresh source</button>
+    <span id="refresh-status" role="status">${options.refresh ? "Manual refresh · reads source only" : "Offline snapshot"}</span>
+    <details class="snapshot-info${partial ? " partial" : ""}"><summary>Snapshot details${partial ? " · partial analysis" : ""}</summary>
+    <div id="captured-at">${captured}</div><p>${quality}</p>
+    ${a.warnings.length ? `<ul>${a.warnings.map((warning) => `<li>${esc(warning)}</li>`).join("")}</ul>` : ""}</details>`;
 }

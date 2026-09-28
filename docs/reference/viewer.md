@@ -67,11 +67,11 @@ Task state appears as text as well as color. Task-table rows share the DAG state
 
 An empty snapshot says **No tasks in this snapshot**. A grid with no schedulable open work explains that tasks may be closed or have cycles or unresolved dependencies. Ready work and Findings each have explicit empty states.
 
-The snapshot is loaded before the page opens. **Refresh source** explicitly rereads it through the local server, then reloads the page with the workspace state restored. There is no polling. A failed read keeps the previous snapshot and displays an error; concurrent refresh requests share one read. Offline exports disable refresh. Invalid embedded data produces a visible startup error. Closing every panel leaves the Views menu available to reopen views or reset the layout. An unknown server path returns `404 not found`.
+The snapshot is loaded before the page opens. **Views menu → Refresh source** explicitly rereads it through the local server, then reloads the page with the workspace state restored. There is no polling. A failed read keeps the previous snapshot and displays an error in the footer; concurrent refresh requests share one read. Offline exports disable refresh. Invalid embedded data produces a visible startup error. Closing every panel leaves the Views menu available to reopen views or reset the layout. An unknown server path returns `404 not found`.
 
 ## Freshness and comparison
 
-The banner displays an exact capture timestamp, or **Capture time unknown** for legacy snapshots. Reading or refreshing a snapshot file preserves that file’s capture time; it does not refresh the original tracker. Partial-analysis notices identify missing blocker references, unknown statuses, cycles, and source warnings.
+Open **Views menu → Snapshot details** for the exact capture timestamp, or **Capture time unknown** for legacy snapshots. Reading or refreshing a snapshot file preserves that file’s capture time; it does not refresh the original tracker. An amber dot on the Views button flags partial data; Snapshot details identifies missing blocker references, unknown statuses, cycles, and source warnings.
 
 **Changes** reports added and removed tasks, completed tasks, status changes, added/removed blockers, and changes in critical-chain membership. After a successful refresh it compares the previous successful read. **Compare snapshot JSON** instead compares a chosen earlier file against the current view; the file stays in the browser. This comparison uses stable task ids. It is not a full field-by-field audit, and different projects can produce misleading comparisons.
 

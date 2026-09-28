@@ -12,6 +12,7 @@ export async function dockWaveGrid(page: Page): Promise<void> {
 }
 
 export async function workspaceAction(page: Page, name: string): Promise<void> {
-  await page.getByRole("button", { name: "Views menu", exact: true }).click();
+  const toggle = page.getByRole("button", { name: "Views menu", exact: true });
+  if (await toggle.getAttribute("aria-expanded") !== "true") { await toggle.click(); }
   await page.getByRole("button", { name, exact: true }).click();
 }

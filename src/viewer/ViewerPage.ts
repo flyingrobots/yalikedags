@@ -17,10 +17,9 @@ export function viewerPage(a: Analysis, assets: { svg: string; snapshotJson: str
 <button data-panel="graph" aria-label="Show DAG">DAG</button><button data-panel="grid" aria-label="Show wave grid">Wave grid</button>
 <button data-panel="table" aria-label="Show task table">Task table</button><button data-panel="changes">Changes</button>
 <button data-panel="details">Task details</button><button data-panel="ready">Ready work</button><button data-panel="findings">Findings <span class="count">${String(a.findings.length)}</span></button>
-<button id="filter-summary" data-panel="table" hidden></button><hr><button data-action="reset">Reset layout</button><button id="toggle-banner">Hide banner</button></nav></div></header>
-${viewerMetadata(a, options)}
+<button id="filter-summary" data-panel="table" hidden></button><hr><button data-action="reset">Reset layout</button><button id="toggle-banner">Hide banner</button><hr>${viewerMetadata(a, options)}</nav></div></header>
 
-<main id="workspace" aria-label="Task workspace"></main><footer><span id="selection-status" role="status">Select a task to trace its dependencies.</span><span>Drag tabs to arrange views · Esc clears selection</span><div id="compact-controls"></div></footer>
+<main id="workspace" aria-label="Task workspace"></main><footer><span id="selection-status" role="status">Select a task to trace its dependencies.</span><span>Drag tabs to arrange views · Esc clears selection</span><span id="viewer-notice" role="status" hidden></span><div id="compact-controls"></div></footer>
 ${new ViewerPanels(a, options.changes).render(assets.svg)}
 <noscript>This viewer needs JavaScript to display its panels. The snapshot data is embedded in this file.</noscript>
 <script id="snapshot" type="application/json">${assets.snapshotJson.replace(/</g, "\\u003c")}</script>
