@@ -154,7 +154,7 @@ suite("live Linear round trip", () => {
     expect(after.blockers(byTitle(after, "D isolated").id)).toEqual([byTitle(after, "A root").id]);
   }, 3 * MINUTE);
 
-  test("an estimate is written and reads back on the 0 to 3 scale", async () => {
+  test("an estimate is written and reads back exactly on the fixture team scale", async () => {
     const current = await readCurrent(e);
     const desired = desiredOf(current, [], { [`${TITLE_PREFIX} A root`]: 3 });
     const plan = new ReconcileService(clock).plan({ desired, current, desiredSource: "memory", currentSource: `linear:${e.project}` });

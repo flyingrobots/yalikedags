@@ -143,14 +143,14 @@ describe("AuditService", () => {
     const stale = new AuditService().audit(dag).filter((x) => x.kind === "stale-blocker");
     expect(stale.map((x) => x.task)).toEqual(["a"]);
   });
-  test("effort 3 with no children, a two-verb title, and wide fan-out are split candidates with reasons", () => {
+  test("split candidates use structural evidence, not an assumed estimate scale", () => {
     const dag = new Dag([
       t("big", [], { effort: 3 }),
       t("two", [], { title: "Build the parser and write the docs" }),
       t("hub"), t("h1", ["hub"]), t("h2", ["hub"]), t("h3", ["hub"]), t("h4", ["hub"]),
     ]);
     const split = new AuditService().audit(dag).filter((x) => x.kind === "split-candidate");
-    expect(split.map((x) => x.task).sort()).toEqual(["big", "hub", "two"]);
+    expect(split.map((x) => x.task).sort()).toEqual(["hub", "two"]);
     for (const f of split) {
       expect(f.detail.length).toBeGreaterThan(0);
       expect(f.wouldKill.length).toBeGreaterThan(0);

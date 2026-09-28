@@ -33,6 +33,8 @@ A plan is written by `plan --out <file>` or `plan --json`, and read by `apply --
 
 All ids in `mutations` are **source-side** ids, so a plan is meaningless against a different project. That is what `currentSource` guards.
 
+`set-estimate` values are exact finite nonnegative source estimates or `null`. Reading 8 cannot satisfy a planned value of 3; fractions are preserved.
+
 `from` records what the source held when the plan was computed. It is there so a reviewer can see what is being replaced, so a mutation that overwrites a value can be classified as destructive, and so `apply` can tell whether the source has moved since (see **Stale mutations** below).
 
 ## A plan that would not schedule is never written

@@ -67,12 +67,12 @@ describe("LinearTaskRepositoryAdapter", () => {
     expect(http.requests).toHaveLength(3);
     expect(http.requests[2]!.body).toContain("cur1");
   });
-  test("an estimate above 3 is clamped to 3 and reported as a warning, not silently", async () => {
+  test("an estimate above 3 is preserved exactly", async () => {
     const http = new RecordingHttpAdapter([ok(projectLookup), ok(page([issue({ id: "a", identifier: "PRO-1", estimate: 5 })], null))]);
     const adapter = new LinearTaskRepositoryAdapter(http, "k", "Growth");
     const tasks = await adapter.load();
-    expect(tasks[0]!.effort).toBe(3);
-    expect(adapter.warnings).toEqual(["PRO-1: estimate 5 is above the 0 to 3 scale; recorded as 3"]);
+    expect(tasks[0]!.effort).toBe(5);
+    expect(adapter.warnings).toEqual([]);
   });
   test("a rejected key is refused with a named reason", async () => {
     const http = new RecordingHttpAdapter([{ status: 401, body: '{"errors":[{"message":"Authentication required"}]}' }]);

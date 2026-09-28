@@ -53,7 +53,7 @@ describe("TextReportRendererAdapter", () => {
     expect(text).toContain("PRO-2");
     expect(text).toMatch(/critical path by depth: 1 task/);
     expect(text).toMatch(/by effort: 3/);
-    expect(text).toContain("split-candidate");
+    expect(text).toContain("stale-blocker");
   });
 });
 

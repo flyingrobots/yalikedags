@@ -1,6 +1,5 @@
 import type { Dag } from "../domain/Dag.ts";
 import type { Task } from "../domain/Task.ts";
-import { MAX_EFFORT } from "../domain/Task.ts";
 
 export type FindingKind = "isolated" | "redundant-edge" | "stale-blocker" | "dangling-blocker" | "cycle" | "split-candidate";
 
@@ -73,9 +72,6 @@ export class AuditService {
 
   private splitCandidates(dag: Dag, t: Task): Finding[] {
     const out: Finding[] = [];
-    if (t.effort === MAX_EFFORT && t.children.length === 0) {
-      out.push(finding("split-candidate")(t.id, `effort ${String(MAX_EFFORT)} with no sub-issues`, "the work is one indivisible change"));
-    }
     if (TWO_VERB_TITLE.test(t.title)) {
       out.push(finding("split-candidate")(t.id, `title joins two things: "${t.title}"`, "the conjunction is inside one deliverable's name"));
     }

@@ -84,7 +84,7 @@ Eight issues, declared in `scripts/live-fixture.ts`, each present for a reason:
 | `G link target` | nothing | the blocker in the prune case |
 | `H prune source` | blocked by G | an edge no desired graph declares, so `--prune` has something to remove |
 
-Plus two project milestones, and the team's estimate scale set to Linear with zero allowed, because the tool's 0 to 3 scale needs a scale that accepts those values.
+Plus two project milestones, and the team's estimate scale set to Linear with zero allowed, because the synthetic tests write values from zero through three. The reader itself preserves any finite nonnegative estimate exactly.
 
 ## Two declared deviations from the testing standard
 

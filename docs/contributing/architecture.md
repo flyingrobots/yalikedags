@@ -29,7 +29,7 @@ src/cli.ts            the composition root; the only file that constructs host a
 
 ## Invariants worth knowing before you edit
 
-- `Task` validates in its constructor: no self-blocking, effort is an integer 0 to 3. Adapters must respect that (the Linear adapter clamps and warns).
+- `Task` validates in its constructor: no self-blocking, effort is a finite nonnegative number. The Linear adapter preserves raw estimates, including fractions, for both analysis and mutation verification.
 - `Dag.dependents` is derived from `blockedBy`; never store the inverse.
 - `unknown` becomes a domain class only in `JsonSnapshotRepositoryAdapter.decodeTask`, `LinearTaskRepositoryAdapter.toTask`, `TaskDagJsonRepositoryAdapter.toTask` and `PlanJsonCodec.decode`.
 - `TaskWriterPort` has no method for status, assignee, priority or title. Adding one would move ownership of that field; do not do it to make a plan more convenient.

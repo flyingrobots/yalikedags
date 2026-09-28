@@ -20,7 +20,7 @@ The write path does not change that ownership; it is how a file-held graph gets 
 
 - To add a dependency, add the relation in Linear (M then B on the blocked card). The next sync shows it.
 - Linear moves a `blocks` relation to Related once the blocker is resolved. For scheduling that is correct; for history it is lossy, and the audit's `stale-blocker` finding is where you see the moment it happens.
-- Effort uses Linear's estimate field. Enable estimates on the team with the Linear scale and zero estimates allowed, and use 0 to 3; higher values are clamped and reported.
+- Effort preserves Linear's estimate field exactly, including values above three and fractions. The team controls its scale. Effort-based paths sum these values without converting them to durations or normalizing different team scales.
 - Workstreams are computed, not assigned. A milestone can be pushed from a desired graph's own `milestone` field, or from a task-dag node's `group` with `--groups-as-milestones`, but the tool never invents a milestone name from a computed workstream id, and it never creates a milestone that does not already exist.
 - Status, assignee, priority and title have no method on the writer port at all, so no plan can contain them. Ownership is enforced by the shape of the interface rather than by remembering.
 

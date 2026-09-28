@@ -1,6 +1,5 @@
 import { Task } from "../../core/domain/Task.ts";
 import type { Priority, TaskFields, TaskStatus } from "../../core/domain/Task.ts";
-import { MAX_EFFORT } from "../../core/domain/Task.ts";
 import type { HttpPort } from "../../ports/HttpPort.ts";
 import type { TaskRepositoryPort } from "../../ports/TaskRepositoryPort.ts";
 import { LinearGraphqlClient } from "../linear/LinearGraphqlClient.ts";
@@ -101,7 +100,7 @@ export class LinearTaskRepositoryAdapter implements TaskRepositoryPort {
       }
     }
     const priority = PRIORITIES.find((p) => p === num(raw["priority"]));
-    const effort = this.effortOf(key, num(raw["estimate"]));
+    const effort = num(raw["estimate"]);
     return new Task({ ...f, ...(priority && { priority }), ...(effort !== undefined && { effort }) });
   }
 
@@ -113,17 +112,6 @@ export class LinearTaskRepositoryAdapter implements TaskRepositoryPort {
       return "open";
     }
     return mapped;
-  }
-
-  private effortOf(key: string, estimate: number | undefined): number | undefined {
-    if (estimate === undefined) {
-      return undefined;
-    }
-    if (estimate > MAX_EFFORT) {
-      this.warnings.push(`${key}: estimate ${String(estimate)} is above the 0 to ${String(MAX_EFFORT)} scale; recorded as ${String(MAX_EFFORT)}`);
-      return MAX_EFFORT;
-    }
-    return Math.max(0, Math.round(estimate));
   }
 
   /** inverseRelations of type blocks name what blocks this issue. The forward direction is merged in load(). */

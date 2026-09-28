@@ -31,7 +31,7 @@ Written by `sync` and `render --format json`; read by `--snapshot` and served at
 | `children`, `labels`, `resources` | string[] | yes | may be empty |
 | `parent`, `assignee`, `milestone`, `due`, `url`, `createdAt`, `description` | string | no | absent when unknown |
 | `priority` | 1 to 4 | no | Linear's scale; 0 (none) is absent |
-| `effort` | 0 to 3 | no | Linear estimate; values above 3 are clamped with a warning |
+| `effort` | finite nonnegative number | no | Exact source estimate, including fractions; no rounding or clamping |
 | `state` | `done`, `in-progress`, `blocked`, `ready` | derived | not read back |
 | `workstream` | string or null | derived | not read back |
 | `critical` | boolean | derived | on either critical path |
