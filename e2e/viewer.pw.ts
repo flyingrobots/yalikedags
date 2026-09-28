@@ -269,3 +269,17 @@ test("workspace controls live in a dismissible keyboard-accessible header dropdo
   await page.locator(".brand").click();
   await expect(toggle).toHaveAttribute("aria-expanded", "false");
 });
+
+test("the banner can be hidden and restored without losing access to Views", async ({ page }) => {
+  await page.goto(exported);
+  const before = await page.locator("#workspace").boundingBox();
+  await workspaceAction(page, "Hide banner");
+  await expect(page.locator("header")).toBeHidden();
+  await expect(page.locator("footer").getByRole("button", { name: "Views menu", exact: true })).toBeVisible();
+  expect((await page.locator("#workspace").boundingBox())!.height).toBeGreaterThan(before!.height);
+  await page.reload();
+  await expect(page.locator("header")).toBeHidden();
+  await workspaceAction(page, "Show banner");
+  await expect(page.locator("header")).toBeVisible();
+  await expect(page.locator("header").getByRole("button", { name: "Views menu", exact: true })).toBeVisible();
+});

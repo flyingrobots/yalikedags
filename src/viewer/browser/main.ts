@@ -1,3 +1,4 @@
+import { BannerController } from "./BannerController.ts";
 import { WorkspaceMenu } from "./WorkspaceMenu.ts";
 import "dockview/dist/styles/dockview.css";
 import "./viewer.css";
@@ -16,6 +17,7 @@ import { ChangesController } from "./ChangesController.ts";
 
 async function start(): Promise<void> {
   new WorkspaceMenu();
+  new BannerController();
   const state = new ViewerState(await new JsonSnapshotRepositoryAdapter(element("snapshot").textContent, "embedded").load());
   const session = new SessionState();
   const workspace = new Workspace(session.layout());

@@ -11,16 +11,16 @@ export function viewerPage(a: Analysis, assets: { svg: string; snapshotJson: str
   return `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${esc(a.source)} · yalikedags</title><style>${viewerStyles.replace(/<\/style/gi, "<\\/style")}</style></head>
-<body data-source="${esc(a.source)}"><header class="app-header"><div class="brand">yalikedags<span>DEPENDENCY WORKSPACE</span></div>
+<body data-source="${esc(a.source)}"><header id="page-banner" class="app-header"><div class="brand">yalikedags<span>DEPENDENCY WORKSPACE</span></div>
 <div class="project"><strong>${esc(a.source)}</strong><span>${String(a.dag.size)} tasks · ${String(a.frontier.length)} ready · as of ${esc(a.asOf)}</span></div>
 <div class="search"><label class="sr-only" for="search">Find a task</label><input id="search" type="search" placeholder="Find a task by key, title or assignee…" autocomplete="off"><div id="search-results" hidden></div></div><div id="workspace-controls" class="workspace-controls"><button id="workspace-views" class="workspace-views" aria-label="Views menu" title="Views and layout" aria-expanded="false" aria-controls="workspace-menu"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="7" height="18" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></button><nav id="workspace-menu" class="workspace-menu" aria-label="Workspace views" hidden>
 <button data-panel="graph" aria-label="Show DAG">DAG</button><button data-panel="grid" aria-label="Show wave grid">Wave grid</button>
 <button data-panel="table" aria-label="Show task table">Task table</button><button data-panel="changes">Changes</button>
 <button data-panel="details">Task details</button><button data-panel="ready">Ready work</button><button data-panel="findings">Findings <span class="count">${String(a.findings.length)}</span></button>
-<button id="filter-summary" data-panel="table" hidden></button><hr><button data-action="reset">Reset layout</button></nav></div></header>
+<button id="filter-summary" data-panel="table" hidden></button><hr><button data-action="reset">Reset layout</button><button id="toggle-banner">Hide banner</button></nav></div></header>
 ${viewerMetadata(a, options)}
 
-<main id="workspace" aria-label="Task workspace"></main><footer><span id="selection-status" role="status">Select a task to trace its dependencies.</span><span>Drag tabs to arrange views · Esc clears selection</span></footer>
+<main id="workspace" aria-label="Task workspace"></main><footer><span id="selection-status" role="status">Select a task to trace its dependencies.</span><span>Drag tabs to arrange views · Esc clears selection</span><div id="compact-controls"></div></footer>
 ${new ViewerPanels(a, options.changes).render(assets.svg)}
 <noscript>This viewer needs JavaScript to display its panels. The snapshot data is embedded in this file.</noscript>
 <script id="snapshot" type="application/json">${assets.snapshotJson.replace(/</g, "\\u003c")}</script>

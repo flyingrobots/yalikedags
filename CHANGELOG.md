@@ -4,6 +4,8 @@ All notable changes to this project are documented here. The format follows Keep
 
 ## [Unreleased]
 
+- Add a persistent Hide banner option; keep the Views menu reachable in the footer while the banner is hidden.
+
 - Replace the settings cog with a dashboard icon labeled Views menu.
 
 - Move view and layout actions into a header cog dropdown with keyboard navigation, focus restoration, and outside-click dismissal.

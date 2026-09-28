@@ -44,6 +44,8 @@ Selecting a task dims unrelated nodes, cards, and edges. Its ancestors and desce
 
 The header Views button opens the view/layout dropdown. Choose an action to close it; Escape returns focus to the Views button, and clicking outside dismisses it. Arrow keys, Home, and End navigate its buttons. A green dot indicates active table filters.
 
+Choose **Hide banner** in the Views menu to reclaim vertical space. The Views button moves to the footer; **Show banner** brings it back. The preference persists when browser storage is available.
+
 ## Controls and visual cues
 
 | Action | Control |

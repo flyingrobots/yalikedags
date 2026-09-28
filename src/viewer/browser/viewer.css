@@ -47,3 +47,10 @@ button:disabled {opacity:.5;cursor:default}
 .workspace-controls:has(#filter-summary:not([hidden]))>.workspace-views::after {content:"";position:absolute;right:3px;top:3px;width:7px;height:7px;border-radius:50%;background:var(--accent)}
 #workspace {margin-top:10px}
 @media(max-width:800px){.search{order:3}.workspace-controls{order:2}.project{min-width:100px}#workspace{margin-top:6px}}
+
+.app-header[hidden] {display:none}
+footer {align-items:center}
+#compact-controls:empty {display:none}
+#compact-controls {margin-left:auto;flex-shrink:0}
+#compact-controls .workspace-views {width:30px;height:30px}
+#compact-controls .workspace-menu {top:auto;bottom:calc(100% + 8px)}

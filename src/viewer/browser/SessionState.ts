@@ -24,6 +24,6 @@ export class SessionState {
     const inputs = new Set(roots.flatMap((root) => Array.from(root.querySelectorAll<HTMLInputElement | HTMLSelectElement>("input[id],select[id]"))));
     const controls = Object.fromEntries([...inputs]
       .filter((control) => control.type !== "file").map((control) => [control.id, control.value]));
-    history.replaceState({ selected: state.selected, controls, layout: workspace.layout() }, "");
+    history.replaceState({ bannerHidden: document.getElementById("page-banner")?.hidden === true, selected: state.selected, controls, layout: workspace.layout() }, "");
   }
 }
