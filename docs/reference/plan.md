@@ -41,7 +41,11 @@ All ids in `mutations` are **source-side** ids, so a plan is meaningless against
 
 Each edge in such a plan is individually reasonable, which is why this is checked on the set rather than one at a time, and why it is checked here rather than trusted to the source: Linear will accept every one of those writes in turn and leave you with a project that no longer schedules.
 
-A cycle the source *already* has is not the plan's doing. Those are left alone, reported by `audit`, and do not block a plan.
+A cycle the source *already* has is reported by `audit`. Apply safety compares cyclic edges, so an unchanged existing cycle does not prevent unrelated changes.
+
+`apply` checks the effective plan against its initial fresh read, after permissions and stale-state checks. If skipping a removal would leave an unsafe addition, it refuses before any write with exit `10`. Permitted removals run first. A further read establishes which removals actually landed; each addition is checked against that observed graph plus every earlier attempted addition (a failed response may still have landed). Failed or silently ignored removals cannot justify an unsafe addition. If this read fails, additions are withheld.
+
+A final read verifies every mutation, including those already satisfied at startup, and checks for newly cyclic edges. Skipped changes leave the receipt incomplete. These are client-side checks, not a transaction: another person can change the tracker between a read and a write. A cycle detected on the final read leaves `graphSafe: false` and exits `8`.
 
 ## Which mutations are destructive
 
@@ -84,6 +88,7 @@ Written by `apply --confirm --receipt <file>`.
   "target": "Linear project example-project",
   "at": "2026-09-23",
   "verified": true,
+  "graphSafe": true,
   "complete": true,
   "counts": { "confirmed": 12, "unconfirmed": 0, "failed": 0, "skipped": 0, "stale": 0 },
   "results": [
@@ -95,7 +100,8 @@ Written by `apply --confirm --receipt <file>`.
 | Field | Meaning |
 |---|---|
 | `verified` | the source was read again after writing. When `false`, no outcome below it is trustworthy. |
-| `complete` | `verified`, and every result is `confirmed` or `skipped` |
+| `graphSafe` | the verification read found no newly cyclic edges relative to the initial read; false if verification failed |
+| `complete` | `verified`, `graphSafe`, and every result is `confirmed` |
 | `outcome` | one of `confirmed`, `unconfirmed`, `failed`, `skipped`, `stale` |
 | `detail` | the refusal for `failed`, the reason for `skipped` or `stale`, and for `unconfirmed` the note that a fresh read does not show the write |
 

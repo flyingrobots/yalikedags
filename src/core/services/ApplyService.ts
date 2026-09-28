@@ -13,6 +13,7 @@ import type { Dag } from "../domain/Dag.ts";
 import type { Mutation } from "../domain/Mutation.ts";
 import type { Plan } from "../domain/Plan.ts";
 import type { TaskWriterPort } from "../../ports/TaskWriterPort.ts";
+import { GraphSafetyService } from "./GraphSafetyService.ts";
 
 /**
  * `stale` is the outcome that keeps the destructive gate honest: the state
@@ -44,6 +45,7 @@ export interface ApplyReceiptFields {
   at: string;
   /** True when the source was read again after writing. */
   verified: boolean;
+  graphSafe: boolean;
 }
 
 export class ApplyReceipt {
@@ -51,12 +53,14 @@ export class ApplyReceipt {
   readonly target: string;
   readonly at: string;
   readonly verified: boolean;
+  readonly graphSafe: boolean;
 
   constructor(f: ApplyReceiptFields) {
     this.results = Object.freeze([...f.results]);
     this.target = f.target;
     this.at = f.at;
     this.verified = f.verified;
+    this.graphSafe = f.graphSafe;
     Object.freeze(this);
   }
 
@@ -65,7 +69,7 @@ export class ApplyReceipt {
   }
 
   get complete(): boolean {
-    return this.verified && this.results.every((r) => r.outcome === "confirmed" || r.outcome === "skipped");
+    return this.verified && this.graphSafe && this.results.every((r) => r.outcome === "confirmed");
   }
 
   toJSON(): Record<string, unknown> {
@@ -73,6 +77,7 @@ export class ApplyReceipt {
       target: this.target,
       at: this.at,
       verified: this.verified,
+      graphSafe: this.graphSafe,
       complete: this.complete,
       counts: { confirmed: this.count("confirmed"), unconfirmed: this.count("unconfirmed"), failed: this.count("failed"), skipped: this.count("skipped"), stale: this.count("stale") },
       results: this.results.map((r) => r.toJSON()),
@@ -93,25 +98,63 @@ export interface ApplyRequest {
 }
 
 export class ApplyService {
+  private readonly safety = new GraphSafetyService();
   /**
-   * Write every mutation, then verify with one fresh read rather than a
-   * read-back per mutation: a single consistent snapshot answers for the
-   * whole plan and costs the source one query instead of dozens.
+   * Validate the permitted plan before any write. Observe removals before
+   * deciding which additions remain safe, then verify all effects and graph
+   * safety in a final read. These reads do not make the remote API transactional.
    */
   async apply(request: ApplyRequest): Promise<ApplyReceipt> {
+    this.safety.assertSafe(request.before, request.plan.mutations.filter((m) => this.decide(m, request) === undefined));
     const written = await this.write(request);
     const after = await this.readQuietly(request.reread);
     const results = written.map((r) => this.verify(r, after));
-    return new ApplyReceipt({ results, target: request.writer.describe(), at: request.at, verified: after !== undefined });
+    const graphSafe = after !== undefined && !this.safety.introducedCycle(request.before, after);
+    return new ApplyReceipt({ results, target: request.writer.describe(), at: request.at, verified: after !== undefined, graphSafe });
   }
 
   private async write(request: ApplyRequest): Promise<MutationResult[]> {
-    const out: MutationResult[] = [];
-    for (const m of request.plan.mutations) {
-      const decided = this.decide(m, request);
-      out.push(decided ?? (await this.writeOne(m, request.writer)));
+    const results = new Map<Mutation, MutationResult>();
+    const pending = request.plan.mutations.filter((m) => {
+      const result = this.decide(m, request);
+      if (result !== undefined) { results.set(m, result); }
+      return result === undefined;
+    });
+    const removals = pending.filter((m) => m.kind === "remove-blocking-relation");
+    for (const m of removals) { results.set(m, await this.writeOne(m, request.writer)); }
+    const refreshed = removals.length > 0 ? await this.readQuietly(request.reread) : request.before;
+    let projected = refreshed;
+    for (const m of pending.filter((mutation) => mutation.kind !== "remove-blocking-relation")) {
+      const checked = refreshed === undefined ? undefined : this.decide(m, { ...request, before: refreshed });
+      const refusal = checked ?? this.edgeRefusal(m, projected);
+      const result = refusal ?? (await this.writeOne(m, request.writer));
+      results.set(m, result);
+      // A failed request can have landed before its response was lost. Keep
+      // every attempted addition in the safety projection until a fresh read.
+      if (projected !== undefined && refusal === undefined) {
+        projected = this.safety.project(projected, [m]);
+      }
     }
-    return out;
+    return request.plan.mutations.map((m) => {
+      const result = results.get(m);
+      if (result === undefined) { throw new Error("internal: missing mutation result"); }
+      return result;
+    });
+  }
+
+  /** Only observed removals can justify an addition. Failed/ignored removals remain in the graph. */
+  private edgeRefusal(m: Mutation, graph: Dag | undefined): MutationResult | undefined {
+    if (m.kind !== "add-blocking-relation") { return undefined; }
+    if (graph === undefined) {
+      return new MutationResult(m, "stale", "could not verify removals; no dependent additions were attempted");
+    }
+    if (!m.preconditionHolds(graph)) {
+      return new MutationResult(m, "stale", "an endpoint disappeared during apply; re-plan");
+    }
+    if (this.safety.introducedCycle(graph, this.safety.project(graph, [m]))) {
+      return new MutationResult(m, "stale", "addition would introduce a cycle in the observed graph; re-plan after verifying removals");
+    }
+    return undefined;
   }
 
   /**
@@ -153,11 +196,12 @@ export class ApplyService {
   }
 
   private verify(result: MutationResult, after: Dag | undefined): MutationResult {
-    if (after === undefined || result.outcome !== "unconfirmed") {
+    if (result.outcome !== "unconfirmed" && result.outcome !== "confirmed") {
       return result;
     }
+    if (after === undefined) { return new MutationResult(result.mutation, "unconfirmed", "verification read failed"); }
     return result.mutation.satisfiedBy(after)
-      ? new MutationResult(result.mutation, "confirmed", "")
+      ? new MutationResult(result.mutation, "confirmed", result.detail)
       : new MutationResult(result.mutation, "unconfirmed", "the write returned cleanly but a fresh read does not show it");
   }
 }

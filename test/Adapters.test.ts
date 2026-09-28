@@ -135,7 +135,7 @@ describe("PlanTextAdapter.renderReceipt", () => {
     labels: { "id-1": "PRO-9" },
   });
   const receiptOf = (outcome: Outcome, detail: string, verified = true): ApplyReceipt =>
-    new ApplyReceipt({ results: [new MutationResult(new SetEstimate("id-1", 1, 2), outcome, detail)], target: "Linear project Example", at: "2026-09-23", verified });
+    new ApplyReceipt({ results: [new MutationResult(new SetEstimate("id-1", 1, 2), outcome, detail)], target: "Linear project Example", at: "2026-09-23", verified, graphSafe: true });
 
   // oracle: specified. Counts, one line per mutation with its label, and advice only when incomplete.
   test("names every outcome in the counts line, stale included", () => {

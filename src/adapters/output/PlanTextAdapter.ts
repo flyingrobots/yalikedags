@@ -65,6 +65,12 @@ export class PlanTextAdapter {
     if (receipt.complete) {
       return [];
     }
+    if (receipt.verified && !receipt.graphSafe) {
+      return ["", "The fresh graph contains new cyclic edges. Audit the source and re-plan before applying more changes."];
+    }
+    if (receipt.count("skipped") > 0) {
+      return ["", "Reviewed destructive changes were skipped. Review the receipt and re-plan, or use --allow-destructive if those changes are still intended."];
+    }
     if (receipt.count("stale") > 0) {
       return ["", "This plan no longer describes the source: something changed after it was made. Plan again; re-running this one will report the same."];
     }

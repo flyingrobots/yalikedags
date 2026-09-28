@@ -159,4 +159,10 @@ describe("ReconcileService cycle guard", () => {
     const p = plan([t("a"), t("b", ["a"])], current, { prune: true });
     expect(p.mutations.map((m) => m.kind)).toEqual(["remove-blocking-relation"]);
   });
+
+  test("refuses a new cyclic edge even when the cycle still has the same members", () => {
+    const current = [t("a", ["c"]), t("b", ["a"]), t("c", ["b"])];
+    const desired = [t("a", ["c", "b"]), t("b", ["a"]), t("c", ["b"])];
+    expect(() => plan(desired, current)).toThrow(/^plan_would_cycle/);
+  });
 });

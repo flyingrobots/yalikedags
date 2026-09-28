@@ -89,7 +89,7 @@ The receipt is the verification: after writing, the project is read again and ev
 | `skipped` | destructive, and this run was not allowed to perform it |
 | `stale` | the tracker moved after the plan was made, so this mutation no longer describes what it would do. Nothing was written for it. |
 
-The command exits `0` only when every mutation is `confirmed` or `skipped`, and `8` otherwise.
+The command exits `0` only when every mutation is confirmed and the final read shows no newly cyclic edges. Skipped changes, failed verification, and unsafe final graphs exit `8`. An unsafe effective plan is refused before writing, exit `10`.
 
 A `stale` result is answered by planning again, not by re-running or by adding a flag. It means somebody changed that card between your plan and your apply, and the plan's account of what it was about to overwrite is out of date. `--allow-destructive` does not cover it: that flag says you accept losing a value you saw, and the point of `stale` is that the value is no longer the one you saw.
 
