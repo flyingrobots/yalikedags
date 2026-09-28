@@ -112,6 +112,7 @@ export class TableController {
 
   private row(task: Task): HTMLTableRowElement {
     const row = document.createElement("tr"); row.dataset["id"] = task.id;
+    row.className = this.states.stateOf(this.state.dag, task.id);
     for (const column of TABLE_COLUMNS) {
       const cell = row.insertCell();
       if (column === "Key") { const control = button(task.key, task.id); cell.append(control); }

@@ -57,7 +57,7 @@ Selecting a task dims unrelated nodes, cards, and edges. Its ancestors and desce
 | select a task | click a node/card/key, or focus it and press Enter or Space |
 | clear selection | Escape |
 
-Task state appears as text as well as color. Ready tasks are green, blocked tasks peach, in-progress tasks blue, and closed tasks gray. A bold border marks the critical path; a dashed border marks a shared prerequisite. The selected task has a stronger green outline. Full node titles are available on hover and in Task details.
+Task state appears as text as well as color. Task-table rows share the DAG state colors; selection adds an outline without replacing the state color. Ready tasks are green, blocked tasks peach, in-progress tasks blue, and closed tasks gray. A bold border marks the critical path; a dashed border marks a shared prerequisite. The selected task has a stronger green outline. Full node titles are available on hover and in Task details.
 
 ## Empty and error states
 

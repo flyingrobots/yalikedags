@@ -230,3 +230,18 @@ test("table headers stay flush with their scroll viewport in both directions", a
     expect(metrics.header).toBeCloseTo(metrics.top, 0);
   }
 });
+
+test("task rows use the same state colors as DAG nodes, including selected rows", async ({ page }) => {
+  await page.goto(exported);
+  const colors = await page.locator("#graph .node").evaluateAll((nodes) => nodes.map((node) => ({ id: node.getAttribute("data-id"), color: getComputedStyle(node.querySelector("rect")!).fill })));
+  await page.getByRole("button", { name: "Show task table", exact: true }).click();
+  for (const row of await page.locator("#task-table tbody tr").all()) {
+    const id = await row.getAttribute("data-id");
+    expect(await row.evaluate((el) => getComputedStyle(el).backgroundColor)).toBe(colors.find((entry) => entry.id === id)?.color);
+  }
+  const first = page.locator("#task-table tbody tr").first();
+  await first.getByRole("button").click();
+  await expect(first).toHaveClass(/selected/);
+  const selectedId = await first.getAttribute("data-id");
+  expect(await first.evaluate((el) => getComputedStyle(el).backgroundColor)).toBe(colors.find((entry) => entry.id === selectedId)?.color);
+});

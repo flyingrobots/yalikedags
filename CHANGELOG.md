@@ -4,6 +4,8 @@ All notable changes to this project are documented here. The format follows Keep
 
 ## [Unreleased]
 
+- Match task-table row colors to DAG node states, preserving state color when a row is selected.
+
 - Fix sticky table headers by giving each table an unpadded scroll viewport; filter controls and introductions remain outside it.
 
 - Replace speculative scaling guidance with current limits and a reproducible measurement approach.
