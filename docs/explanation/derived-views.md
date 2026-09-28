@@ -24,7 +24,7 @@ FOLDS:   done ─┐
 
 **State.** A task is `done` when its status is done or canceled (both stop blocking). Otherwise it is `in-progress` if Linear says so, `unresolved` if its status or a blocker status is unknown or a blocker is absent, `ready` if every stored blocker is known and done, else `blocked`. The audit also reports missing references as dangling.
 
-**Frontier.** The ready tasks, sorted by days until due (undated last), then priority (1 first, unset last), then how many open tasks the task transitively unblocks (more first), then creation time, then id. Priority is a tiebreaker inside the frontier and never overrides an edge.
+**Frontier.** The ready tasks, sorted by days until due (undated last), then priority (1 first, unset last), then how many direct dependents become ready upon its completion, then the number of open descendants (more first), then creation time, then id. Priority is a tiebreaker inside the frontier and never overrides an edge.
 
 **Resource conflicts.** Resources are attributes on tasks, never edges, because contention is symmetric and non-transitive. Ready tasks sharing an `exclusive` resource, or more of them than a `capacity` allows, are flagged. `advisory` never blocks. Phase 1 has no resource source; the policy is empty until one exists.
 

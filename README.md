@@ -64,8 +64,8 @@ loaded 12 tasks from task list examples/example-tasklist.txt
 task list examples/example-tasklist.txt, as of <today>: 12 tasks (2 done, 2 ready, 7 blocked, 1 in-progress)
 
 frontier (2 ready tasks, most urgent first):
-  implement-core-dag-builder  Implement core DAG builder  unlocks:7
-  write-documentation  Write documentation  unlocks:2
+  implement-core-dag-builder  Implement core DAG builder  immediately-unblocks:2  downstream-impact:7
+  write-documentation  Write documentation  immediately-unblocks:1  downstream-impact:2
 ...
 critical path by depth: 6 tasks: implement-core-dag-builder then ... then deploy-to-production
 ```

@@ -17,7 +17,7 @@ export class TextReportRendererAdapter implements RendererPort {
       `${a.source}, as of ${a.asOf}: ${plural(a.dag.size, "task")} (${[...counts].map(([s, n]) => `${String(n)} ${s}`).join(", ")})`,
       "",
       `frontier (${plural(a.frontier.length, "ready task")}, most urgent first):`,
-      ...a.frontier.map((e) => `  ${key(e.task.id)}  ${e.task.title}  unlocks:${String(e.unlocks)}${e.daysUntilDue < 9999 ? `  due in ${String(e.daysUntilDue)}d` : ""}${(a.conflicts.get(e.task.id) ?? []).map((c) => `  CONFLICT ${c}`).join("")}`),
+      ...a.frontier.map((e) => `  ${key(e.task.id)}  ${e.task.title}  immediately-unblocks:${String(e.immediatelyUnblocks)}  downstream-impact:${String(e.downstreamImpact)}${e.daysUntilDue < 9999 ? `  due in ${String(e.daysUntilDue)}d` : ""}${(a.conflicts.get(e.task.id) ?? []).map((c) => `  CONFLICT ${c}`).join("")}`),
       "",
       `waves: ${a.waves.map((w) => `[${w.map(key).join(", ")}]`).join(" -> ") || "(none schedulable)"}`,
       `gatekeepers: ${a.gatekeepers.map(key).join(", ") || "(none)"}`,

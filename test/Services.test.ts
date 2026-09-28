@@ -51,7 +51,7 @@ describe("FrontierService", () => {
     const dag = new Dag([t("a", [], { due: "2026-09-25" }), t("b", ["a"]), t("c", ["b"])]);
     const [entry] = new FrontierService(clock).frontier(dag);
     expect(entry!.daysUntilDue).toBe(2);
-    expect(entry!.unlocks).toBe(2);
+    expect(entry!.downstreamImpact).toBe(2);
   });
   test("undated tasks sort after dated ones", () => {
     const dag = new Dag([t("undated"), t("dated", [], { due: "2027-01-01" })]);
