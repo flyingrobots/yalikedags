@@ -12,7 +12,7 @@ export class TableController {
   private readonly filters = new Map<string, HTMLSelectElement>();
   private readonly query: HTMLInputElement;
 
-  constructor(private readonly state: ViewerState) {
+  constructor(private readonly state: ViewerState, private readonly panels: readonly HTMLElement[]) {
     const query = this.control("table-query");
     if (!(query instanceof HTMLInputElement)) { throw new Error("Missing table query"); }
     this.query = query;
@@ -104,7 +104,7 @@ export class TableController {
     summary.hidden = tasks.length === this.state.dag.size;
     summary.textContent = `Filters: ${String(tasks.length)}/${String(this.state.dag.size)} tasks · edit in Task table`;
     const ids = new Set(tasks.map((task) => task.id));
-    document.querySelectorAll<HTMLElement | SVGElement>(".node,.card").forEach((node) => {
+    this.panels.flatMap((panel) => [...panel.querySelectorAll<HTMLElement | SVGElement>(".node,.card")]).forEach((node) => {
       node.classList.toggle("filtered-out", !ids.has(node.dataset["id"] ?? ""));
     });
     this.highlight();

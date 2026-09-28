@@ -1,3 +1,4 @@
+import { PopoutActions } from "./PopoutActions.ts";
 import type { DockviewApi, DockviewGroupPanel } from "dockview";
 import { Sidebars } from "./Sidebars.ts";
 
@@ -5,6 +6,8 @@ import { Sidebars } from "./Sidebars.ts";
 export class GroupActions {
   private expandedSidebar: string | undefined;
   constructor(private readonly current: () => DockviewApi) {}
+
+  popout(group: DockviewGroupPanel): void { void new PopoutActions(this.current).open(group); }
 
   maximize(group: DockviewGroupPanel): void {
     const api = this.current();

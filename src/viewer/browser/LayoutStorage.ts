@@ -31,12 +31,28 @@ export class LayoutStorage {
     if (!isRec(raw)) { return undefined; }
     const grid = rec(raw["grid"]);
     const ids = new Set<string>();
-    const root = this.node(grid["root"], ids, 0);
+    let root = this.node(grid["root"], ids, 0);
     if (root === undefined) { return undefined; }
     const edgeGroups = this.edges(raw["edgeGroups"], ids);
+    root = this.redockPopouts(root, raw["popoutGroups"], ids);
     const panels = Object.fromEntries([...ids].map((id) => [id, { id, contentComponent: id, title: PANEL_TITLES.get(id) ?? id }]));
     const orientation = grid["orientation"] === Orientation.VERTICAL ? Orientation.VERTICAL : Orientation.HORIZONTAL;
     return { grid: { root, width: this.size(grid["width"]), height: this.size(grid["height"]), orientation }, panels, edgeGroups };
+  }
+
+  private redockPopouts(root: GridNode, raw: unknown, ids: Set<string>): GridNode {
+    const groups = list(raw);
+    if (groups.length > PANEL_TITLES.size) { throw new Error("Too many pop-outs"); }
+    const restored = groups.map((value) => {
+      const entry = rec(value);
+      const node = entry["grid"] === undefined
+        ? this.leaf({ data: entry["data"] }, ids)
+        : this.node(rec(entry["grid"])["root"], ids, 0);
+      if (node === undefined) { throw new Error("Invalid pop-out layout"); }
+      return node;
+    });
+    if (restored.length === 0) { return root; }
+    return { type: "branch", size: this.size(root.size), data: [...(Array.isArray(root.data) ? root.data : [root]), ...restored] };
   }
 
   private edges(raw: unknown, ids: Set<string>): NonNullable<Layout["edgeGroups"]> {
@@ -52,11 +68,17 @@ export class LayoutStorage {
     return out;
   }
 
+  private emptyPlaceholder(raw: unknown): boolean {
+    const node = rec(raw);
+    const views = rec(node["data"])["views"];
+    return node["type"] === "leaf" && Array.isArray(views) && views.length === 0;
+  }
+
   private node(raw: unknown, ids: Set<string>, depth: number): GridNode | undefined {
     if (!isRec(raw) || depth > 10) { return undefined; }
     const size = this.size(raw["size"]);
     if (raw["type"] === "branch") {
-      const children = list(raw["data"]);
+      const children = list(raw["data"]).filter((child) => !this.emptyPlaceholder(child));
       if (children.length > PANEL_TITLES.size) { return undefined; }
       const decoded = children.map((child) => this.node(child, ids, depth + 1));
       if (decoded.some((child) => child === undefined)) { return undefined; }

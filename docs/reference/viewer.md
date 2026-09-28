@@ -28,6 +28,8 @@ Docked layout and sizes are saved locally in the browser, shared between snapsho
 
 Task details, Ready work, Findings, and Changes share a collapsible sidebar on the right (bottom on narrow screens). Use its collapse/expand arrow or click the active tab. Choosing a sidebar view from Views opens it again. Sidebar sizes and collapsed state survive reload; older standalone inspector groups migrate into a sidebar.
 
+Use **Pop out view** (↗) to move the active tab into its own browser window. Selection, filters, and graph controls remain shared. Closing that window returns the view; reloading the parent brings popped-out views back into the workspace without reopening windows. Allow pop-ups for the local server if prompted. Pop-out is disabled in HTML files opened directly from disk; run the local viewer with `serve` to use it.
+
 Use **Expand view** in a group header to maximize it; **Restore view** returns the arrangement. A sidebar view temporarily joins the main area and returns to its sidebar on restore.
 
 ![DAG and wave grid docked together, with a shared task selection](../images/viewer-split.png)

@@ -11,3 +11,8 @@ export function button(label: string, task: string): HTMLButtonElement {
   out.dataset["task"] = task;
   return out;
 }
+
+/** Adopted pop-out nodes can belong to a different browser realm. */
+export function isElement(target: EventTarget | null): target is Element {
+  return target !== null && "nodeType" in target && target.nodeType === 1;
+}

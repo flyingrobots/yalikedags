@@ -24,6 +24,14 @@ describe("ViewerRequestHandler", () => {
     expect(res.body).not.toMatch(/@import/);
     expect(res.body).toContain('id="refresh" disabled');
   });
+  test("GET /popout.html is an empty same-origin shell without task data or scripts", () => {
+    const res = new ViewerRequestHandler(() => analysis).handle("/popout.html");
+    expect(res.status).toBe(200);
+    expect(res.contentType).toContain("text/html");
+    expect(res.body).toContain("<body></body>");
+    expect(res.body).not.toContain("<script");
+    expect(res.body).not.toContain("PRO-1");
+  });
   test("GET /snapshot.json returns the snapshot as JSON", () => {
     const res = new ViewerRequestHandler(() => analysis).handle("/snapshot.json");
     expect(res.status).toBe(200);

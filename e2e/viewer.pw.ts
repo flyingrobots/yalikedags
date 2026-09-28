@@ -357,3 +357,82 @@ test("group expand and restore work repeatedly, including inspector views", asyn
   await page.getByRole("button", { name: "Restore view", exact: true }).click();
   await expect(page.getByRole("button", { name: "Collapse sidebar", exact: true })).toBeVisible();
 });
+
+test("pop-out views stay interactive and return when their window closes", async ({ page }) => {
+  await page.goto("http://127.0.0.1:4178");
+  await workspaceAction(page, "Show task table");
+  const group = page.locator(".dv-groupview").filter({ has: page.getByRole("tab", { name: "Task table", exact: true }) });
+  const opened = page.waitForEvent("popup");
+  await group.getByRole("button", { name: "Pop out view", exact: true }).click();
+  const popup = await opened;
+  await popup.locator("#table-query").fill("Implement core DAG");
+  await expect(popup.locator("#task-table tbody tr")).toHaveCount(1);
+  await popup.locator("#task-table tbody button").click();
+  await expect(page.locator("#detail h2")).toContainText("Implement core DAG builder");
+  await popup.close({ runBeforeUnload: true });
+  await workspaceAction(page, "Show task table");
+  await expect(page.locator("#table-query")).toHaveValue("Implement core DAG");
+  await workspaceAction(page, "Show DAG");
+  const graphWindow = page.waitForEvent("popup");
+  await group.getByRole("button", { name: "Pop out view", exact: true }).click();
+  const graph = await graphWindow;
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  graph.on("pageerror", (error) => errors.push(error.message));
+  const before = await graph.locator("#graph svg").getAttribute("viewBox");
+  await graph.getByRole("button", { name: "Zoom in", exact: true }).click();
+  expect(errors).toEqual([]);
+  await expect(graph.locator("#graph svg")).not.toHaveAttribute("viewBox", before!);
+  await page.reload();
+  await workspaceAction(page, "Show DAG");
+  await expect(page.locator("#graph")).toBeVisible();
+  await expect.poll(() => graph.isClosed()).toBe(true);
+});
+
+test("pop-outs explain offline limits and recover from blocked windows", async ({ page }) => {
+  await page.goto(exported);
+  await expect(page.getByRole("button", { name: "Pop out view", exact: true }).first()).toBeDisabled();
+  await page.goto("http://127.0.0.1:4178");
+  await page.evaluate(() => { window.open = (): null => null; });
+  await workspaceAction(page, "Task details");
+  const sidebar = page.locator(".dv-groupview").filter({ has: page.getByRole("tab", { name: "Task details", exact: true }) });
+  await sidebar.getByRole("button", { name: "Pop out view", exact: true }).click();
+  await expect(page.locator("#viewer-notice")).toContainText("Allow pop-ups");
+  await expect(sidebar.getByRole("button", { name: "Collapse sidebar", exact: true })).toBeVisible();
+  await expect(page.locator("#detail")).toBeVisible();
+});
+
+test("sidebar pop-outs return to the sidebar and reset closes their windows", async ({ page }) => {
+  await page.goto("http://127.0.0.1:4178");
+  await workspaceAction(page, "Task details");
+  const sidebar = page.locator(".dv-groupview").filter({ has: page.getByRole("tab", { name: "Task details", exact: true }) });
+  for (const reset of [false, true]) {
+    const opened = page.waitForEvent("popup");
+    await sidebar.getByRole("button", { name: "Pop out view", exact: true }).click();
+    const popup = await opened;
+    await expect(popup.locator("#detail")).toBeVisible();
+    if (reset) { await workspaceAction(page, "Reset layout"); }
+    else { await popup.close({ runBeforeUnload: true }); }
+    await expect.poll(() => popup.isClosed()).toBe(true);
+    await workspaceAction(page, "Task details");
+    await expect(page.locator("#detail")).toBeVisible();
+    await expect(sidebar.getByRole("button", { name: "Collapse sidebar", exact: true })).toBeVisible();
+  }
+});
+
+test("reload redocks popped-out sidebar views while preserving a split layout", async ({ page }) => {
+  await page.goto("http://127.0.0.1:4178");
+  await dockWaveGrid(page);
+  await workspaceAction(page, "Task details");
+  const sidebar = page.locator(".dv-groupview").filter({ has: page.getByRole("tab", { name: "Task details", exact: true }) });
+  const opened = page.waitForEvent("popup");
+  await sidebar.getByRole("button", { name: "Pop out view", exact: true }).click();
+  const popup = await opened;
+  await expect(popup.locator("#detail")).toBeVisible();
+  await page.reload();
+  await expect(page.locator("#graph")).toBeVisible();
+  await expect(page.locator("#grid")).toBeVisible();
+  await workspaceAction(page, "Task details");
+  await expect(page.locator("#detail")).toBeVisible();
+  await expect(sidebar.getByRole("button", { name: "Collapse sidebar", exact: true })).toBeVisible();
+});

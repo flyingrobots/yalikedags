@@ -66,3 +66,5 @@ footer {align-items:center}
 .group-controls button {width:26px;height:26px;padding:2px;border:0;background:transparent;font-size:17px}
 .group-controls button[hidden] {display:none}
 .group-controls button:hover {background:#dcebe3}
+.dv-right-actions-container-vertical .group-controls {flex-direction:column;padding:4px 0}
+.group-controls button:disabled {opacity:.4;cursor:default}

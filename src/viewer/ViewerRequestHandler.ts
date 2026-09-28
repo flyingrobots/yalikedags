@@ -29,6 +29,8 @@ export class ViewerRequestHandler {
       case "/":
       case "/index.html":
         return { status: 200, contentType: "text/html; charset=utf-8", body: viewerPage(a, { svg: this.svg.render(a), snapshotJson: this.json.render(a) }, this.options()) };
+      case "/popout.html":
+        return { status: 200, contentType: "text/html; charset=utf-8", body: '<!doctype html><html lang="en"><head><meta charset="utf-8"><title>yalikedags · View</title></head><body></body></html>' };
       case "/snapshot.json":
         return { status: 200, contentType: this.json.contentType, body: this.json.render(a) };
       case "/graph.svg":

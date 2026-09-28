@@ -3,7 +3,7 @@ import { WorkspaceMenu } from "./WorkspaceMenu.ts";
 import "dockview/dist/styles/dockview.css";
 import "./viewer.css";
 import { JsonSnapshotRepositoryAdapter } from "../../adapters/input/JsonSnapshotRepositoryAdapter.ts";
-import { element } from "./Dom.ts";
+import { element, isElement } from "./Dom.ts";
 import { ViewerState } from "./ViewerState.ts";
 import { Workspace } from "./Workspace.ts";
 import { SelectionController } from "./SelectionController.ts";
@@ -21,7 +21,7 @@ async function start(): Promise<void> {
   const state = new ViewerState(await new JsonSnapshotRepositoryAdapter(element("snapshot").textContent, "embedded").load());
   const session = new SessionState();
   const workspace = new Workspace(session.layout());
-  new TableController(state);
+  new TableController(state, [...workspace.panels.values()]);
   new ChangesController(state);
   new RefreshController(state, workspace, session);
   const svg = element("graph").querySelector("svg");
@@ -36,13 +36,16 @@ async function start(): Promise<void> {
     ["zoom-in", (): void => { graph.zoom(1 / 1.25); }], ["zoom-out", (): void => { graph.zoom(1.25); }],
     ["reset", (): void => { workspace.reset(); graph.readable(); }],
   ]);
-  document.addEventListener("click", (event) => {
-    if (!(event.target instanceof Element)) { return; }
+  const handleAction = (event: MouseEvent): void => {
+    if (!isElement(event.target)) { return; }
     const control = event.target.closest("button");
     const panel = control?.dataset["panel"];
     if (panel !== undefined) { workspace.show(panel); }
-    actions.get(control?.dataset["action"] ?? "")?.();
-  });
+    const action = actions.get(control?.dataset["action"] ?? "");
+    if (action !== undefined) { event.stopPropagation(); action(); }
+  };
+  document.addEventListener("click", handleAction);
+  workspace.panels.forEach((panel) => { panel.addEventListener("click", handleAction); });
   session.restore(state);
   document.body.dataset["ready"] = "true";
 }

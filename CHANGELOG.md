@@ -4,6 +4,8 @@ All notable changes to this project are documented here. The format follows Keep
 
 ## [Unreleased]
 
+- Add active-view pop-out windows to the local viewer, preserve cross-window interactions, and redock views when windows close or the parent reloads.
+
 - Add repeatable Expand view / Restore view controls, including temporary expansion of sidebar views.
 
 - Make inspector views a native collapsible Dockview sidebar and preserve sidebar placement and collapse state.

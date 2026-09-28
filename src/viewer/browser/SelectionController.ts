@@ -1,4 +1,4 @@
-import { element } from "./Dom.ts";
+import { element, isElement } from "./Dom.ts";
 import type { ViewerState } from "./ViewerState.ts";
 
 export class SelectionController {
@@ -15,13 +15,14 @@ export class SelectionController {
 
   private bind(panel: HTMLElement): void {
     panel.addEventListener("click", (event) => {
-      if (!(event.target instanceof Element)) { return; }
+      if (!isElement(event.target)) { return; }
       const node = event.target.closest("[data-task],.node[data-id]");
       const id = node?.getAttribute("data-task") ?? node?.getAttribute("data-id");
       if (id) { this.state.select(id); }
     });
     panel.addEventListener("keydown", (event) => {
-      if (!(event.target instanceof SVGElement) || !["Enter", " "].includes(event.key)) { return; }
+      if (event.key === "Escape") { this.state.select(undefined); event.stopPropagation(); }
+      if (!isElement(event.target) || !event.target.matches(".node[data-id]") || !["Enter", " "].includes(event.key)) { return; }
       event.preventDefault();
       this.state.select(event.target.getAttribute("data-id") ?? undefined);
     });
