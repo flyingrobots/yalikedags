@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { LiveFixture, assertFixtureProject, PROJECT_SENTINEL, TITLE_PREFIX } from "../scripts/live-fixture.ts";
+import { LiveFixture, assertFixtureProject, liveEnabled, PROJECT_SENTINEL, TITLE_PREFIX } from "../scripts/live-fixture.ts";
 import { RecordingHttpAdapter } from "./fakes/RecordingHttpAdapter.ts";
 import { rejection } from "./fakes/rejection.ts";
 
@@ -14,6 +14,14 @@ const issuePage = (hasNextPage: boolean): { status: number; body: string } =>
   ok({ data: { project: { issues: { pageInfo: { hasNextPage }, nodes: [] } } } });
 
 describe("LiveFixture guards", () => {
+  // oracle: specified. Only the documented explicit opt-in enables real writes.
+  test("live tests require exactly 1, never a false-looking value", () => {
+    expect(liveEnabled({})).toBe(false);
+    for (const value of ["", "0", "false", "true", "yes", " 1 "]) {
+      expect(liveEnabled({ YALIKEDAGS_LIVE: value })).toBe(false);
+    }
+    expect(liveEnabled({ YALIKEDAGS_LIVE: "1" })).toBe(true);
+  });
   // oracle: specified. The sentinel is checked before any query is sent.
   test("a project name without the sentinel is refused before anything is queried", () => {
     const http = new RecordingHttpAdapter([]);

@@ -4,6 +4,8 @@ All notable changes to this project are documented here. The format follows Keep
 
 ## [Unreleased]
 
+- Require exactly `YALIKEDAGS_LIVE=1` for live tests and guard teardown when fixture setup fails.
+
 - Fix cycle safety across skipped/failed removals, attempted additions, and final verification. Skipped changes leave receipts incomplete.
 
 ### Added

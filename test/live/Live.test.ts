@@ -67,16 +67,18 @@ const reset = async (e: FixtureEnv): Promise<void> => {
 
 suite("live Linear round trip", () => {
   let e: FixtureEnv;
+  let configured = false;
 
   beforeAll(async () => {
     const found = await resolveFixture();
     assertFixtureProject(found.project);
     e = found;
+    configured = true;
     await reset(e);
   }, 5 * MINUTE);
 
   afterAll(async () => {
-    await reset(e);
+    if (configured) { await reset(e); }
   }, 5 * MINUTE);
 
   // oracle: specified by the fixture baseline in scripts/live-fixture.ts.

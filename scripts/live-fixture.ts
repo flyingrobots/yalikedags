@@ -123,7 +123,7 @@ export interface FixtureOverrides {
  * still run the fixture.
  */
 export function liveEnabled(env: Readonly<Record<string, string | undefined>> = process.env): boolean {
-  return (env["YALIKEDAGS_LIVE"] ?? "").length > 0;
+  return env["YALIKEDAGS_LIVE"] === "1";
 }
 
 /** The key: the environment first, then the keychain. Never LINEAR_API_KEY, from either. */
