@@ -5,7 +5,7 @@ import { isRec, list, rec, str, num } from "../../adapters/linear/GraphqlJson.ts
 type Layout = ReturnType<DockviewApi["toJSON"]>;
 type GridNode = Layout["grid"]["root"];
 export const PANEL_TITLES = new Map([
-  ["graph", "DAG"], ["grid", "Wave grid"], ["details", "Task details"], ["ready", "Ready work"], ["findings", "Findings"],
+  ["graph", "DAG"], ["table", "Task table"], ["grid", "Wave grid"], ["details", "Task details"], ["ready", "Ready work"], ["findings", "Findings"],
 ]);
 
 /** Untrusted local storage is decoded into a bounded, docked-only layout. No URLs or task data. */

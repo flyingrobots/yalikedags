@@ -14,8 +14,9 @@ export function viewerPage(a: Analysis, assets: { svg: string; snapshotJson: str
 <div class="search"><label class="sr-only" for="search">Find a task</label><input id="search" type="search" placeholder="Find a task by key, title or assignee…" autocomplete="off"><div id="search-results" hidden></div></div></header>
 <nav class="workspace-toolbar" aria-label="Workspace views">
 <button data-panel="graph" aria-label="Show DAG">DAG</button><button data-panel="grid" aria-label="Show wave grid">Wave grid</button>
+<button data-panel="table" aria-label="Show task table">Task table</button>
 <button data-panel="details">Task details</button><button data-panel="ready">Ready work</button><button data-panel="findings">Findings <span class="count">${String(a.findings.length)}</span></button>
-<span class="toolbar-spacer"></span><button data-action="split">Split views</button><button data-action="reset">Reset layout</button></nav>
+<button id="filter-summary" data-panel="table" hidden></button><span class="toolbar-spacer"></span><button data-action="split">Split views</button><button data-action="reset">Reset layout</button></nav>
 <main id="workspace" aria-label="Task workspace"></main><footer><span id="selection-status" role="status">Select a task to trace its dependencies.</span><span>Drag tabs to arrange views · Esc clears selection</span></footer>
 ${new ViewerPanels(a).render(assets.svg)}
 <noscript>This viewer needs JavaScript to display its panels. The snapshot data is embedded in this file.</noscript>

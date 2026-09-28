@@ -9,3 +9,5 @@ Docked layout and sizes are saved in local storage. Invalid or unavailable stora
 HTML exports bundle the workspace, styles, graph and data in one offline file. No runtime assets or credentials are required. An empty project, unschedulable grid, and startup errors have explicit messages.
 
 See [Open the local viewer](../how-to/open-the-viewer.md) and [Audit a project](../how-to/audit-a-project.md).
+
+**Task table** lists all tasks with sortable columns and search by key, title, or assignee. Filter by state, assignee, milestone, or label; the graph and wave grid dim nonmatches while keeping dependency context. Selection is shared across views, including when the table is closed and reopened. **Clear filters** restores all tasks.

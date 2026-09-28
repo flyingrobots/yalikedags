@@ -9,9 +9,12 @@ import { GraphController } from "./GraphController.ts";
 import { SearchController } from "./SearchController.ts";
 
 
+import { TableController } from "./TableController.ts";
+
 async function start(): Promise<void> {
   const state = new ViewerState(await new JsonSnapshotRepositoryAdapter(element("snapshot").textContent, "embedded").load());
   const workspace = new Workspace();
+  new TableController(state);
   const svg = element("graph").querySelector("svg");
   if (svg === null) { throw new Error("Missing graph SVG"); }
   const graph = new GraphController(svg);

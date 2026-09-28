@@ -59,6 +59,7 @@ export class Workspace {
     this.size();
     this.api.addPanel({ id: "graph", component: "graph", title: "DAG" });
     this.api.addPanel({ id: "grid", component: "grid", title: "Wave grid", position: { referencePanel: "graph" } });
+    this.api.addPanel({ id: "table", component: "table", title: "Task table", position: { referencePanel: "graph" } });
     const direction = window.innerWidth < 800 ? "within" : "right";
     this.api.addPanel({ id: "details", component: "details", title: "Task details", initialWidth: 340, position: { referencePanel: "graph", direction } });
     this.api.addPanel({ id: "ready", component: "ready", title: "Ready work", position: { referencePanel: "details" } });

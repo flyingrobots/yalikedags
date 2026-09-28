@@ -4,6 +4,8 @@ All notable changes to this project are documented here. The format follows Keep
 
 ## [Unreleased]
 
+- Add a sortable, searchable task table with state, assignee, milestone, and label filters while retaining the wave grid.
+
 - Add a Dockview workspace with shared selection, search, keyboard navigation, graph controls, persistent layouts, and offline browser coverage.
 
 - Preserve source capture timestamps and warnings across snapshot round trips, with explicit unknown legacy capture times.

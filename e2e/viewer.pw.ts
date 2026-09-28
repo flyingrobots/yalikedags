@@ -141,3 +141,31 @@ test("a corrupt saved layout falls back to the default workspace", async ({ page
   await expect(page.locator("#frontier")).toBeVisible();
 });
 
+test("task table sorts and filters while retaining the wave grid", async ({ page }) => {
+  await page.goto(exported);
+  await page.getByRole("button", { name: "Show task table", exact: true }).click();
+  await page.getByRole("searchbox", { name: "Filter tasks" }).fill("parser");
+  await expect(page.locator("#task-table tbody tr")).toHaveCount(2);
+  await page.getByRole("button", { name: "Sort by Title", exact: true }).click();
+  await expect(page.locator("#task-table thead th[aria-sort=ascending]")).toContainText("Title");
+  await page.locator("#task-table tbody button").first().click();
+  await expect(page.locator("#detail h2")).toContainText("parser");
+  await page.getByRole("button", { name: "Show wave grid", exact: true }).click();
+  await expect(page.locator("#grid")).toBeVisible();
+});
+
+test("closing the task table preserves filters and does not break selection elsewhere", async ({ page }) => {
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  await page.goto(exported);
+  await page.getByRole("button", { name: "Show task table", exact: true }).click();
+  await page.getByRole("searchbox", { name: "Filter tasks", exact: true }).fill("parser");
+  await page.getByRole("button", { name: "Close Task table", exact: true }).click();
+  await page.getByRole("searchbox", { name: "Find a task" }).fill("Implement core DAG");
+  await page.locator("#search-results button").first().click();
+  await expect(page.locator("#detail h2")).toContainText("Implement core DAG builder");
+  await page.getByRole("button", { name: "Show task table", exact: true }).click();
+  await expect(page.getByRole("searchbox", { name: "Filter tasks", exact: true })).toHaveValue("parser");
+  await expect(page.locator("#task-table tbody tr")).toHaveCount(2);
+  expect(errors).toEqual([]);
+});
