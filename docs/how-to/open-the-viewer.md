@@ -26,7 +26,7 @@ Open the address. To pick the port yourself, add `--port 8787`.
 
 ## Verify
 
-The page opens with a DAG and Ready work. Search for a task or click a node: Task details opens and unrelated work dims. Press **Wave grid** to inspect the same selection in a table, or drag its tab beside the DAG to see both at once. Drag tabs and dividers to arrange the workspace; **Reset layout** restores the default. The page loads without further network requests. **Refresh source** explicitly rereads the source through the local server; the key stays on the server.
+The page opens with a DAG and Ready work. Search for a task or click a node: Task details opens and unrelated work dims. Open the header’s **Workspace settings** cog and choose **Wave grid** to inspect the same selection in a table, or drag its tab beside the DAG to see both at once. Drag tabs and dividers to arrange the workspace; the cog menu’s **Reset layout** restores the default. The page loads without further network requests. **Refresh source** explicitly rereads the source through the local server; the key stays on the server.
 
 ## Common variations
 

@@ -10,3 +10,8 @@ export async function dockWaveGrid(page: Page): Promise<void> {
     force: true, targetPosition: { x: bounds.width / 2, y: bounds.height - 15 },
   });
 }
+
+export async function workspaceAction(page: Page, name: string): Promise<void> {
+  await page.getByRole("button", { name: "Workspace settings", exact: true }).click();
+  await page.getByRole("button", { name, exact: true }).click();
+}

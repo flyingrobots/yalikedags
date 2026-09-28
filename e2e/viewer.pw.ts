@@ -1,4 +1,4 @@
-import { dockWaveGrid } from "./workspace.ts";
+import { dockWaveGrid, workspaceAction } from "./workspace.ts";
 import { test, expect } from "@playwright/test";
 import { pathToFileURL } from "node:url";
 import { resolve } from "node:path";
@@ -26,9 +26,9 @@ for (const url of ["http://127.0.0.1:4178", exported]) {
     await page.locator("#search-results button").first().click();
     await expect(page.locator("#detail h2")).toContainText("Implement core DAG builder");
     await expect(page.locator("#graph .node.selected")).toHaveCount(1);
-    await page.getByRole("button", { name: "Show wave grid", exact: true }).click();
+    await workspaceAction(page, "Show wave grid");
     await expect(page.locator("#grid .card.selected")).toHaveCount(1);
-    await page.getByRole("button", { name: "Show DAG", exact: true }).click();
+    await workspaceAction(page, "Show DAG");
     const svg = page.locator("#graph svg");
     await page.getByRole("button", { name: "Fit all", exact: true }).click();
     const fitted = await svg.getAttribute("viewBox");
@@ -55,7 +55,7 @@ test("panels can be rearranged, restored and reset without losing selection", as
   await page.reload();
   await expect(page.locator("#graph")).toBeVisible();
   await expect(page.locator("#grid")).toBeVisible();
-  await page.getByRole("button", { name: "Reset layout", exact: true }).click();
+  await workspaceAction(page, "Reset layout");
   await expect(page.locator("#graph")).toBeVisible();
   await expect(page.locator("#grid")).not.toBeVisible();
 });
@@ -67,7 +67,7 @@ test("closing and reopening panels retains shared selection; nodes work from the
   await page.keyboard.press("Enter");
   await expect(page.locator("#detail h2")).toContainText("Implement core DAG builder");
   await page.getByRole("button", { name: "Close DAG", exact: true }).click();
-  await page.getByRole("button", { name: "Show DAG", exact: true }).click();
+  await workspaceAction(page, "Show DAG");
   await expect(page.locator("#graph .node.selected")).toHaveCount(1);
 });
 
@@ -97,7 +97,7 @@ test("empty projects, hostile text, and unavailable storage remain usable offlin
   await page.goto(pathToFileURL(resolve("dist/viewer-empty.html")).href);
   await expect(page.locator("body")).toHaveAttribute("data-ready", "true");
   await expect(page.locator("#graph-panel")).toContainText("No tasks");
-  await page.getByRole("button", { name: "Show wave grid", exact: true }).click();
+  await workspaceAction(page, "Show wave grid");
   await expect(page.locator("#grid")).toContainText("Nothing schedulable");
   await page.goto(pathToFileURL(resolve("dist/viewer-escaping.html")).href);
   await page.getByRole("searchbox", { name: "Find a task" }).fill("Unsafe");
@@ -105,7 +105,7 @@ test("empty projects, hostile text, and unavailable storage remain usable offlin
   await expect(page.locator("#detail h2")).toContainText("</script><img");
   await expect(page.locator("img")).toHaveCount(0);
   await expect(page.locator('a[href^="javascript:"]')).toHaveCount(0);
-  await page.getByRole("button", { name: "Reset layout", exact: true }).click();
+  await workspaceAction(page, "Reset layout");
   await expect(page.locator("#graph .node.selected")).toHaveCount(1);
   expect(errors).toEqual([]);
 });
@@ -116,7 +116,7 @@ test("a crowded graph is searchable and a narrow screen keeps controls reachable
   await page.getByRole("searchbox", { name: "Find a task" }).fill("PRO-150");
   await page.locator("#search-results button").first().click();
   await expect(page.locator("#detail h2")).toHaveText("Example task 150");
-  await page.getByRole("button", { name: "Show DAG", exact: true }).click();
+  await workspaceAction(page, "Show DAG");
   await expect(page.locator("#graph .node.selected")).toHaveCount(1);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 });
@@ -145,21 +145,21 @@ test("a corrupt saved layout falls back to the default workspace", async ({ page
 
 test("task table sorts and filters while retaining the wave grid", async ({ page }) => {
   await page.goto(exported);
-  await page.getByRole("button", { name: "Show task table", exact: true }).click();
+  await workspaceAction(page, "Show task table");
   await page.getByRole("searchbox", { name: "Filter tasks" }).fill("parser");
   await expect(page.locator("#task-table tbody tr")).toHaveCount(2);
   await page.getByRole("button", { name: "Sort by Title", exact: true }).click();
   await expect(page.locator("#task-table thead th[aria-sort=ascending]")).toContainText("Title");
   await page.locator("#task-table tbody button").first().click();
   await expect(page.locator("#detail h2")).toContainText("parser");
-  await page.getByRole("button", { name: "Show wave grid", exact: true }).click();
+  await workspaceAction(page, "Show wave grid");
   await expect(page.locator("#grid")).toBeVisible();
 });
 
 test("served refresh preserves selection, filters, sorting and docked layout; failure preserves the page", async ({ page }) => {
   await page.addInitScript(() => { Object.defineProperty(window, "localStorage", { get: () => { throw new Error("Storage denied"); } }); });
   await page.goto("http://127.0.0.1:4178");
-  await page.getByRole("button", { name: "Show task table", exact: true }).click();
+  await workspaceAction(page, "Show task table");
   await page.getByRole("searchbox", { name: "Filter tasks", exact: true }).fill("parser");
   await page.getByRole("button", { name: "Sort by Title", exact: true }).click();
   await page.locator("#task-table tbody tr button").first().click();
@@ -177,7 +177,7 @@ test("served refresh preserves selection, filters, sorting and docked layout; fa
   await expect(page.locator("#detail h2")).toHaveText(selection ?? "");
   await expect(page.locator("#graph")).toBeVisible();
   await expect(page.locator("#grid")).toBeVisible();
-  await page.getByRole("button", { name: "Show task table", exact: true }).click();
+  await workspaceAction(page, "Show task table");
   await expect(page.getByRole("searchbox", { name: "Filter tasks", exact: true })).toHaveValue("parser");
   await expect(page.locator('#task-table th[aria-sort="ascending"]')).toHaveText("Title");
   await expect(page.locator("#task-table tbody tr")).toHaveCount(2);
@@ -188,7 +188,7 @@ test("offline comparison explains added blockers without sending the selected fi
   await page.goto(exported);
   page.on("request", (request) => requests.push(request.url()));
   await expect(page.getByRole("button", { name: "Refresh source", exact: true })).toBeDisabled();
-  await page.getByRole("button", { name: "Changes", exact: true }).click();
+  await workspaceAction(page, "Changes");
   await page.getByLabel("Compare snapshot JSON").setInputFiles({
     name: "earlier.json", mimeType: "application/json", buffer: Buffer.from(JSON.stringify({
       schema: "yalikedags/snapshot/1", capturedAt: "2026-09-20T10:00:00.000Z",
@@ -205,13 +205,13 @@ test("closing the task table preserves filters and does not break selection else
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
   await page.goto(exported);
-  await page.getByRole("button", { name: "Show task table", exact: true }).click();
+  await workspaceAction(page, "Show task table");
   await page.getByRole("searchbox", { name: "Filter tasks", exact: true }).fill("parser");
   await page.getByRole("button", { name: "Close Task table", exact: true }).click();
   await page.getByRole("searchbox", { name: "Find a task" }).fill("Implement core DAG");
   await page.locator("#search-results button").first().click();
   await expect(page.locator("#detail h2")).toContainText("Implement core DAG builder");
-  await page.getByRole("button", { name: "Show task table", exact: true }).click();
+  await workspaceAction(page, "Show task table");
   await expect(page.getByRole("searchbox", { name: "Filter tasks", exact: true })).toHaveValue("parser");
   await expect(page.locator("#task-table tbody tr")).toHaveCount(2);
   expect(errors).toEqual([]);
@@ -221,7 +221,7 @@ test("table headers stay flush with their scroll viewport in both directions", a
   await page.setViewportSize({ width: 1000, height: 500 });
   await page.goto(exported);
   for (const { view, selector } of [{ view: "Show task table", selector: "#table-panel .table-scroll" }, { view: "Show wave grid", selector: "#grid" }]) {
-    await page.getByRole("button", { name: view, exact: true }).click();
+    await workspaceAction(page, view);
     const viewport = page.locator(selector);
     await expect(viewport).toBeVisible();
     await viewport.evaluate((el) => { el.scrollTop = 120; el.scrollLeft = 80; });
@@ -237,7 +237,7 @@ test("table headers stay flush with their scroll viewport in both directions", a
 test("task rows use the same state colors as DAG nodes, including selected rows", async ({ page }) => {
   await page.goto(exported);
   const colors = await page.locator("#graph .node").evaluateAll((nodes) => nodes.map((node) => ({ id: node.getAttribute("data-id"), color: getComputedStyle(node.querySelector("rect")!).fill })));
-  await page.getByRole("button", { name: "Show task table", exact: true }).click();
+  await workspaceAction(page, "Show task table");
   for (const row of await page.locator("#task-table tbody tr").all()) {
     const id = await row.getAttribute("data-id");
     expect(await row.evaluate((el) => getComputedStyle(el).backgroundColor)).toBe(colors.find((entry) => entry.id === id)?.color);
@@ -247,4 +247,25 @@ test("task rows use the same state colors as DAG nodes, including selected rows"
   await expect(first).toHaveClass(/selected/);
   const selectedId = await first.getAttribute("data-id");
   expect(await first.evaluate((el) => getComputedStyle(el).backgroundColor)).toBe(colors.find((entry) => entry.id === selectedId)?.color);
+});
+
+test("workspace controls live in a dismissible keyboard-accessible header dropdown", async ({ page }) => {
+  await page.goto(exported);
+  const toggle = page.getByRole("button", { name: "Workspace settings", exact: true });
+  await expect(page.locator(".workspace-toolbar")).toHaveCount(0);
+  await expect(page.locator("header").getByRole("button", { name: "Workspace settings", exact: true })).toBeVisible();
+  await toggle.click();
+  await expect(toggle).toHaveAttribute("aria-expanded", "true");
+  await page.getByRole("button", { name: "Show task table", exact: true }).click();
+  await expect(page.locator("#task-table")).toBeVisible();
+  await expect(toggle).toHaveAttribute("aria-expanded", "false");
+  await toggle.focus();
+  await page.keyboard.press("ArrowDown");
+  await expect(page.getByRole("button", { name: "Show DAG", exact: true })).toBeFocused();
+  await page.keyboard.press("Escape");
+  await expect(toggle).toBeFocused();
+  await expect(toggle).toHaveAttribute("aria-expanded", "false");
+  await toggle.click();
+  await page.locator(".brand").click();
+  await expect(toggle).toHaveAttribute("aria-expanded", "false");
 });

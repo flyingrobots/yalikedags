@@ -1,4 +1,4 @@
-import { dockWaveGrid } from "../e2e/workspace.ts";
+import { dockWaveGrid, workspaceAction } from "../e2e/workspace.ts";
 import { mkdir } from "node:fs/promises";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
@@ -25,7 +25,7 @@ try {
   await dockWaveGrid(page);
   await page.getByRole("button", { name: "Focus selection", exact: true }).click();
   await page.screenshot({ path: "docs/images/viewer-split.png" });
-  await page.getByRole("button", { name: "Show task table", exact: true }).click();
+  await workspaceAction(page, "Show task table");
   await page.screenshot({ path: "docs/images/viewer-table.png" });
 } finally { await browser.close(); }
 console.log("viewer screenshots written to docs/images/");

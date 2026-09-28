@@ -1,3 +1,4 @@
+import { WorkspaceMenu } from "./WorkspaceMenu.ts";
 import "dockview/dist/styles/dockview.css";
 import "./viewer.css";
 import { JsonSnapshotRepositoryAdapter } from "../../adapters/input/JsonSnapshotRepositoryAdapter.ts";
@@ -14,6 +15,7 @@ import { RefreshController } from "./RefreshController.ts";
 import { ChangesController } from "./ChangesController.ts";
 
 async function start(): Promise<void> {
+  new WorkspaceMenu();
   const state = new ViewerState(await new JsonSnapshotRepositoryAdapter(element("snapshot").textContent, "embedded").load());
   const session = new SessionState();
   const workspace = new Workspace(session.layout());
