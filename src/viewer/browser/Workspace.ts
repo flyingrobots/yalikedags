@@ -1,3 +1,4 @@
+import { GroupActions } from "./GroupActions.ts";
 import { GroupControls } from "./GroupControls.ts";
 import { Sidebars, SIDEBAR_PANELS } from "./Sidebars.ts";
 import { createDockview, themeLight } from "dockview";
@@ -11,6 +12,7 @@ export class Workspace {
   private api: DockviewApi;
   private readonly storage = new LayoutStorage();
   private resetting = false;
+  private readonly actions = new GroupActions(() => this.api);
   private readonly sidebars = new Sidebars();
 
   constructor(saved?: unknown) {
@@ -23,7 +25,7 @@ export class Workspace {
 
   private createApi(): DockviewApi {
     const api = createDockview(element("workspace"), {
-      createRightHeaderActionComponent: (group) => new GroupControls(group, () => { if (!this.resetting) { this.storage.save(this.api); } }),
+      createRightHeaderActionComponent: (group) => new GroupControls(group, () => { if (!this.resetting) { this.storage.save(this.api); } }, this.actions),
       createWatermarkComponent: () => {
         const host = document.createElement("div"); host.className = "empty-workspace";
         const reset = document.createElement("button");
@@ -40,6 +42,7 @@ export class Workspace {
         return { element: host, init: (): void => { host.append(content); } };
       },
     });
+    api.onDidMaximizedGroupChange(() => { queueMicrotask(() => { if (this.api === api) { this.actions.restoreSidebar(); } }); });
     api.onDidRemovePanel(() => { queueMicrotask(() => { if (this.api === api && !this.resetting) { this.sidebars.removeEmpty(api); } }); });
     api.onDidLayoutChange(() => { if (!this.resetting) { this.storage.save(api); } });
     return api;

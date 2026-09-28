@@ -22,11 +22,13 @@ A wave is a forecast of parallel work, not a deadline or a scheduling barrier. T
 
 ## Arrange your views
 
-Drag a tab to dock it beside or beneath another view, or keep several views together as tabs. Drag dividers to resize. Close tabs you do not need; the header’s **Views menu** Views menu reopens them.
+Drag a tab to dock it beside or beneath another view, or keep several views together as tabs. Drag dividers to resize. Close tabs you do not need; the header’s **Views menu** reopens them.
 
 Docked layout and sizes are saved locally in the browser, shared between snapshots on the same origin. Storage contains panel layout, not task data or selection. File URL storage behavior depends on the browser. When storage is unavailable or invalid, the viewer starts with its default layout. **Reset layout** restores the default arrangement without clearing the selection.
 
 Task details, Ready work, Findings, and Changes share a collapsible sidebar on the right (bottom on narrow screens). Use its collapse/expand arrow or click the active tab. Choosing a sidebar view from Views opens it again. Sidebar sizes and collapsed state survive reload; older standalone inspector groups migrate into a sidebar.
+
+Use **Expand view** in a group header to maximize it; **Restore view** returns the arrangement. A sidebar view temporarily joins the main area and returns to its sidebar on restore.
 
 ![DAG and wave grid docked together, with a shared task selection](../images/viewer-split.png)
 

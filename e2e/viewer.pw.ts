@@ -337,3 +337,23 @@ test("inspector views collapse to a sidebar and retain that state across reload"
   await workspaceAction(page, "Task details");
   await expect(page.locator("#detail")).toBeVisible();
 });
+
+test("group expand and restore work repeatedly, including inspector views", async ({ page }) => {
+  await page.goto(exported);
+  await dockWaveGrid(page);
+  const graphGroup = page.locator(".dv-groupview").filter({ has: page.getByRole("tab", { name: "DAG", exact: true }) });
+  await expect.poll(async () => (await page.locator("#graph").boundingBox())!.height).toBeLessThan(600);
+  const height = (await page.locator("#graph").boundingBox())!.height;
+  for (let round = 0; round < 2; round += 1) {
+    await graphGroup.getByRole("button", { name: "Expand view", exact: true }).click();
+    await expect.poll(async () => (await page.locator("#graph").boundingBox())!.height).toBeGreaterThan(height);
+    await graphGroup.getByRole("button", { name: "Restore view", exact: true }).click();
+    await expect(page.locator("#grid")).toBeVisible();
+  }
+  await workspaceAction(page, "Task details");
+  const inspector = page.locator(".dv-groupview").filter({ has: page.getByRole("tab", { name: "Task details", exact: true }) });
+  await inspector.getByRole("button", { name: "Expand view", exact: true }).click();
+  await expect(page.locator("#detail")).toBeVisible();
+  await page.getByRole("button", { name: "Restore view", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Collapse sidebar", exact: true })).toBeVisible();
+});
