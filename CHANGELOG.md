@@ -4,6 +4,8 @@ All notable changes to this project are documented here. The format follows Keep
 
 ## [Unreleased]
 
+- Fix sticky table headers by giving each table an unpadded scroll viewport; filter controls and introductions remain outside it.
+
 - Replace speculative scaling guidance with current limits and a reproducible measurement approach.
 
 - Add capture and partial-analysis notices, manual refresh preserving workspace state, and local snapshot comparison for task status, blockers, and critical chains.

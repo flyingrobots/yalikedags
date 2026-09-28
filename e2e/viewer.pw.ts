@@ -213,3 +213,20 @@ test("closing the task table preserves filters and does not break selection else
   await expect(page.locator("#task-table tbody tr")).toHaveCount(2);
   expect(errors).toEqual([]);
 });
+
+test("table headers stay flush with their scroll viewport in both directions", async ({ page }) => {
+  await page.setViewportSize({ width: 1000, height: 500 });
+  await page.goto(exported);
+  for (const { view, selector } of [{ view: "Show task table", selector: "#table-panel .table-scroll" }, { view: "Show wave grid", selector: "#grid" }]) {
+    await page.getByRole("button", { name: view, exact: true }).click();
+    const viewport = page.locator(selector);
+    await expect(viewport).toBeVisible();
+    await viewport.evaluate((el) => { el.scrollTop = 120; el.scrollLeft = 80; });
+    const metrics = await viewport.evaluate((el) => {
+      const header = el.querySelector("thead th:nth-child(2)");
+      return { scroll: el.scrollTop, top: el.getBoundingClientRect().top, header: header?.getBoundingClientRect().top };
+    });
+    expect(metrics.scroll).toBeGreaterThan(0);
+    expect(metrics.header).toBeCloseTo(metrics.top, 0);
+  }
+});
