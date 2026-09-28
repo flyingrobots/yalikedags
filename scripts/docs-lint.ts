@@ -78,7 +78,6 @@ function checkHeadings(file: string, lines: string[]): void {
  */
 const NOT_CATALOGUED: Record<string, string> = {
   "research.md": "prototype-era research notes, kept for their content; not part of the reader-task doc set",
-  "scaling.md": "prototype-era scaling notes, same",
 };
 
 /** The catalog can only see the pages it lists, so check the other direction too. */

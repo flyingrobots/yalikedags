@@ -4,6 +4,8 @@ All notable changes to this project are documented here. The format follows Keep
 
 ## [Unreleased]
 
+- Replace speculative scaling guidance with current limits and a reproducible measurement approach.
+
 - Add capture and partial-analysis notices, manual refresh preserving workspace state, and local snapshot comparison for task status, blockers, and critical chains.
 
 - Add a sortable, searchable task table with state, assignee, milestone, and label filters while retaining the wave grid.
@@ -38,7 +40,7 @@ All notable changes to this project are documented here. The format follows Keep
 - A live test tier and an idempotent fixture provisioner (`scripts/live-fixture.ts`, `test/live/`, `bun run test:live`). The fixture is eight issues, two milestones and a team estimate scale, each present for a named reason; provisioning is also a reset, so a run leaves the workspace where it found it. It is fenced by three things: its own credential name (`YALIKEDAGS_LIVE_KEY`, in the keychain or the environment, deliberately never `LINEAR_API_KEY`), a sentinel the project name must contain, and a prefix every issue title it will touch must start with. The key resolves from the keychain, and the team and project from a flag, the environment, or the manifest, so a shell that exported nothing but the `YALIKEDAGS_LIVE` opt-in switch can still run it.
 - TypeScript on bun rewrite of the Python prototype, which remains in the first commit as history. Zero Python.
 - Binding standards under `docs/standards/`: documentation (reader-task), TypeScript code, testing.
-- Domain: `Task` (validated, frozen, effort 0 to 3, Linear-shaped priority) and `Dag` (blockedBy as the only stored edge; derived dependents, closures, Kahn order, Tarjan cycles, transitive redundancy). `ResourcePolicy` for exclusive, capacity, advisory resources.
+- Domain: `Task` (validated, frozen, finite nonnegative raw effort, Linear-shaped priority) and `Dag` (blockedBy as the only stored edge; derived dependents, closures, Kahn order, Tarjan cycles, transitive redundancy). `ResourcePolicy` for exclusive, capacity, advisory resources.
 - Services: state, frontier (due, priority, fan-out, age, id) with resource conflicts, waves and gatekeepers and MECE workstreams, critical path by depth and by summed effort, audit (isolated, redundant, stale and dangling blockers, cycles, split candidates with the observation that would kill each), layered layout, and `Analysis` composing them.
 - Input adapters: Markdown task lists, snapshot JSON (`yalikedags/snapshot/1`), and Linear over GraphQL (read-only; pages at 50 under Linear's complexity cap; blocks relations in both directions; named refusals).
 - Output adapters: snapshot JSON, GraphViz DOT, standalone SVG, plain-text report.
