@@ -1,7 +1,7 @@
 import type { Dag } from "../domain/Dag.ts";
 
 /** The computed state of a task: a fold over `status` and the blockers' `status`, never stored. */
-export type TaskState = "done" | "in-progress" | "blocked" | "ready";
+export type TaskState = "done" | "in-progress" | "blocked" | "ready" | "unresolved";
 
 export class StateService {
   stateOf(dag: Dag, id: string): TaskState {
@@ -12,12 +12,13 @@ export class StateService {
     if (task.isInProgress()) {
       return "in-progress";
     }
+    if (task.status === "unknown" || task.blockedBy.some((b) => !dag.has(b) || dag.get(b).status === "unknown")) { return "unresolved"; }
     return this.blockersDone(dag, id) ? "ready" : "blocked";
   }
 
-  /** True when every blocker that exists in the graph is done. Dangling refs do not block. */
+  /** Unknown or external blocker status cannot establish readiness. */
   blockersDone(dag: Dag, id: string): boolean {
-    return dag.blockers(id).every((b) => dag.get(b).isDone());
+    return dag.get(id).blockedBy.every((b) => dag.has(b) && dag.get(b).isDone());
   }
 
   /** Open tasks (not done) in the graph's own order. */

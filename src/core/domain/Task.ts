@@ -9,7 +9,7 @@
  * It validates in the constructor and freezes itself.
  */
 
-export type TaskStatus = "open" | "in-progress" | "done" | "canceled";
+export type TaskStatus = "open" | "in-progress" | "done" | "canceled" | "unknown";
 
 /** Priority follows Linear: 1 urgent, 2 high, 3 medium, 4 low. Absent means unset. */
 export type Priority = 1 | 2 | 3 | 4;

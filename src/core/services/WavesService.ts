@@ -28,7 +28,8 @@ export class WavesService {
     const open = new Set(this.state.open(dag));
     const remaining = new Map<string, number>();
     for (const id of open) {
-      remaining.set(id, dag.blockers(id).filter((b) => open.has(b)).length);
+      const task = dag.get(id);
+      remaining.set(id, task.blockedBy.filter((b) => !dag.has(b) || open.has(b)).length + (task.status === "unknown" ? 1 : 0));
     }
     const out: string[][] = [];
     let layer = [...remaining].filter(([, n]) => n === 0).map(([id]) => id).sort();

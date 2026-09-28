@@ -25,9 +25,9 @@ describe("StateService", () => {
     expect(s.stateOf(dag, "c")).toBe("blocked");
     expect(s.stateOf(dag, "d")).toBe("in-progress");
   });
-  test("a dangling blocker does not block", () => {
+  test("a dangling blocker leaves readiness unresolved", () => {
     const dag = new Dag([t("b", ["ghost"])]);
-    expect(new StateService().stateOf(dag, "b")).toBe("ready");
+    expect(new StateService().stateOf(dag, "b")).toBe("unresolved");
   });
 });
 

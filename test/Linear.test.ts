@@ -5,13 +5,13 @@ import { RecordingHttpAdapter } from "./fakes/RecordingHttpAdapter.ts";
 const issue = (over: Record<string, unknown>): Record<string, unknown> => ({
   id: "i1", identifier: "PRO-1", title: "One", description: null, url: "https://linear.app/x/issue/PRO-1", createdAt: "2026-09-01T00:00:00.000Z",
   priority: 0, estimate: null, dueDate: null, state: { name: "Todo", type: "unstarted" }, assignee: null,
-  labels: { nodes: [] }, projectMilestone: null, parent: null, children: { nodes: [] },
-  relations: { nodes: [] }, inverseRelations: { nodes: [] },
+  labels: { pageInfo: { hasNextPage: false }, nodes: [] }, projectMilestone: null, parent: null, children: { pageInfo: { hasNextPage: false }, nodes: [] },
+  relations: { pageInfo: { hasNextPage: false }, nodes: [] }, inverseRelations: { pageInfo: { hasNextPage: false }, nodes: [] },
   ...over,
 });
 const page = (nodes: unknown[], endCursor: string | null): string =>
   JSON.stringify({ data: { project: { id: "p1", name: "Growth", issues: { nodes, pageInfo: { hasNextPage: endCursor !== null, endCursor } } } } });
-const projectLookup = JSON.stringify({ data: { projects: { nodes: [{ id: "p1", name: "Growth" }] } } });
+const projectLookup = JSON.stringify({ data: { projects: { pageInfo: { hasNextPage: false }, nodes: [{ id: "p1", name: "Growth" }] } } });
 const ok = (body: string): { status: number; body: string } => ({ status: 200, body });
 
 describe("LinearTaskRepositoryAdapter", () => {
@@ -21,8 +21,8 @@ describe("LinearTaskRepositoryAdapter", () => {
       ok(projectLookup),
       ok(page([
         issue({ id: "a", identifier: "PRO-1", title: "A", state: { name: "Done", type: "completed" }, estimate: 2, priority: 1 }),
-        issue({ id: "b", identifier: "PRO-2", title: "B", state: { name: "In Progress", type: "started" }, assignee: { name: "Sam" }, labels: { nodes: [{ name: "Backend" }] }, projectMilestone: { name: "Stream 1" }, dueDate: "2026-10-01", inverseRelations: { nodes: [{ type: "blocks", issue: { id: "a" } }] } }),
-        issue({ id: "c", identifier: "PRO-3", title: "C", state: { name: "Canceled", type: "canceled" }, relations: { nodes: [{ type: "blocks", relatedIssue: { id: "b" } }, { type: "related", relatedIssue: { id: "a" } }] }, parent: { id: "a" } }),
+        issue({ id: "b", identifier: "PRO-2", title: "B", state: { name: "In Progress", type: "started" }, assignee: { name: "Sam" }, labels: { pageInfo: { hasNextPage: false }, nodes: [{ name: "Backend" }] }, projectMilestone: { name: "Stream 1" }, dueDate: "2026-10-01", inverseRelations: { pageInfo: { hasNextPage: false }, nodes: [{ type: "blocks", issue: { id: "a" } }] } }),
+        issue({ id: "c", identifier: "PRO-3", title: "C", state: { name: "Canceled", type: "canceled" }, relations: { pageInfo: { hasNextPage: false }, nodes: [{ type: "blocks", relatedIssue: { id: "b" } }, { type: "related", relatedIssue: { id: "a" } }] }, parent: { id: "a" } }),
       ], null)),
     ]);
     const tasks = await new LinearTaskRepositoryAdapter(http, "lin_api_test_token_example", "Growth").load();
@@ -80,7 +80,7 @@ describe("LinearTaskRepositoryAdapter", () => {
     expect(String(failure)).toMatch(/linear_unauthorized/);
   });
   test("an unknown project is refused with a named reason", async () => {
-    const http = new RecordingHttpAdapter([ok(JSON.stringify({ data: { projects: { nodes: [] } } }))]);
+    const http = new RecordingHttpAdapter([ok(JSON.stringify({ data: { projects: { pageInfo: { hasNextPage: false }, nodes: [] } } }))]);
     const failure = await new LinearTaskRepositoryAdapter(http, "k", "Nope").load().then(() => undefined, (e: unknown) => e);
     expect(String(failure)).toMatch(/linear_project_not_found/);
   });

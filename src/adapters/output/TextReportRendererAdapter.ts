@@ -19,7 +19,7 @@ export class TextReportRendererAdapter implements RendererPort {
       `frontier (${plural(a.frontier.length, "ready task")}, most urgent first):`,
       ...a.frontier.map((e) => `  ${key(e.task.id)}  ${e.task.title}  unlocks:${String(e.unlocks)}${e.daysUntilDue < 9999 ? `  due in ${String(e.daysUntilDue)}d` : ""}${(a.conflicts.get(e.task.id) ?? []).map((c) => `  CONFLICT ${c}`).join("")}`),
       "",
-      `waves: ${a.waves.map((w) => `[${w.map(key).join(", ")}]`).join(" -> ") || "(none open)"}`,
+      `waves: ${a.waves.map((w) => `[${w.map(key).join(", ")}]`).join(" -> ") || "(none schedulable)"}`,
       `gatekeepers: ${a.gatekeepers.map(key).join(", ") || "(none)"}`,
       `workstreams (${String(a.workstreams.length)}):`,
       ...a.workstreams.map((w) => `  ${w.id}: ${w.tasks.map(key).join(", ")}`),

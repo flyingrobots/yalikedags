@@ -11,7 +11,7 @@ Two stored facts per task: its **status** and its **blockedBy** list. Every othe
 ```text
 STORED:  status, blockedBy
 FOLDS:   done ─┐
-               ├─ state (done | in-progress | blocked | ready)
+               ├─ state (done | in-progress | blocked | ready | unresolved)
                ├─ dependents (the inverse of blockedBy)
                ├─ frontier (ready, ordered)
                ├─ waves (Kahn layers over open tasks)
@@ -22,24 +22,24 @@ FOLDS:   done ─┐
 
 ## Main mechanism
 
-**State.** A task is `done` when its status is done or canceled (both stop blocking). Otherwise it is `in-progress` if Linear says so, `ready` if every blocker present in the graph is done, else `blocked`. A blocker that is not in the graph does not block; the audit reports it as dangling instead.
+**State.** A task is `done` when its status is done or canceled (both stop blocking). Otherwise it is `in-progress` if Linear says so, `unresolved` if its status or a blocker status is unknown or a blocker is absent, `ready` if every stored blocker is known and done, else `blocked`. The audit also reports missing references as dangling.
 
 **Frontier.** The ready tasks, sorted by days until due (undated last), then priority (1 first, unset last), then how many open tasks the task transitively unblocks (more first), then creation time, then id. Priority is a tiebreaker inside the frontier and never overrides an edge.
 
 **Resource conflicts.** Resources are attributes on tasks, never edges, because contention is symmetric and non-transitive. Ready tasks sharing an `exclusive` resource, or more of them than a `capacity` allows, are flagged. `advisory` never blocks. Phase 1 has no resource source; the policy is empty until one exists.
 
-**Waves.** Kahn layering over the open subgraph: wave 0 is every open task whose open blockers are none, wave 1 what those free, and so on. Each wave is an antichain, a set that could be worked in parallel. Waves are a forecast, not a barrier; the frontier rolls.
+**Waves.** Kahn layering over the open subgraph: wave 0 is every task with a known open status whose stored blockers are all known and done, wave 1 what those free, and so on. Each wave is an antichain, a set that could be worked in parallel. Waves are a forecast, not a barrier; the frontier rolls.
 
 **Gatekeepers and workstreams.** A gatekeeper is an open task with two or more open dependents: a shared prerequisite. Cut the gatekeepers out of the open graph and the connected pieces that remain are the workstreams. Every open non-gatekeeper task is in exactly one workstream, so the decomposition is mutually exclusive and collectively exhaustive by construction.
 
-**Grid.** Waves cut the open graph by time and workstreams cut it by topology, and both partition the same open tasks, so their product is a grid in which every open task has exactly one cell. One row per workstream, one column per wave, and a shared row first for the gatekeepers, which belong to a wave but to no workstream. This is what the viewer's Grid view draws.
+**Grid.** Waves cut the open graph by time and workstreams cut it by topology, and both partition the same open tasks, so their product is a grid in which every open schedulable task has exactly one cell. One row per workstream, one column per wave, and a shared row first for the gatekeepers, which belong to a wave but to no workstream. This is what the viewer's Grid view draws.
 
 **Critical path.** The longest chain of open tasks, computed twice: by depth (number of hand-offs) and by effort (summed estimate, unestimated tasks weighing 1 as Linear counts them). The two can disagree, and both are reported. There is no float, no forward or backward pass: those need durations, and this graph carries effort.
 
 ## Important invariants
 
 - Done tasks never block and belong to no wave, workstream, or grid cell.
-- Every open task is in exactly one wave and, unless it is a gatekeeper, exactly one workstream; the grid inherits both.
+- Every schedulable open task is in exactly one wave. Every open non-gatekeeper task is in one workstream; unschedulable tasks have no grid cell.
 - `dependents` is derived; storing both directions would be two sources of truth for one edge.
 - The layout used by the SVG and the viewer is the same pure service, so what you see is what the report computed.
 
@@ -49,7 +49,7 @@ A cycle makes the graph invalid: Kahn ordering stops early, the critical path tr
 
 ## Tradeoffs and alternatives
 
-Time-based CPM, PERT and critical-chain buffers were deliberately not implemented: they need durations, and estimates on a 0 to 3 scale are not durations. Balancing workstreams by summed effort across people was also left out: that is assignment, a different step from partition, and doing it inside the partition step is how a MECE split stops being one.
+Time-based CPM, PERT and critical-chain buffers were deliberately not implemented: they need durations, and raw effort estimates are not durations. Balancing workstreams by summed effort across people was also left out: that is assignment, a different step from partition, and doing it inside the partition step is how a MECE split stops being one.
 
 ## Related tasks and reference
 

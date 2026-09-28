@@ -3,7 +3,7 @@ import type { Priority, TaskFields, TaskStatus } from "../../core/domain/Task.ts
 import type { TaskRepositoryPort } from "../../ports/TaskRepositoryPort.ts";
 import { SNAPSHOT_SCHEMA } from "../output/JsonSnapshotAdapter.ts";
 
-const STATUSES: readonly TaskStatus[] = ["open", "in-progress", "done", "canceled"];
+const STATUSES: readonly TaskStatus[] = ["open", "in-progress", "done", "canceled", "unknown"];
 const PRIORITIES: readonly Priority[] = [1, 2, 3, 4];
 
 function isRecord(x: unknown): x is Record<string, unknown> {

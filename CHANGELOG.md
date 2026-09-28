@@ -4,6 +4,8 @@ All notable changes to this project are documented here. The format follows Keep
 
 ## [Unreleased]
 
+- Keep external blockers and unknown statuses unresolved, and reject malformed or truncated Linear connections instead of trusting a partial graph.
+
 - Preserve exact raw estimates, including fractions, through analysis and mutation verification; remove scale-specific split heuristics.
 
 - Reject boolean flag values, missing option values, and duplicate CLI switches.
