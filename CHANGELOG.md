@@ -4,6 +4,8 @@ All notable changes to this project are documented here. The format follows Keep
 
 ## [Unreleased]
 
+- Add README subheadings for the overview, Linear writes, team use, offline sharing, viewer layout, and bundled example.
+
 - Add active-view pop-out windows to the local viewer, preserve cross-window interactions, and redock views when windows close or the parent reloads.
 
 - Add repeatable Expand view / Restore view controls, including temporary expansion of sidebar views.
