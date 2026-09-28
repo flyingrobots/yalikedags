@@ -21,6 +21,8 @@ export class JsonSnapshotAdapter implements RendererPort {
       schema: SNAPSHOT_SCHEMA,
       source: a.source,
       asOf: a.asOf,
+      capturedAt: a.capturedAt,
+      warnings: a.warnings,
       quality: {
         unresolvedDependencies: a.dag.tasks.flatMap((t) => t.blockedBy.filter((id) => !a.dag.has(id))).length,
         unknownStatuses: a.dag.tasks.filter((t) => t.status === "unknown").length,

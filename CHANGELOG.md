@@ -4,6 +4,8 @@ All notable changes to this project are documented here. The format follows Keep
 
 ## [Unreleased]
 
+- Preserve source capture timestamps and warnings across snapshot round trips, with explicit unknown legacy capture times.
+
 - Include in-progress resource holders when reporting contention for ready work.
 
 - Separate immediate unblocking from downstream impact in frontier ranking and reports.

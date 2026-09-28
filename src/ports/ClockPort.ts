@@ -2,4 +2,6 @@
 export interface ClockPort {
   /** Today as an ISO date, YYYY-MM-DD. */
   today(): string;
+  /** Exact acquisition timestamp when the clock supports it. Never fabricate one from a day. */
+  now?(): string;
 }

@@ -10,6 +10,8 @@ export interface AnalysisFields {
   dag: Dag;
   source: string;
   asOf: string;
+  capturedAt?: string | null;
+  warnings?: readonly string[];
   states: ReadonlyMap<string, TaskState>;
   frontier: readonly FrontierEntry[];
   conflicts: ReadonlyMap<string, readonly string[]>;
@@ -27,6 +29,8 @@ export class Analysis {
   readonly dag: Dag;
   readonly source: string;
   readonly asOf: string;
+  readonly capturedAt: string | null;
+  readonly warnings: readonly string[];
   readonly states: ReadonlyMap<string, TaskState>;
   readonly frontier: readonly FrontierEntry[];
   readonly conflicts: ReadonlyMap<string, readonly string[]>;
@@ -42,6 +46,8 @@ export class Analysis {
     this.dag = f.dag;
     this.source = f.source;
     this.asOf = f.asOf;
+    this.capturedAt = f.capturedAt ?? null;
+    this.warnings = Object.freeze([...(f.warnings ?? [])]);
     this.states = f.states;
     this.frontier = f.frontier;
     this.conflicts = f.conflicts;

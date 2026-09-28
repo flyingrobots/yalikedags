@@ -2,6 +2,7 @@ import type { ClockPort } from "../../ports/ClockPort.ts";
 
 /** The wall clock, in the local time zone's calendar date. Only the CLI constructs this. */
 export class SystemClockAdapter implements ClockPort {
+  now(): string { return new Date().toISOString(); }
   today(): string {
     const d = new Date();
     const pad = (n: number): string => String(n).padStart(2, "0");

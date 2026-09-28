@@ -92,6 +92,8 @@ export function decodeTask(raw: unknown): Task {
 }
 
 export class JsonSnapshotRepositoryAdapter implements TaskRepositoryPort {
+  capturedAt: string | null = null;
+  warnings: string[] = [];
   constructor(
     private readonly text: string,
     private readonly name: string,
@@ -106,6 +108,9 @@ export class JsonSnapshotRepositoryAdapter implements TaskRepositoryPort {
     if (!isRecord(parsed) || parsed["schema"] !== SNAPSHOT_SCHEMA) {
       return Promise.reject(new Error(`snapshot: expected schema ${SNAPSHOT_SCHEMA}`));
     }
+    const capturedAt = str(parsed, "capturedAt");
+    this.capturedAt = capturedAt !== undefined && Number.isFinite(Date.parse(capturedAt)) ? capturedAt : null;
+    this.warnings = strList(parsed, "warnings");
     const tasks = parsed["tasks"];
     if (!Array.isArray(tasks)) {
       return Promise.reject(new Error("snapshot: tasks must be a list"));

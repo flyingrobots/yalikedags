@@ -26,7 +26,7 @@ export class AnalysisService {
     this.frontier = new FrontierService(clock);
   }
 
-  analyse(tasks: readonly Task[], source: string): Analysis {
+  analyse(tasks: readonly Task[], source: string, provenance: { capturedAt?: string | null; warnings?: readonly string[] } = {}): Analysis {
     const dag = new Dag(tasks);
     const waves = this.waves.waves(dag);
     const gatekeepers = this.waves.gatekeepers(dag);
@@ -35,6 +35,8 @@ export class AnalysisService {
       dag,
       source,
       asOf: this.clock.today(),
+      capturedAt: provenance.capturedAt === undefined ? (this.clock.now?.() ?? null) : provenance.capturedAt,
+      warnings: provenance.warnings ?? [],
       states: this.state.states(dag),
       frontier: this.frontier.frontier(dag),
       conflicts: this.frontier.resourceConflicts(dag, this.policy),
