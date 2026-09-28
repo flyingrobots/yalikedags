@@ -4,6 +4,7 @@ import { SvgRendererAdapter } from "../adapters/output/SvgRendererAdapter.ts";
 import { DotRendererAdapter } from "../adapters/output/DotRendererAdapter.ts";
 import { viewerPage } from "./ViewerPage.ts";
 
+
 export interface ViewerResponse {
   status: number;
   contentType: string;
@@ -26,7 +27,7 @@ export class ViewerRequestHandler {
     switch (path) {
       case "/":
       case "/index.html":
-        return { status: 200, contentType: "text/html; charset=utf-8", body: viewerPage(a, this.svg.render(a), this.json.render(a)) };
+        return { status: 200, contentType: "text/html; charset=utf-8", body: viewerPage(a, { svg: this.svg.render(a), snapshotJson: this.json.render(a) }) };
       case "/snapshot.json":
         return { status: 200, contentType: this.json.contentType, body: this.json.render(a) };
       case "/graph.svg":

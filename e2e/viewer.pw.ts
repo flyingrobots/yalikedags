@@ -1,0 +1,143 @@
+import { test, expect } from "@playwright/test";
+import { pathToFileURL } from "node:url";
+import { resolve } from "node:path";
+import { execFileSync } from "node:child_process";
+import { writeFixtures } from "./fixtures.ts";
+
+const exported = pathToFileURL(resolve("dist/viewer-test.html")).href;
+
+test.beforeAll(() => {
+  execFileSync("bun", ["src/cli.ts", "render", "--tasklist", "examples/example-tasklist.txt", "--format", "html", "--out", "dist/viewer-test.html"]);
+  writeFixtures();
+});
+
+for (const url of ["http://127.0.0.1:4178", exported]) {
+  test(`selection, search, grid and controls work at ${url.startsWith("file") ? "file" : "server"}`, async ({ page }) => {
+    const errors: string[] = [];
+    const external: string[] = [];
+    page.on("pageerror", (error) => errors.push(error.message));
+    page.on("request", (request) => {
+      if (request.url() !== url && !request.url().startsWith(`${url}/`)) { external.push(request.url()); }
+    });
+    await page.goto(url);
+    await expect(page.getByRole("button", { name: "Fit all", exact: true })).toBeVisible();
+    await page.getByRole("searchbox", { name: "Find a task" }).fill("Implement core DAG");
+    await page.locator("#search-results button").first().click();
+    await expect(page.locator("#detail h2")).toContainText("Implement core DAG builder");
+    await expect(page.locator("#graph .node.selected")).toHaveCount(1);
+    await page.getByRole("button", { name: "Show wave grid", exact: true }).click();
+    await expect(page.locator("#grid .card.selected")).toHaveCount(1);
+    await page.getByRole("button", { name: "Show DAG", exact: true }).click();
+    const svg = page.locator("#graph svg");
+    await page.getByRole("button", { name: "Fit all", exact: true }).click();
+    const fitted = await svg.getAttribute("viewBox");
+    await page.getByRole("button", { name: "Zoom in", exact: true }).click();
+    await expect(svg).not.toHaveAttribute("viewBox", fitted ?? "");
+    await page.getByRole("button", { name: "Fit all", exact: true }).click();
+    await expect(svg).toHaveAttribute("viewBox", fitted ?? "");
+    await page.keyboard.press("Escape");
+    await expect(page.locator("#graph .node.selected")).toHaveCount(0);
+    expect(errors).toEqual([]);
+    expect(external).toEqual([]);
+  });
+}
+
+test("panels can be rearranged, restored and reset without losing selection", async ({ page }) => {
+  await page.goto(exported);
+  await page.getByRole("searchbox", { name: "Find a task" }).fill("Implement core DAG");
+  await page.locator("#search-results button").first().click();
+  await page.getByRole("button", { name: "Split views", exact: true }).click();
+  await expect(page.locator("#graph")).toBeVisible();
+  await expect(page.locator("#grid")).toBeVisible();
+  await expect(page.locator("#grid .card.selected")).toHaveCount(1);
+  await page.reload();
+  await expect(page.locator("#graph")).toBeVisible();
+  await expect(page.locator("#grid")).toBeVisible();
+  await page.getByRole("button", { name: "Reset layout", exact: true }).click();
+  await expect(page.locator("#graph")).toBeVisible();
+  await expect(page.locator("#grid")).not.toBeVisible();
+});
+
+test("closing and reopening panels retains shared selection; nodes work from the keyboard", async ({ page }) => {
+  await page.goto(exported);
+  const node = page.locator('#graph .node[data-id="implement-core-dag-builder"]');
+  await node.focus();
+  await page.keyboard.press("Enter");
+  await expect(page.locator("#detail h2")).toContainText("Implement core DAG builder");
+  await page.getByRole("button", { name: "Close DAG", exact: true }).click();
+  await page.getByRole("button", { name: "Show DAG", exact: true }).click();
+  await expect(page.locator("#graph .node.selected")).toHaveCount(1);
+});
+
+test("dragging pans without selecting and wheel zoom preserves a finite viewport", async ({ page }) => {
+  await page.goto(exported);
+  const svg = page.locator("#graph svg");
+  const before = await svg.getAttribute("viewBox");
+  const bounds = await svg.boundingBox();
+  if (bounds === null) { throw new Error("graph is not visible"); }
+  await page.mouse.move(bounds.x + 80, bounds.y + 80);
+  await page.mouse.down();
+  await page.mouse.move(bounds.x + 200, bounds.y + 160, { steps: 5 });
+  await page.mouse.up();
+  await expect(svg).not.toHaveAttribute("viewBox", before ?? "");
+  await expect(page.locator("#graph .node.selected")).toHaveCount(0);
+  await page.mouse.wheel(0, -300);
+  const box = (await svg.getAttribute("viewBox"))?.split(" ").map(Number);
+  expect(box?.every(Number.isFinite)).toBe(true);
+});
+
+test("empty projects, hostile text, and unavailable storage remain usable offline", async ({ page }) => {
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  await page.addInitScript(() => {
+    Object.defineProperty(window, "localStorage", { get: () => { throw new Error("storage unavailable"); } });
+  });
+  await page.goto(pathToFileURL(resolve("dist/viewer-empty.html")).href);
+  await expect(page.locator("body")).toHaveAttribute("data-ready", "true");
+  await expect(page.locator("#graph-panel")).toContainText("No tasks");
+  await page.getByRole("button", { name: "Show wave grid", exact: true }).click();
+  await expect(page.locator("#grid")).toContainText("Nothing schedulable");
+  await page.goto(pathToFileURL(resolve("dist/viewer-escaping.html")).href);
+  await page.getByRole("searchbox", { name: "Find a task" }).fill("Unsafe");
+  await page.locator("#search-results button").first().click();
+  await expect(page.locator("#detail h2")).toContainText("</script><img");
+  await expect(page.locator("img")).toHaveCount(0);
+  await expect(page.locator('a[href^="javascript:"]')).toHaveCount(0);
+  await page.getByRole("button", { name: "Reset layout", exact: true }).click();
+  await expect(page.locator("#graph .node.selected")).toHaveCount(1);
+  expect(errors).toEqual([]);
+});
+
+test("a crowded graph is searchable and a narrow screen keeps controls reachable", async ({ page }) => {
+  await page.setViewportSize({ width: 700, height: 900 });
+  await page.goto(pathToFileURL(resolve("dist/viewer-crowded.html")).href);
+  await page.getByRole("searchbox", { name: "Find a task" }).fill("PRO-150");
+  await page.locator("#search-results button").first().click();
+  await expect(page.locator("#detail h2")).toHaveText("Example task 150");
+  await page.getByRole("button", { name: "Show DAG", exact: true }).click();
+  await expect(page.locator("#graph .node.selected")).toHaveCount(1);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+});
+
+test("dragging a tab docks it into a separate visible group", async ({ page }) => {
+  await page.goto(exported);
+  const group = page.locator(".dv-groupview").first();
+  const bounds = await group.boundingBox();
+  if (bounds === null) { throw new Error("Missing docking group"); }
+  // Dockview paints panel contents in a sibling overlay above the group's drop surface.
+  // Send the real drag to the underlying group's bottom edge without hit-target filtering.
+  await page.getByRole("tab", { name: "Wave grid", exact: true }).dragTo(group, {
+    force: true, targetPosition: { x: bounds.width / 2, y: bounds.height - 15 },
+  });
+  await expect(page.locator("#graph")).toBeVisible();
+  await expect(page.locator("#grid")).toBeVisible();
+});
+
+test("a corrupt saved layout falls back to the default workspace", async ({ page }) => {
+  await page.addInitScript(() => { localStorage.setItem("yalikedags.layout.v1", "{invalid"); });
+  await page.goto(exported);
+  await expect(page.locator("body")).toHaveAttribute("data-ready", "true");
+  await expect(page.locator("#graph")).toBeVisible();
+  await expect(page.locator("#frontier")).toBeVisible();
+});
+

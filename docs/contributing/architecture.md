@@ -20,7 +20,9 @@ src/adapters/output/  LinearTaskWriterAdapter, DryRunTaskWriterAdapter, PlanText
 src/adapters/linear/  LinearGraphqlClient, GraphqlJson (shared by the reader and the writer)
 src/adapters/plan/    PlanJsonCodec
 src/adapters/{http,clock,secrets}/  the hosts: fetch, wall clock, env, vault, chain
-src/viewer/           ViewerPage (HTML), ViewerRequestHandler (pure), ViewerServerAdapter (Bun.serve)
+src/viewer/           ViewerPage + ViewerPanels (HTML), ViewerRequestHandler (pure), ViewerServerAdapter (Bun.serve)
+src/viewer/browser/   typed Dockview workspace, selection, search and SVG navigation
+scripts/build-viewer.ts  bundles JS/CSS into ignored src/viewer/generated/assets.ts
 src/cli/              Args, ExitCode, SourceResolver, SourceSpec, ReconcileCommands
 src/cli.ts            the composition root; the only file that constructs host adapters
 ```
@@ -48,7 +50,7 @@ src/cli.ts            the composition root; the only file that constructs host a
 | a new audit finding | `AuditService.audit`, a new `FindingKind` | one behaviour test per kind |
 | a new mutation kind | a `Mutation` subclass; a method on `TaskWriterPort`; both writer adapters; `PlanJsonCodec.decodeMutation` | `satisfiedBy` both ways, the codec round trip, and the writer over a recorded fixture |
 | a Linear field | the GraphQL string and `toTask` in the Linear adapter; `TaskFields`; the snapshot codec both ways; `docs/reference/snapshot.md` | the Linear fixture test and the snapshot round-trip |
-| the viewer | `ViewerPage.ts` (markup and inline script) or `ViewerRequestHandler.ts` (routes) | `test/Viewer.test.ts` |
+| the viewer | `ViewerPage.ts`, `ViewerPanels.ts`, `browser/` or `ViewerRequestHandler.ts` | `test/Viewer.test.ts` and `e2e/viewer.pw.ts` |
 
 ## Verification
 
@@ -60,6 +62,12 @@ bun run docs:lint    # links, fenced-block languages, catalog ids
 ```
 
 Live check against a real project (read-only, needs the key): `bun src/cli.ts sync --project "<name>" --out output/live.json`. `output/` is ignored; delete the file afterwards if it holds a real workspace.
+
+## Viewer build and browser checks
+
+`bun install` builds the viewer through `postinstall`. After browser-code edits, run `bun run build:viewer`; `bun run check` also rebuilds it. The generated module is ignored by Git and imported by both HTML renderers, keeping their output identical and free of runtime asset requests. Dockview is the MIT TypeScript package; its license is included in the inline bundle.
+
+Install the test browser with `bunx playwright install chromium`, then run `bun run test:browser`. CI installs Chromium and runs this separately from the offline Bun suite. The browser suite exercises both `file://` export and loopback serving, storage fallback, shared selection, panel lifecycle, graph navigation, escaping, and crowded/empty graphs.
 
 ## Known gaps
 

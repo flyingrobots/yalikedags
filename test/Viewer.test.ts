@@ -88,7 +88,7 @@ describe("HtmlRendererAdapter", () => {
       "linear:Example",
     );
     const urls = (html: string): string[] =>
-      [...new Set([...html.matchAll(/https?:\/\/[^"'\s)]+/g)].map((m) => m[0]))].filter((u) => u !== "http://www.w3.org/2000/svg");
+      [...new Set([...html.matchAll(/href="(https?:\/\/[^"\s]+)"/g)].flatMap((m) => m[1] === undefined ? [] : [m[1]]))];
     expect(urls(new HtmlRendererAdapter().render(page()))).toEqual([]);
     expect(urls(new HtmlRendererAdapter().render(withUrl))).toEqual(["https://linear.app/x/issue/PRO-1"]);
   });
@@ -145,13 +145,15 @@ describe("viewer grid", () => {
     });
   });
 
-  test("the page ships an empty grid container for the script to fill, not a rendered table", () => {
-    expect(page).toMatch(/<div id="grid"><\/div>/);
-    expect(page).toContain("snap.grid");
+  test("the offline page carries an escaped wave table and keyboard-selectable cards", () => {
+    expect(page).toContain('id="grid-table"');
+    expect(page).toContain('scope="col">Wave 2');
+    expect(page).toContain("Gate &lt;i&gt;");
+    expect(page).toMatch(/<button[^>]*data-task="g"/);
   });
 
   test("offers a switch between the graph and the grid", () => {
-    expect(page).toMatch(/<button[^>]*data-view="graph"/);
-    expect(page).toMatch(/<button[^>]*data-view="grid"/);
+    expect(page).toMatch(/<button[^>]*data-panel="graph"/);
+    expect(page).toMatch(/<button[^>]*data-panel="grid"/);
   });
 });

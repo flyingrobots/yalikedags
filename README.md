@@ -17,6 +17,8 @@ It's for the whole team. Everyone's got their own Linear key in their own keycha
 
 And when ya want someone else to see it who hasn't got the tool, or the key, or the first idea what a terminal is: `render --format html --out dag.html`. One file. Whole viewer in it, graph and all. Opens by double-clicking, asks the internet for nothing, works on a plane. Send it to whoever ya like.
 
+The viewer now has dockable views: DAG, wave grid, task details, ready work, and findings. Search for a task, split the graph and grid, drag tabs to arrange your workspace, or reset the layout. The exported HTML still carries everything in one offline file.
+
 ## Start here
 
 Get a graph on screen in about two minutes, off the bundled example, no key needed: [See your first DAG](docs/tutorials/first-dag.md).

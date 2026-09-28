@@ -9,10 +9,13 @@
     "yalikedags": "./src/cli.ts"
   },
   "scripts": {
+    "postinstall": "bun run build:viewer",
+    "build:viewer": "bun scripts/build-viewer.ts",
+    "test:browser": "bun run build:viewer && playwright test -c e2e/playwright.config.ts",
     "test": "bun test test/",
     "lint": "bunx eslint . && bunx tsc --noEmit",
     "typecheck": "bunx tsc --noEmit",
-    "check": "bun run lint && bun run docs:lint && bun run clean-room && bun test",
+    "check": "bun run build:viewer && bun run lint && bun run docs:lint && bun run clean-room && bun test",
     "docs:lint": "bun scripts/docs-lint.ts",
     "clean-room": "bun scripts/clean-room.ts",
     "test:live": "bun run fixture:provision && YALIKEDAGS_LIVE=1 bun test test/live/",
@@ -24,10 +27,12 @@
     "bun": ">=1.2"
   },
   "dependencies": {
-    "@git-stunts/vault": "^1.0.1"
+    "@git-stunts/vault": "^1.0.1",
+    "dockview": "^8.3.1"
   },
   "devDependencies": {
     "@eslint/js": "^9",
+    "@playwright/test": "^1.63.0",
     "@types/bun": "latest",
     "eslint": "^9",
     "jiti": "^2.7.0",
