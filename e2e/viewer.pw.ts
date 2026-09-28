@@ -299,3 +299,26 @@ test("snapshot metadata and refresh live in Views instead of a page status strip
   await expect(page.locator("#viewer-notice")).toBeVisible();
   await expect(page.locator("#viewer-notice")).toContainText("Refresh failed");
 });
+
+test("an empty workspace offers a centered reset and restores its empty state on reload", async ({ page }) => {
+  await page.goto(exported);
+  await workspaceAction(page, "Hide banner");
+  for (const title of ["DAG", "Wave grid", "Task table", "Task details", "Ready work", "Findings", "Changes"]) {
+    await page.getByRole("button", { name: "Views menu", exact: true }).click();
+    await page.locator("#workspace-menu").getByRole("button", { name: new RegExp(title, "i") }).click();
+    await page.getByRole("button", { name: `Close ${title}`, exact: true }).click();
+  }
+  const reset = page.locator("#workspace").getByRole("button", { name: "Reset layout", exact: true });
+  await expect(reset).toBeVisible();
+  const area = (await page.locator("#workspace").boundingBox())!;
+  const control = (await reset.boundingBox())!;
+  expect(Math.abs(control.x + control.width / 2 - area.x - area.width / 2)).toBeLessThan(2);
+  expect(Math.abs(control.y + control.height / 2 - area.y - area.height / 2)).toBeLessThan(2);
+  await expect.poll(() => page.evaluate(() => localStorage.getItem("yalikedags.layout.v1"))).toContain('"panels":{}');
+  await page.reload();
+  await expect(reset).toBeVisible();
+  await reset.click();
+  await expect(page.locator("#graph")).toBeVisible();
+  await expect(reset).toHaveCount(0);
+  await expect(page.locator("header")).toBeHidden();
+});

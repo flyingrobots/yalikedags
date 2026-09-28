@@ -59,3 +59,5 @@ footer {align-items:center}
 #refresh-status {display:block;padding:0 12px 6px;font-size:11px;color:var(--muted)}
 #viewer-notice {max-width:55vw;color:#94610b;font-size:12px}
 .workspace-controls:has(.snapshot-info.partial)>.workspace-views::after {content:"";position:absolute;right:3px;top:3px;width:7px;height:7px;border-radius:50%;background:#ba871b}
+
+.empty-workspace {display:grid;place-items:center;width:100%;height:100%}

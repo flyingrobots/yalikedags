@@ -67,7 +67,7 @@ Task state appears as text as well as color. Task-table rows share the DAG state
 
 An empty snapshot says **No tasks in this snapshot**. A grid with no schedulable open work explains that tasks may be closed or have cycles or unresolved dependencies. Ready work and Findings each have explicit empty states.
 
-The snapshot is loaded before the page opens. **Views menu → Refresh source** explicitly rereads it through the local server, then reloads the page with the workspace state restored. There is no polling. A failed read keeps the previous snapshot and displays an error in the footer; concurrent refresh requests share one read. Offline exports disable refresh. Invalid embedded data produces a visible startup error. Closing every panel leaves the Views menu available to reopen views or reset the layout. An unknown server path returns `404 not found`.
+The snapshot is loaded before the page opens. **Views menu → Refresh source** explicitly rereads it through the local server, then reloads the page with the workspace state restored. There is no polling. A failed read keeps the previous snapshot and displays an error in the footer; concurrent refresh requests share one read. Offline exports disable refresh. Invalid embedded data produces a visible startup error. Closing every panel shows a centered **Reset layout** button; the empty layout is preserved on reload. The Views menu also remains available to reopen individual views. An unknown server path returns `404 not found`.
 
 ## Freshness and comparison
 

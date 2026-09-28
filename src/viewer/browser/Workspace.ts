@@ -19,6 +19,13 @@ export class Workspace {
 
   private createApi(): DockviewApi {
     const api = createDockview(element("workspace"), {
+      createWatermarkComponent: () => {
+        const host = document.createElement("div"); host.className = "empty-workspace";
+        const reset = document.createElement("button");
+        reset.textContent = "Reset layout"; reset.dataset["action"] = "reset";
+        host.append(reset);
+        return { element: host, init: (): void => { /* watermark content is static */ } };
+      },
       theme: themeLight, disableFloatingGroups: true, defaultRenderer: "always",
       createComponent: ({ name }) => {
         const content = this.panels.get(name);

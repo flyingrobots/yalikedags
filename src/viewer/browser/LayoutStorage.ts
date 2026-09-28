@@ -22,7 +22,7 @@ export class LayoutStorage {
       const layout = this.decode(raw);
       if (layout === undefined) { return false; }
       api.fromJSON(layout);
-      return api.panels.length > 0;
+      return true;
     } catch { return false; }
   }
 
@@ -31,7 +31,7 @@ export class LayoutStorage {
     const grid = rec(raw["grid"]);
     const ids = new Set<string>();
     const root = this.node(grid["root"], ids, 0);
-    if (root === undefined || ids.size === 0) { return undefined; }
+    if (root === undefined) { return undefined; }
     const panels = Object.fromEntries([...ids].map((id) => [id, { id, contentComponent: id, title: PANEL_TITLES.get(id) ?? id }]));
     const orientation = grid["orientation"] === Orientation.VERTICAL ? Orientation.VERTICAL : Orientation.HORIZONTAL;
     return { grid: { root, width: this.size(grid["width"]), height: this.size(grid["height"]), orientation }, panels };
