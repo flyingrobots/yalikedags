@@ -17,7 +17,7 @@ It's for the whole team. Everyone's got their own Linear key in their own keycha
 
 And when ya want someone else to see it who hasn't got the tool, or the key, or the first idea what a terminal is: `render --format html --out dag.html`. One file. Whole viewer in it, graph and all. Opens by double-clicking, asks the internet for nothing, works on a plane. Send it to whoever ya like.
 
-The viewer now has dockable views: DAG, wave grid, task table, task details, ready work, and findings. The task table supports sorting, search, and state/assignee/milestone/label filters. Search for a task, drag tabs to arrange your workspace, and use the header cog to open views or reset the layout. The exported HTML still carries everything in one offline file.
+The viewer now has dockable views: DAG, wave grid, task table, task details, ready work, and findings. The task table supports sorting, search, and state/assignee/milestone/label filters. Search for a task, drag tabs to arrange your workspace, and use the header Views button to open views or reset the layout. The exported HTML still carries everything in one offline file.
 
 ## Start here
 

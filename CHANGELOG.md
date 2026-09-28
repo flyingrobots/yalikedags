@@ -4,6 +4,8 @@ All notable changes to this project are documented here. The format follows Keep
 
 ## [Unreleased]
 
+- Replace the settings cog with a dashboard icon labeled Views menu.
+
 - Move view and layout actions into a header cog dropdown with keyboard navigation, focus restoration, and outside-click dismissal.
 
 - Remove the one-shot Split views action; arrange multiple views by dragging their tabs instead.

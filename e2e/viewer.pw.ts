@@ -251,9 +251,9 @@ test("task rows use the same state colors as DAG nodes, including selected rows"
 
 test("workspace controls live in a dismissible keyboard-accessible header dropdown", async ({ page }) => {
   await page.goto(exported);
-  const toggle = page.getByRole("button", { name: "Workspace settings", exact: true });
+  const toggle = page.getByRole("button", { name: "Views menu", exact: true });
   await expect(page.locator(".workspace-toolbar")).toHaveCount(0);
-  await expect(page.locator("header").getByRole("button", { name: "Workspace settings", exact: true })).toBeVisible();
+  await expect(page.locator("header").getByRole("button", { name: "Views menu", exact: true })).toBeVisible();
   await toggle.click();
   await expect(toggle).toHaveAttribute("aria-expanded", "true");
   await page.getByRole("button", { name: "Show task table", exact: true }).click();

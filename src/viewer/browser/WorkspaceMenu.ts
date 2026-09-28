@@ -2,7 +2,7 @@ import { element } from "./Dom.ts";
 
 /** A disclosure of ordinary buttons, with keyboard navigation and focus restoration. */
 export class WorkspaceMenu {
-  private readonly toggle = element("workspace-settings");
+  private readonly toggle = element("workspace-views");
   private readonly menu = element("workspace-menu");
   private readonly root = element("workspace-controls");
 

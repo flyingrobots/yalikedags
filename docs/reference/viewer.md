@@ -22,7 +22,7 @@ A wave is a forecast of parallel work, not a deadline or a scheduling barrier. T
 
 ## Arrange your views
 
-Drag a tab to dock it beside or beneath another view, or keep several views together as tabs. Drag dividers to resize. Close tabs you do not need; the header’s **Workspace settings** cog menu reopens them.
+Drag a tab to dock it beside or beneath another view, or keep several views together as tabs. Drag dividers to resize. Close tabs you do not need; the header’s **Views menu** Views menu reopens them.
 
 Docked layout and sizes are saved locally in the browser, shared between snapshots on the same origin. Storage contains panel layout, not task data or selection. File URL storage behavior depends on the browser. When storage is unavailable or invalid, the viewer starts with its default layout. **Reset layout** restores the default arrangement without clearing the selection.
 
@@ -42,16 +42,16 @@ Selecting a task dims unrelated nodes, cards, and edges. Its ancestors and desce
 
 ![Selected task with its dependency chain emphasized and details visible](../images/viewer-selection.png)
 
-The header cog opens the view/layout dropdown. Choose an action to close it; Escape returns focus to the cog, and clicking outside dismisses it. Arrow keys, Home, and End navigate its buttons. A green dot indicates active table filters.
+The header Views button opens the view/layout dropdown. Choose an action to close it; Escape returns focus to the Views button, and clicking outside dismisses it. Arrow keys, Home, and End navigate its buttons. A green dot indicates active table filters.
 
 ## Controls and visual cues
 
 | Action | Control |
 |---|---|
-| open or reopen a view | **Workspace settings** cog → view |
+| open or reopen a view | **Views menu** → view |
 | arrange views | drag tabs or dividers |
 | show DAG and grid together | drag the Wave grid tab to the bottom edge of the DAG group |
-| restore the default arrangement | **Workspace settings** cog → **Reset layout** |
+| restore the default arrangement | **Views menu** → **Reset layout** |
 | pan | drag inside the graph; dragging does not select a node |
 | zoom | mouse wheel over the graph, or **+** / **−** |
 | show the whole graph | **Fit all** |
@@ -65,7 +65,7 @@ Task state appears as text as well as color. Task-table rows share the DAG state
 
 An empty snapshot says **No tasks in this snapshot**. A grid with no schedulable open work explains that tasks may be closed or have cycles or unresolved dependencies. Ready work and Findings each have explicit empty states.
 
-The snapshot is loaded before the page opens. **Refresh source** explicitly rereads it through the local server, then reloads the page with the workspace state restored. There is no polling. A failed read keeps the previous snapshot and displays an error; concurrent refresh requests share one read. Offline exports disable refresh. Invalid embedded data produces a visible startup error. Closing every panel leaves the cog menu available to reopen views or reset the layout. An unknown server path returns `404 not found`.
+The snapshot is loaded before the page opens. **Refresh source** explicitly rereads it through the local server, then reloads the page with the workspace state restored. There is no polling. A failed read keeps the previous snapshot and displays an error; concurrent refresh requests share one read. Offline exports disable refresh. Invalid embedded data produces a visible startup error. Closing every panel leaves the Views menu available to reopen views or reset the layout. An unknown server path returns `404 not found`.
 
 ## Freshness and comparison
 
