@@ -4,6 +4,8 @@ All notable changes to this project are documented here. The format follows Keep
 
 ## [Unreleased]
 
+- Make inspector views a native collapsible Dockview sidebar and preserve sidebar placement and collapse state.
+
 - Show a centered Reset layout button when all views are closed, and preserve intentionally empty layouts on reload.
 
 - Remove the status strip; keep capture/quality details, Refresh source, and Reset layout in Views, with refresh failures visible in the footer.

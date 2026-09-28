@@ -26,7 +26,7 @@ Drag a tab to dock it beside or beneath another view, or keep several views toge
 
 Docked layout and sizes are saved locally in the browser, shared between snapshots on the same origin. Storage contains panel layout, not task data or selection. File URL storage behavior depends on the browser. When storage is unavailable or invalid, the viewer starts with its default layout. **Reset layout** restores the default arrangement without clearing the selection.
 
-On narrow screens, the default layout puts the views in one tab group. Floating and separate popout windows are not offered.
+Task details, Ready work, Findings, and Changes share a collapsible sidebar on the right (bottom on narrow screens). Use its collapse/expand arrow or click the active tab. Choosing a sidebar view from Views opens it again. Sidebar sizes and collapsed state survive reload; older standalone inspector groups migrate into a sidebar.
 
 ![DAG and wave grid docked together, with a shared task selection](../images/viewer-split.png)
 

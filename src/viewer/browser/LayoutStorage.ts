@@ -1,3 +1,4 @@
+import { EDGES } from "./Sidebars.ts";
 import { Orientation } from "dockview";
 import type { DockviewApi } from "dockview";
 import { isRec, list, rec, str, num } from "../../adapters/linear/GraphqlJson.ts";
@@ -32,9 +33,23 @@ export class LayoutStorage {
     const ids = new Set<string>();
     const root = this.node(grid["root"], ids, 0);
     if (root === undefined) { return undefined; }
+    const edgeGroups = this.edges(raw["edgeGroups"], ids);
     const panels = Object.fromEntries([...ids].map((id) => [id, { id, contentComponent: id, title: PANEL_TITLES.get(id) ?? id }]));
     const orientation = grid["orientation"] === Orientation.VERTICAL ? Orientation.VERTICAL : Orientation.HORIZONTAL;
-    return { grid: { root, width: this.size(grid["width"]), height: this.size(grid["height"]), orientation }, panels };
+    return { grid: { root, width: this.size(grid["width"]), height: this.size(grid["height"]), orientation }, panels, edgeGroups };
+  }
+
+  private edges(raw: unknown, ids: Set<string>): NonNullable<Layout["edgeGroups"]> {
+    const source = rec(raw);
+    const out: NonNullable<Layout["edgeGroups"]> = {};
+    for (const edge of EDGES) {
+      if (source[edge] === undefined) { continue; }
+      const entry = rec(source[edge]);
+      const group = this.leaf({ size: entry["size"], data: entry["group"] }, ids);
+      if (group?.type !== "leaf") { throw new Error("Invalid sidebar layout"); }
+      out[edge] = { size: this.size(entry["size"]), visible: entry["visible"] !== false, collapsed: entry["collapsed"] === true, group: group.data };
+    }
+    return out;
   }
 
   private node(raw: unknown, ids: Set<string>, depth: number): GridNode | undefined {

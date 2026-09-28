@@ -1,3 +1,5 @@
+import { GroupControls } from "./GroupControls.ts";
+import { Sidebars, SIDEBAR_PANELS } from "./Sidebars.ts";
 import { createDockview, themeLight } from "dockview";
 import type { DockviewApi } from "dockview";
 import { element } from "./Dom.ts";
@@ -9,16 +11,19 @@ export class Workspace {
   private api: DockviewApi;
   private readonly storage = new LayoutStorage();
   private resetting = false;
+  private readonly sidebars = new Sidebars();
 
   constructor(saved?: unknown) {
     for (const id of PANEL_TITLES.keys()) { this.panels.set(id, element(`${id}-panel`)); }
     this.api = this.createApi();
     this.size();
     if (!this.storage.restore(this.api, saved)) { this.reset(); }
+    else { this.sidebars.migrate(this.api); }
   }
 
   private createApi(): DockviewApi {
     const api = createDockview(element("workspace"), {
+      createRightHeaderActionComponent: (group) => new GroupControls(group, () => { if (!this.resetting) { this.storage.save(this.api); } }),
       createWatermarkComponent: () => {
         const host = document.createElement("div"); host.className = "empty-workspace";
         const reset = document.createElement("button");
@@ -35,6 +40,7 @@ export class Workspace {
         return { element: host, init: (): void => { host.append(content); } };
       },
     });
+    api.onDidRemovePanel(() => { queueMicrotask(() => { if (this.api === api && !this.resetting) { this.sidebars.removeEmpty(api); } }); });
     api.onDidLayoutChange(() => { if (!this.resetting) { this.storage.save(api); } });
     return api;
   }
@@ -50,8 +56,9 @@ export class Workspace {
     const title = PANEL_TITLES.get(id);
     if (title === undefined) { return; }
     const existing = this.api.getPanel(id);
-    if (existing !== undefined) { existing.api.setActive(); return; }
-    this.api.addPanel({ id, component: id, title });
+    if (existing !== undefined) { existing.api.setActive(); existing.group.api.expand(); return; }
+    const group = SIDEBAR_PANELS.includes(id) ? this.sidebars.group(this.api) : undefined;
+    this.api.addPanel({ id, component: id, title, ...(group && { position: { referenceGroup: group.id } }) });
   }
 
   reset(): void {
@@ -62,8 +69,8 @@ export class Workspace {
     this.api.addPanel({ id: "graph", component: "graph", title: "DAG" });
     this.api.addPanel({ id: "grid", component: "grid", title: "Wave grid", position: { referencePanel: "graph" } });
     this.api.addPanel({ id: "table", component: "table", title: "Task table", position: { referencePanel: "graph" } });
-    const direction = window.innerWidth < 800 ? "within" : "right";
-    this.api.addPanel({ id: "details", component: "details", title: "Task details", initialWidth: 340, position: { referencePanel: "graph", direction } });
+    const sidebar = this.sidebars.group(this.api);
+    this.api.addPanel({ id: "details", component: "details", title: "Task details", position: { referenceGroup: sidebar.id } });
     this.api.addPanel({ id: "ready", component: "ready", title: "Ready work", position: { referencePanel: "details" } });
     this.api.addPanel({ id: "findings", component: "findings", title: "Findings", position: { referencePanel: "details" } });
     this.api.addPanel({ id: "changes", component: "changes", title: "Changes", position: { referencePanel: "details" } });

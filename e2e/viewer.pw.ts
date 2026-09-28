@@ -322,3 +322,18 @@ test("an empty workspace offers a centered reset and restores its empty state on
   await expect(reset).toHaveCount(0);
   await expect(page.locator("header")).toBeHidden();
 });
+
+test("inspector views collapse to a sidebar and retain that state across reload", async ({ page }) => {
+  await page.goto(exported);
+  const width = (await page.locator("#graph").boundingBox())!.width;
+  await page.getByRole("button", { name: "Collapse sidebar", exact: true }).click();
+  await expect(page.locator("#frontier")).not.toBeVisible();
+  expect((await page.locator("#graph").boundingBox())!.width).toBeGreaterThan(width);
+  await page.reload();
+  await expect(page.locator("#frontier")).not.toBeVisible();
+  await page.getByRole("button", { name: "Expand sidebar", exact: true }).click();
+  await expect(page.locator("#frontier")).toBeVisible();
+  await page.getByRole("button", { name: "Collapse sidebar", exact: true }).click();
+  await workspaceAction(page, "Task details");
+  await expect(page.locator("#detail")).toBeVisible();
+});
