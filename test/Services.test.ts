@@ -62,7 +62,7 @@ describe("FrontierService", () => {
     const dag = new Dag([t("a", [], { resources: ["db"] }), t("b", [], { resources: ["db"] }), t("c", [], { resources: ["db"] })]);
     const policy = new ResourcePolicy([{ id: "db", mode: "exclusive" }]);
     const conflicts = new FrontierService(clock).resourceConflicts(dag, policy);
-    expect(conflicts.get("a")).toEqual(["db (exclusive, 3 ready contenders)"]);
+    expect(conflicts.get("a")).toEqual(["db (exclusive, 3 ready contenders, 0 in-progress holders)"]);
     expect(conflicts.size).toBe(3);
   });
   test("a capacity resource conflicts only above its capacity, and advisory never does", () => {

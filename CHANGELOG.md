@@ -4,6 +4,8 @@ All notable changes to this project are documented here. The format follows Keep
 
 ## [Unreleased]
 
+- Include in-progress resource holders when reporting contention for ready work.
+
 - Separate immediate unblocking from downstream impact in frontier ranking and reports.
 
 - Keep external blockers and unknown statuses unresolved, and reject malformed or truncated Linear connections instead of trusting a partial graph.

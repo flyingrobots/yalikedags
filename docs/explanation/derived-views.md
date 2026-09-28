@@ -26,7 +26,7 @@ FOLDS:   done ─┐
 
 **Frontier.** The ready tasks, sorted by days until due (undated last), then priority (1 first, unset last), then how many direct dependents become ready upon its completion, then the number of open descendants (more first), then creation time, then id. Priority is a tiebreaker inside the frontier and never overrides an edge.
 
-**Resource conflicts.** Resources are attributes on tasks, never edges, because contention is symmetric and non-transitive. Ready tasks sharing an `exclusive` resource, or more of them than a `capacity` allows, are flagged. `advisory` never blocks. Phase 1 has no resource source; the policy is empty until one exists.
+**Resource conflicts.** Resources are attributes on tasks, never edges, because contention is symmetric and non-transitive. Ready tasks are flagged when their combined contention with in-progress holders exceeds an exclusive or capacity limit. `advisory` never blocks. The task-dag file source supplies resource policy; sources without a policy report no capacity conflicts.
 
 **Waves.** Kahn layering over the open subgraph: wave 0 is every task with a known open status whose stored blockers are all known and done, wave 1 what those free, and so on. Each wave is an antichain, a set that could be worked in parallel. Waves are a forecast, not a barrier; the frontier rolls.
 

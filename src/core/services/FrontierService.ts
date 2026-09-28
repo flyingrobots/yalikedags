@@ -52,16 +52,18 @@ export class FrontierService {
   /** Ready tasks that contend for a resource the policy does not allow them to share. */
   resourceConflicts(dag: Dag, policy: ResourcePolicy): Map<string, string[]> {
     const holders = new Map<string, string[]>();
-    for (const entry of this.frontier(dag)) {
-      for (const r of entry.task.resources) {
-        holders.set(r, [...(holders.get(r) ?? []), entry.task.id]);
+    const ready = new Set(this.frontier(dag).map((entry) => entry.task.id));
+    for (const task of dag.tasks.filter((t) => ready.has(t.id) || t.isInProgress())) {
+      for (const r of task.resources) {
+        holders.set(r, [...(holders.get(r) ?? []), task.id]);
       }
     }
     const out = new Map<string, string[]>();
     for (const [resource, tasks] of holders) {
-      const message = policy.conflict(resource, tasks.length);
+      const active = tasks.filter((id) => dag.get(id).isInProgress()).length;
+      const message = policy.conflict(resource, tasks.length, active);
       if (message !== undefined) {
-        for (const id of tasks) {
+        for (const id of tasks.filter((taskId) => ready.has(taskId))) {
           out.set(id, [...(out.get(id) ?? []), message]);
         }
       }
