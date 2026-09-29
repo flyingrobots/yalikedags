@@ -4,6 +4,8 @@ All notable changes to this project are documented here. The format follows Keep
 
 ## [Unreleased]
 
+- Give unresolved nodes a readable pale yellow fill in standalone SVG exports.
+
 - Report cancellation as a status change in snapshot comparisons; only entering done counts as completion.
 
 - Add README subheadings for the overview, Linear writes, team use, offline sharing, viewer layout, and bundled example.

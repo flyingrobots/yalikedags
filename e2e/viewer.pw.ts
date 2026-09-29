@@ -436,3 +436,11 @@ test("reload redocks popped-out sidebar views while preserving a split layout", 
   await expect(page.locator("#detail")).toBeVisible();
   await expect(sidebar.getByRole("button", { name: "Collapse sidebar", exact: true })).toBeVisible();
 });
+
+test("standalone SVG gives unresolved nodes a readable state fill", async ({ page }) => {
+  // oracle: unresolved nodes use the viewer's pale yellow state color, without viewer CSS.
+  await page.goto(pathToFileURL(resolve("dist/unresolved.svg")).href);
+  const unresolved = page.locator(".node.unresolved rect");
+  await expect(unresolved).toHaveCount(2);
+  for (const rect of await unresolved.all()) { await expect(rect).toHaveCSS("fill", "rgb(255, 240, 201)"); }
+});

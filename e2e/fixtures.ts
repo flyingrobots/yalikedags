@@ -2,10 +2,15 @@ import { writeFileSync } from "node:fs";
 import { Task } from "../src/core/domain/Task.ts";
 import { AnalysisService } from "../src/core/services/AnalysisService.ts";
 import { HtmlRendererAdapter } from "../src/adapters/output/HtmlRendererAdapter.ts";
+import { SvgRendererAdapter } from "../src/adapters/output/SvgRendererAdapter.ts";
 
 export function writeFixtures(): void {
   const service = new AnalysisService({ today: (): string => "2026-09-28" });
   const renderer = new HtmlRendererAdapter();
+  writeFileSync("dist/unresolved.svg", new SvgRendererAdapter().render(service.analyse([
+    new Task({ id: "external", title: "External blocker", blockedBy: ["missing"] }),
+    new Task({ id: "unknown", title: "Unknown status", status: "unknown" }),
+  ], "Unresolved example")));
   writeFileSync("dist/viewer-empty.html", renderer.render(service.analyse([], "Empty example")));
   const tasks = [
     new Task({ id: "__proto__", key: "PRO-1", title: 'Unsafe </script><img src="https://example.invalid/x">', url: "javascript:alert(1)" }),

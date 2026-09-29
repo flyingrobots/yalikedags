@@ -16,6 +16,7 @@ const STYLE = `
 .node rect{stroke:#333;stroke-width:1.5;rx:8}
 .node text{font:12px Helvetica,Arial,sans-serif;fill:#111}
 .node.done rect{fill:#d4edda}.node.in-progress rect{fill:#fff3cd}.node.blocked rect{fill:#f8d7da}.node.ready rect{fill:#d1ecf1}
+.node.unresolved rect{fill:#fff0c9}
 .node.critical rect{stroke-width:3}.node.gatekeeper rect{stroke-dasharray:6 3}
 .edge{fill:none;stroke:#555;stroke-width:1.5;marker-end:url(#arrow)}.edge.critical{stroke:#b00;stroke-width:2.5}
 `;
