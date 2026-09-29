@@ -15,6 +15,8 @@ export class SessionState {
       }
     });
     state.select(str(this.saved["selected"]));
+    // The refresh handoff is consumed; subsequent reloads use the latest saved layout.
+    history.replaceState(null, "");
   }
 
   layout(): unknown { return this.saved["layout"]; }

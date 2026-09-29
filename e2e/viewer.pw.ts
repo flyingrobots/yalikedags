@@ -473,3 +473,16 @@ test("table filters update closed DAG and wave-grid panels", async ({ page }) =>
     expect(await page.locator(`${selector}.filtered-out`).count()).toBeGreaterThan(0);
   }
 });
+
+test("ordinary reload uses layout changes made after a source refresh", async ({ page }) => {
+  // oracle: refresh restoration is one-shot; later persisted layout changes win on reload.
+  await page.goto("http://127.0.0.1:4178");
+  await Promise.all([page.waitForEvent("load"), workspaceAction(page, "Refresh source")]);
+  await expect(page.locator("body")).toHaveAttribute("data-ready", "true");
+  await workspaceAction(page, "Show task table");
+  await page.getByRole("button", { name: "Close Task table", exact: true }).click();
+  await expect.poll(() => page.evaluate(() => localStorage.getItem("yalikedags.layout.v1"))).not.toContain('"contentComponent":"table"');
+  await page.reload();
+  await expect(page.locator("body")).toHaveAttribute("data-ready", "true");
+  await expect(page.getByRole("tab", { name: "Task table", exact: true })).toHaveCount(0);
+});

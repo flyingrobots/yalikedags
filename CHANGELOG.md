@@ -4,6 +4,8 @@ All notable changes to this project are documented here. The format follows Keep
 
 ## [Unreleased]
 
+- Consume refresh restoration state once so later reloads honor the latest saved layout.
+
 - Keep DAG nodes readable when reopening a panel that was closed in the saved layout.
 
 - Give unresolved nodes a readable pale yellow fill in standalone SVG exports.
