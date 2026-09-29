@@ -457,3 +457,19 @@ test("DAG nodes remain readable when reloading with the DAG closed", async ({ pa
   await workspaceAction(page, "Show DAG");
   await expect.poll(async () => (await page.locator("#graph .node rect").first().boundingBox())?.width ?? 0).toBeGreaterThanOrEqual(120);
 });
+
+test("table filters update closed DAG and wave-grid panels", async ({ page }) => {
+  // oracle: reopening either panel preserves the table's two parser matches.
+  await page.goto(exported);
+  await page.getByRole("button", { name: "Close DAG", exact: true }).click();
+  await workspaceAction(page, "Show wave grid");
+  await page.getByRole("button", { name: "Close Wave grid", exact: true }).click();
+  await workspaceAction(page, "Show task table");
+  await page.getByRole("searchbox", { name: "Filter tasks", exact: true }).fill("parser");
+  await expect(page.locator("#task-table tbody tr")).toHaveCount(2);
+  for (const [action, selector] of [["Show DAG", "#graph .node"], ["Show wave grid", "#grid .card"]] as const) {
+    await workspaceAction(page, action);
+    await expect(page.locator(`${selector}:not(.filtered-out)`)).toHaveCount(2);
+    expect(await page.locator(`${selector}.filtered-out`).count()).toBeGreaterThan(0);
+  }
+});
