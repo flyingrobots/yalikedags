@@ -444,3 +444,16 @@ test("standalone SVG gives unresolved nodes a readable state fill", async ({ pag
   await expect(unresolved).toHaveCount(2);
   for (const rect of await unresolved.all()) { await expect(rect).toHaveCSS("fill", "rgb(255, 240, 201)"); }
 });
+
+test("DAG nodes remain readable when reloading with the DAG closed", async ({ page }) => {
+  // oracle: reopening a saved closed DAG must retain a readable node width (at least 120 px).
+  await page.goto(exported);
+  await page.getByRole("button", { name: "Close DAG", exact: true }).click();
+  await workspaceAction(page, "Show task table");
+  await expect.poll(() => page.evaluate(() => localStorage.getItem("yalikedags.layout.v1"))).toContain('"activeView":"table"');
+  await page.reload();
+  await expect(page.locator("body")).toHaveAttribute("data-ready", "true");
+  await expect(page.locator("#task-table")).toBeVisible();
+  await workspaceAction(page, "Show DAG");
+  await expect.poll(async () => (await page.locator("#graph .node rect").first().boundingBox())?.width ?? 0).toBeGreaterThanOrEqual(120);
+});

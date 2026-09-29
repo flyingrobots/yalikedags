@@ -25,8 +25,9 @@ export class GraphController {
 
   /** Open at a readable scale; Fit all remains available for the complete overview. */
   readable(): void {
-    const width = Math.min(this.initial.width, Math.max(500, this.svg.clientWidth));
-    const height = Math.max(300, this.svg.clientHeight) * width / Math.max(1, this.svg.clientWidth);
+    const viewportWidth = this.svg.clientWidth || 500;
+    const width = Math.min(this.initial.width, Math.max(500, viewportWidth));
+    const height = Math.max(300, this.svg.clientHeight) * width / viewportWidth;
     this.set(new DOMRect(0, 0, width, height));
   }
 
