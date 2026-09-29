@@ -11,8 +11,9 @@ export class SnapshotChangesService {
     for (const task of after.tasks) {
       if (!before.has(task.id)) { out.push({ kind: "added", task: task.id, key: task.key, detail: task.title }); continue; }
       const old = before.get(task.id);
-      if (!old.isDone() && task.isDone()) { out.push({ kind: "completed", task: task.id, key: task.key, detail: `${old.status} → ${task.status}` }); }
-      if (old.status !== task.status && !task.isDone()) { out.push({ kind: "status", task: task.id, key: task.key, detail: `${old.status} → ${task.status}` }); }
+      if (old.status !== task.status) {
+        out.push({ kind: task.status === "done" ? "completed" : "status", task: task.id, key: task.key, detail: `${old.status} → ${task.status}` });
+      }
       out.push(...this.blockers(old, task, { before, after }));
     }
     for (const task of before.tasks.filter((t) => !after.has(t.id))) { out.push({ kind: "removed", task: task.id, key: task.key, detail: task.title }); }

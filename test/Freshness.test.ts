@@ -51,3 +51,19 @@ test("refresh endpoint requires an explicit same-origin POST and retains data on
     expect((await fetch(`${server.url}snapshot.json`)).status).toBe(200);
   } finally { server.stop(); }
 });
+
+// oracle: only entering done is completion; cancellation is a distinct status transition.
+for (const [before, after, kind] of [
+  ["open", "canceled", "status"], ["done", "canceled", "status"],
+  ["canceled", "done", "completed"], ["canceled", "open", "status"],
+] as const) {
+  test(`snapshot comparison reports ${before} to ${after} as ${kind}`, () => {
+    const changes = new SnapshotChangesService().compare(
+      new Dag([new Task({ id: "a", title: "A", status: before })]),
+      new Dag([new Task({ id: "a", title: "A", status: after })]),
+    );
+    expect(changes.filter((change) => change.task === "a")).toEqual([
+      { kind, task: "a", key: "a", detail: `${before} → ${after}` },
+    ]);
+  });
+}
