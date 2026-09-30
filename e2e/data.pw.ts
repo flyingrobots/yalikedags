@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
-import { writeFileSync } from "node:fs";
+import { mkdirSync, writeFileSync } from "node:fs";
 import { Task } from "../src/core/domain/Task.ts";
 import { LinearAccount } from "../src/core/domain/LinearAccount.ts";
 import { AnalysisService } from "../src/core/services/AnalysisService.ts";
@@ -16,7 +16,7 @@ const analysis = new AnalysisService({ today: (): string => "2026-09-30" }).anal
 ) });
 const exported = pathToFileURL(resolve("dist/viewer-account.html")).href;
 
-test.beforeAll(() => { writeFileSync("dist/viewer-account.html", new HtmlRendererAdapter().render(analysis)); });
+test.beforeAll(() => { mkdirSync("dist", { recursive: true }); writeFileSync("dist/viewer-account.html", new HtmlRendererAdapter().render(analysis)); });
 
 for (const mode of ["server", "offline"]) {
   test(`account and assignment data render safely across ${mode} views`, async ({ page }) => {

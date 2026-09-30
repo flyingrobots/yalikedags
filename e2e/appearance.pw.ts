@@ -2,13 +2,13 @@ import { THEMES } from "../src/viewer/ThemeCatalog.ts";
 import { test, expect } from "@playwright/test";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
-import { writeFileSync } from "node:fs";
+import { mkdirSync, writeFileSync } from "node:fs";
 import { HtmlRendererAdapter } from "../src/adapters/output/HtmlRendererAdapter.ts";
 import { AnalysisService } from "../src/core/services/AnalysisService.ts";
 
 const url = "http://127.0.0.1:4178";
 const offline = pathToFileURL(resolve("dist/viewer-appearance.html")).href;
-test.beforeAll(() => {
+test.beforeAll(() => { mkdirSync("dist", { recursive: true });
   const analysis = new AnalysisService({ today: (): string => "2026-09-30" }).analyse([], "Theme preview");
   writeFileSync("dist/viewer-appearance.html", new HtmlRendererAdapter().render(analysis));
 });
