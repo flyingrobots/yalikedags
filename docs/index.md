@@ -1,6 +1,6 @@
 # yalikedags documentation
 
-yalikedags turns a Linear project into a dependency DAG, reports the ready frontier, the workstreams and the critical path, audits the cards, and draws the graph in a local viewer. It is read-only.
+yalikedags turns a Linear project into a dependency DAG, reports the ready frontier, the workstreams and the critical path, audits the cards, and draws the graph in a local viewer. Reading and viewing never change the tracker; only an explicitly confirmed reconcile plan writes to Linear.
 
 ## Start here
 - [See your first DAG](tutorials/first-dag.md)

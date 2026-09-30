@@ -1,3 +1,6 @@
+import { ViewerData } from "../src/viewer/ViewerData.ts";
+import { ViewerDataCodec } from "../src/viewer/ViewerDataCodec.ts";
+import { ViewerMarkup } from "../src/viewer/ViewerMarkup.ts";
 import { describe, expect, test } from "bun:test";
 import { Task } from "../src/core/domain/Task.ts";
 import { AnalysisService } from "../src/core/services/AnalysisService.ts";
@@ -13,16 +16,14 @@ const analysis = new AnalysisService(new FixedClockAdapter("2026-09-23")).analys
 
 describe("ViewerRequestHandler", () => {
   // oracle: specified. The page is self-contained: inline SVG, inline JSON, inline script, no external request.
-  test("GET / returns a self-contained HTML page carrying the SVG and the snapshot", () => {
-    const res = new ViewerRequestHandler(() => analysis).handle("/");
+  test("GET / returns a client shell and serves project data separately", () => {
+    const h = new ViewerRequestHandler(() => analysis);
+    const res = h.handle("/");
     expect(res.status).toBe(200);
     expect(res.contentType).toContain("text/html");
-    expect(res.body).toContain("<svg");
-    expect(res.body).toContain('"schema": "yalikedags/snapshot/2"');
-    expect(res.body).not.toMatch(/src="https?:/);
-    expect(res.body).not.toMatch(/href="https?:/);
-    expect(res.body).not.toMatch(/@import/);
-    expect(res.body).toContain('id="refresh" disabled');
+    expect(res.body).not.toContain("PRO-1");
+    expect(res.body).toContain('id="app"');
+    expect(JSON.parse(h.handle("/viewer.json").body)).toMatchObject({ schema: "yalikedags/viewer/1", refresh: false });
   });
   test("GET /popout.html is an empty same-origin shell without task data or scripts", () => {
     const res = new ViewerRequestHandler(() => analysis).handle("/popout.html");
@@ -84,35 +85,37 @@ describe("HtmlRendererAdapter", () => {
     expect(html.startsWith("<!doctype html>")).toBe(true);
     expect(html).not.toMatch(/<script[^>]+\ssrc=/i);
     expect(html).not.toMatch(/<link[^>]+\srel=["']?stylesheet/i);
-    expect(html).not.toMatch(/<img\b|url\(\s*https?:|@import/i);
+    const markup = html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, "");
+    expect(markup).not.toMatch(/<img\b|url\(\s*https?:|@import/i);
   });
 
   /**
    * The SVG namespace is the one URL in the page that is not a link: it is an
    * identifier, never fetched. Everything else must have come from a card.
    */
-  test("its only outbound links are the per-card ones that came from the source data", () => {
+  test("client markup only links to the per-card URLs from source data", async () => {
     const withUrl = new AnalysisService(new FixedClockAdapter("2026-09-23")).analyse(
-      [new Task({ id: "a", key: "PRO-1", title: "Root", url: "https://linear.app/x/issue/PRO-1" })],
-      "linear:Example",
-    );
-    const urls = (html: string): string[] =>
-      [...new Set([...html.matchAll(/href="(https?:\/\/[^"\s]+)"/g)].flatMap((m) => m[1] === undefined ? [] : [m[1]]))];
-    expect(urls(new HtmlRendererAdapter().render(page()))).toEqual([]);
-    expect(urls(new HtmlRendererAdapter().render(withUrl))).toEqual(["https://linear.app/x/issue/PRO-1"]);
+      [new Task({ id: "a", key: "PRO-1", title: "Root", url: "https://linear.app/x/issue/PRO-1" })], "linear:Example");
+    const decoded = await new ViewerDataCodec().decode(new ViewerData().render(withUrl));
+    const html = new ViewerMarkup().render(decoded.analysis, decoded.options);
+    const urls = [...html.matchAll(/href="(https?:\/\/[^"\s]+)"/g)].map((match) => match[1]);
+    expect(urls).toEqual(["https://linear.app/x/issue/PRO-1"]);
   });
 
   // oracle: specified. The server and the file are the same page, or one of them rots.
-  test("renders byte for byte what the server returns for /", () => {
+  test("embeds exactly the JSON that the server delivers to the client", () => {
     const a = page();
-    expect(new HtmlRendererAdapter().render(a)).toBe(new ViewerRequestHandler(() => a).handle("/").body);
+    const html = new HtmlRendererAdapter().render(a);
+    const embedded = /<script id="viewer-data" type="application\/json">(.*?)<\/script>/s.exec(html)?.[1];
+    expect(embedded).toBe(new ViewerRequestHandler(() => a).handle("/viewer.json").body);
   });
 
-  test("carries the graph and the snapshot the page needs to work without a server", () => {
+  test("carries the data needed to render every view without a server", () => {
     const html = new HtmlRendererAdapter().render(page());
-    expect(html).toContain("<svg");
-    expect(html).toContain('id="snapshot"');
+    expect(html).toContain('id="viewer-data"');
     expect(html).toContain("PRO-1");
+    const body = html.replace(/<script\b[^>]*>[\s\S]*?<\/script>/g, "");
+    expect(body).not.toContain('<svg');
   });
 
   test("declares itself as HTML, so the viewer server can serve the same object", () => {
@@ -137,7 +140,7 @@ describe("viewer grid", () => {
     "inline",
   );
   const handler = new ViewerRequestHandler(() => withGate);
-  const page = handler.handle("/").body;
+  const page = new ViewerMarkup().render(withGate, {});
   const snapshot: unknown = JSON.parse(handler.handle("/snapshot.json").body);
 
   // oracle: specified. One column per wave, a shared row first for the gatekeepers, then one row per workstream.

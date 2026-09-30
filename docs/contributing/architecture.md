@@ -20,8 +20,8 @@ src/adapters/output/  LinearTaskWriterAdapter, DryRunTaskWriterAdapter, PlanText
 src/adapters/linear/  LinearGraphqlClient, GraphqlJson (shared by the reader and the writer)
 src/adapters/plan/    PlanJsonCodec
 src/adapters/{http,clock,secrets}/  the hosts: fetch, wall clock, env, vault, chain
-src/viewer/           ViewerPage + ViewerPanels (HTML), ViewerRequestHandler (pure), ViewerServerAdapter (Bun.serve)
-src/viewer/browser/   typed Dockview workspace, selection, search and SVG navigation
+src/viewer/           ViewerPage (shell), ViewerData (JSON), ViewerMarkup + ViewerPanels (client HTML), ViewerRequestHandler (pure), ViewerServerAdapter (Bun.serve)
+src/viewer/browser/   single-view workspace, selection, search and SVG navigation
 scripts/build-viewer.ts  bundles JS/CSS into ignored src/viewer/generated/assets.ts
 src/cli/              Args, ExitCode, SourceResolver, SourceSpec, ReconcileCommands
 src/cli.ts            the composition root; the only file that constructs host adapters
@@ -38,7 +38,7 @@ src/cli.ts            the composition root; the only file that constructs host a
 - Both relation methods on the Linear writer read before they write, so `apply` is re-runnable. Any new mutation must keep that property or the recovery story breaks.
 - A mutation's `satisfiedBy` is what verification means. A mutation whose effect cannot be observed in a re-read must not be added.
 - Renderers never mutate; the domain never serializes.
-- The viewer page carries no external reference and never receives the key.
+- The viewer receives public account provenance and assignment names, never the key. The server produces analysis JSON; the browser renders all project markup.
 
 ## Edit paths by change type
 
@@ -65,16 +65,16 @@ Live check against a real project (read-only, needs the key): `bun src/cli.ts sy
 
 ## Viewer build and browser checks
 
-`bun install` builds the viewer through `postinstall`. After browser-code edits, run `bun run build:viewer`; `bun run check` also rebuilds it. The generated module is ignored by Git and imported by both HTML renderers, keeping their output identical and free of runtime asset requests. Dockview is the MIT TypeScript package; its license is included in the inline bundle.
+`bun install` builds the viewer through `postinstall`. After browser-code edits, run `bun run build:viewer`; `bun run check` also rebuilds it. The generated module is ignored by Git and imported by both HTML renderers, sharing the client renderer between the local shell and offline export. The local shell fetches `/viewer.json`; the offline file embeds that same payload. Neither fetches external assets. The browser workspace has no UI framework dependency. Marked parses task descriptions; DOMPurify sanitizes the resulting markup before insertion. Description images become explicit links so exports do not fetch remote assets.
 
-Install the test browser with `bunx playwright install chromium`, then run `bun run test:browser`. CI installs Chromium and runs this separately from the offline Bun suite. The browser suite exercises both `file://` export and loopback serving, storage fallback, shared selection, panel lifecycle, graph navigation, escaping, and crowded/empty graphs.
+Install the test browser with `bunx playwright install chromium`, then run `bun run test:browser`. CI installs Chromium and runs this separately from the offline Bun suite. The browser suite exercises both `file://` export and loopback serving, storage fallback, shared selection, view navigation and inspector lifecycle, graph navigation and filtering, Markdown sanitization, pagination, palette contrast, inspector resizing, escaping, and crowded/empty graphs.
 
-`bun run viewer:screenshots` regenerates the four viewer documentation screenshots using only the bundled public example and a fixed date.
+`bun run viewer:screenshots` regenerates the viewer documentation screenshots using only the bundled public example and a fixed date.
 
 ## Known gaps
 
 - Resources are read only from a `--dag` source; every other source leaves the policy empty.
-- No live refresh in the viewer.
+- Refresh is manual; the viewer does not poll.
 - The writer's behaviour against the real API is established only by the live tier, which must actually be run; recorded fixtures describe what Linear's responses look like, not what Linear does.
 - Milestones are matched by name and never created.
 - No `OverlayRepository` port; see [source of truth](../explanation/source-of-truth.md).

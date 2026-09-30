@@ -4,6 +4,28 @@ All notable changes to this project are documented here. The format follows Keep
 
 ## [Unreleased]
 
+- Align table filters, counts, and outer cells with shared responsive gutters; inset table and wave pagination controls from the viewport edges.
+
+- Remove the navigation collapse toggle and keep the navigation visible, including when older saved preferences requested collapse.
+
+- Restore the yalikedags? logo, remove the global header, move appearance to the navigation footer, and consolidate snapshot details, refresh, comparison, and JSON export under Import/Export. Hide content scrollbars while preserving scrolling.
+
+- Center readable graph zoom on selection, bound zoom, add client-side graph owner/state filters, make task rows fully selectable, and render sanitized Markdown descriptions. Add a saved, draggable inspector width and replace duplicate header dismissal controls with a single close button.
+
+- Add client-side pagination to ready work, tasks, wave workstreams, unscheduled tasks, and grouped findings, changes, and impact lists; filters and sorting cover the complete project.
+
+- Make impact counts expand into inspectable task lists, add selection-preserving inspector collapse, raise default text to 16 px with a saved size control, and remove decorative viewer copy.
+
+- Add Tomorrow Night Eighties, Solarized, Dracula, Monokai, Gruvbox, Tokyo Night, and Monotone viewer palettes, each with light/dark variants, persisted selection, and contrast-tested semantic tokens.
+
+- Add Palm (the supplied five-color palette) and paired Graphite light/dark stylesheets, with an accessible appearance picker and persistent Light/Dark/System preferences. System follows OS changes; offline exports support the same controls.
+
+- Add stable-id owner filters, graph neighborhoods, local table filters and optional columns, grouped findings and assignment changes, capture provenance on mobile, and token-driven dark/light CSS themes.
+
+- Render all viewer views and SVG in the browser from server-produced `/viewer.json`; embed the same payload in offline HTML. Preserve Linear workspace/project/capture identity in snapshots and display assigned owners or Unassigned throughout the viewer.
+
+- Replace the Dockview panel manager with a workflow-first viewer: ready-work overview, critical-path steps, six full-area views, and an on-demand task inspector. Remove docking and pop-outs; retain offline export, graph navigation, filters, snapshot comparisons, and refresh restoration. Use graphite surfaces and semantic state colors.
+
 - Discard graph drag state when the pointer returns after releasing outside the SVG.
 
 - Resolve critical-path ties in stable task-id order so reordered snapshots do not report false chain changes.

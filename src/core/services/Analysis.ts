@@ -1,3 +1,4 @@
+import type { LinearAccount } from "../domain/LinearAccount.ts";
 import type { Dag } from "../domain/Dag.ts";
 import type { TaskState } from "./StateService.ts";
 import type { FrontierEntry } from "./FrontierService.ts";
@@ -10,6 +11,7 @@ export interface AnalysisFields {
   dag: Dag;
   source: string;
   asOf: string;
+  account?: LinearAccount | undefined;
   capturedAt?: string | null;
   warnings?: readonly string[];
   states: ReadonlyMap<string, TaskState>;
@@ -29,6 +31,7 @@ export class Analysis {
   readonly dag: Dag;
   readonly source: string;
   readonly asOf: string;
+  readonly account: LinearAccount | undefined;
   readonly capturedAt: string | null;
   readonly warnings: readonly string[];
   readonly states: ReadonlyMap<string, TaskState>;
@@ -45,6 +48,7 @@ export class Analysis {
   constructor(f: AnalysisFields) {
     this.dag = f.dag;
     this.source = f.source;
+    this.account = f.account;
     this.asOf = f.asOf;
     this.capturedAt = f.capturedAt ?? null;
     this.warnings = Object.freeze([...(f.warnings ?? [])]);

@@ -1,4 +1,4 @@
-import { dockWaveGrid, workspaceAction } from "../e2e/workspace.ts";
+import { workspaceAction } from "../e2e/workspace.ts";
 import { mkdir } from "node:fs/promises";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
@@ -19,11 +19,13 @@ try {
   await page.goto(pathToFileURL(resolve("dist/viewer-example.html")).href);
   await page.locator("body[data-ready]").waitFor();
   await page.screenshot({ path: "docs/images/viewer-overview.png" });
+  await page.getByRole("button", { name: "Dependencies", exact: true }).click();
+  await page.screenshot({ path: "docs/images/viewer-graph.png" });
   await page.getByRole("searchbox", { name: "Find a task" }).fill("Implement core DAG");
   await page.locator("#search-results button").first().click();
   await page.screenshot({ path: "docs/images/viewer-selection.png" });
-  await dockWaveGrid(page);
-  await page.getByRole("button", { name: "Focus selection", exact: true }).click();
+  await page.getByRole("button", { name: "Close task details" }).click();
+  await workspaceAction(page, "Show wave grid");
   await page.screenshot({ path: "docs/images/viewer-split.png" });
   await workspaceAction(page, "Show task table");
   await page.screenshot({ path: "docs/images/viewer-table.png" });

@@ -1,3 +1,5 @@
+import { ViewerDataCodec } from "../src/viewer/ViewerDataCodec.ts";
+import { ViewerMarkup } from "../src/viewer/ViewerMarkup.ts";
 import { Dag } from "../src/core/domain/Dag.ts";
 import { SnapshotChangesService } from "../src/core/services/SnapshotChangesService.ts";
 import { ViewerRequestHandler } from "../src/viewer/ViewerRequestHandler.ts";
@@ -74,12 +76,16 @@ test("successful unchanged refresh confirms zero changes while failed reads reta
   let fail = false;
   const live = new RefreshingAnalysis(analysis, () => fail ? Promise.reject(new Error("unavailable")) : Promise.resolve(analysis));
   const handler = new ViewerRequestHandler(() => live.current, () => ({ refresh: true, ...(live.changes !== undefined && { changes: live.changes }) }));
-  expect((/<p id="changes-status"[^>]*>([^<]*)<\/p>/.exec(handler.handle("/").body))?.[1]).toContain("Choose an earlier snapshot");
+  const markup = async (): Promise<string> => {
+    const decoded = await new ViewerDataCodec().decode(handler.handle("/viewer.json").body);
+    return new ViewerMarkup().render(decoded.analysis, decoded.options);
+  };
+  expect((/<p id="changes-status"[^>]*>([^<]*)<\/p>/.exec(await markup()))?.[1]).toContain("Choose an earlier snapshot");
   await live.refresh();
-  expect((/<p id="changes-status"[^>]*>([^<]*)<\/p>/.exec(handler.handle("/").body))?.[1]).toContain("No changes since the previous successful refresh.");
+  expect((/<p id="changes-status"[^>]*>([^<]*)<\/p>/.exec(await markup()))?.[1]).toContain("No changes since the previous successful refresh.");
   fail = true;
   await rejection(live.refresh());
-  expect((/<p id="changes-status"[^>]*>([^<]*)<\/p>/.exec(handler.handle("/").body))?.[1]).toContain("No changes since the previous successful refresh.");
+  expect((/<p id="changes-status"[^>]*>([^<]*)<\/p>/.exec(await markup()))?.[1]).toContain("No changes since the previous successful refresh.");
 });
 
 for (const tasks of [

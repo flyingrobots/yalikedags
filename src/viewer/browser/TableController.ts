@@ -1,21 +1,25 @@
+import { Pagination } from "./Pagination.ts";
+import { TableColumns } from "./TableColumns.ts";
 import type { Task } from "../../core/domain/Task.ts";
-import { StateService } from "../../core/services/StateService.ts";
 import { TABLE_COLUMNS } from "../TaskTableMarkup.ts";
 import { element, button } from "./Dom.ts";
 import type { ViewerState } from "./ViewerState.ts";
 
 export class TableController {
   private readonly panel = element("table-panel");
-  private sort = "Key";
+  private readonly pagination: Pagination<Task>;
+  private sort = "Title";
+  private readonly columns = new TableColumns();
   private ascending = true;
-  private readonly states = new StateService();
   private readonly filters = new Map<string, HTMLSelectElement>();
   private readonly query: HTMLInputElement;
 
-  constructor(private readonly state: ViewerState, private readonly panels: readonly HTMLElement[]) {
+  constructor(private readonly state: ViewerState) {
     const query = this.control("table-query");
     if (!(query instanceof HTMLInputElement)) { throw new Error("Missing table query"); }
     this.query = query;
+    this.pagination = new Pagination("Tasks", (tasks) => { this.display(tasks); });
+    this.control("table-count").after(this.pagination.control);
     this.bindSort();
     for (const name of ["state", "assignee", "milestone", "label"]) { this.addFilter(name); }
     query.addEventListener("input", () => { this.render(); });
@@ -63,7 +67,7 @@ export class TableController {
   }
 
   private values(task: Task, name: string): string[] {
-    if (name === "state") { return [this.states.stateOf(this.state.dag, task.id)]; }
+    if (name === "state") { return [(this.state.states.get(task.id) ?? "unresolved")]; }
     if (name === "label") { return [...task.labels]; }
     return [name === "assignee" ? task.assignee ?? "Unassigned" : task.milestone ?? "No milestone"];
   }
@@ -76,8 +80,8 @@ export class TableController {
 
   private value(task: Task, column: string): string | number | undefined {
     const values = new Map<string, string | number | undefined>([
-      ["Key", task.key], ["Title", task.title], ["State", this.states.stateOf(this.state.dag, task.id)],
-      ["Assignee", task.assignee], ["Priority", task.priority], ["Estimate", task.effort],
+      ["Key", task.key], ["Title", task.title], ["State", (this.state.states.get(task.id) ?? "unresolved")],
+      ["Assignee", task.assignee ?? "Unassigned"], ["Priority", task.priority], ["Estimate", task.effort],
       ["Milestone", task.milestone], ["Due", task.due], ["Labels", task.labels.join(", ")],
     ]);
     return values.get(column);
@@ -93,29 +97,28 @@ export class TableController {
 
   private render(): void {
     const table = this.control("task-table");
-    const body = table.querySelector("tbody");
     const tasks = this.state.dag.tasks.filter((task) => this.matches(task)).sort((a, b) => this.compare(a, b));
-    body?.replaceChildren(...tasks.map((task) => this.row(task)));
+    this.pagination.set(tasks);
     for (const control of table.querySelectorAll<HTMLElement>("[data-sort]")) {
       control.parentElement?.setAttribute("aria-sort", control.dataset["sort"] === this.sort ? (this.ascending ? "ascending" : "descending") : "none");
     }
-    this.control("table-count").textContent = `${String(tasks.length)} of ${String(this.state.dag.size)} tasks · Filters also highlight matches in the DAG and wave grid.`;
-    const summary = element("filter-summary");
-    summary.hidden = tasks.length === this.state.dag.size;
-    summary.textContent = `Filters: ${String(tasks.length)}/${String(this.state.dag.size)} tasks · edit in Task table`;
-    const ids = new Set(tasks.map((task) => task.id));
-    this.panels.flatMap((panel) => [...panel.querySelectorAll<HTMLElement | SVGElement>(".node,.card")]).forEach((node) => {
-      node.classList.toggle("filtered-out", !ids.has(node.dataset["id"] ?? ""));
-    });
-    this.highlight();
+    this.control("table-count").textContent = `${String(tasks.length)} of ${String(this.state.dag.size)} tasks · These filters apply to Tasks only.`;
+  }
+
+  private display(tasks: readonly Task[]): void {
+    this.control("task-table").querySelector("tbody")?.replaceChildren(...tasks.map((task) => this.row(task)));
+    this.columns.apply(); this.highlight();
   }
 
   private row(task: Task): HTMLTableRowElement {
-    const row = document.createElement("tr"); row.dataset["id"] = task.id;
-    row.className = this.states.stateOf(this.state.dag, task.id);
+    const row = document.createElement("tr"); row.dataset["id"] = task.id; row.dataset["task"] = task.id; row.tabIndex = 0;
+    row.className = (this.state.states.get(task.id) ?? "unresolved");
     for (const column of TABLE_COLUMNS) {
-      const cell = row.insertCell();
-      if (column === "Key") { const control = button(task.key, task.id); cell.append(control); }
+      const cell = row.insertCell(); cell.dataset["column"] = column;
+      if (column === "Title") {
+        const control = button(task.title, task.id); control.className = "task-title";
+        const key = document.createElement("small"); key.textContent = task.key; cell.append(control, key);
+      }
       else { cell.textContent = String(this.value(task, column) ?? "—"); }
     }
     return row;

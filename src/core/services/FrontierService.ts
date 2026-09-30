@@ -1,3 +1,4 @@
+import { DependencyImpact } from "./DependencyImpact.ts";
 import type { Dag } from "../domain/Dag.ts";
 import type { Task } from "../domain/Task.ts";
 import type { ResourcePolicy } from "../domain/ResourcePolicy.ts";
@@ -42,11 +43,8 @@ export class FrontierService {
   }
 
   private entry(dag: Dag, task: Task, today: number): FrontierEntry {
-    const immediate = dag.dependents(task.id).filter((id) => {
-      const dependent = dag.get(id);
-      return dependent.status === "open" && dependent.blockedBy.every((b) => b === task.id || (dag.has(b) && dag.get(b).isDone()));
-    }).length;
-    return new FrontierEntry({ task, daysUntilDue: this.daysUntil(today, task.due), downstreamImpact: this.openDescendants(dag, task.id), immediatelyUnblocks: immediate });
+    const impact = new DependencyImpact();
+    return new FrontierEntry({ task, daysUntilDue: this.daysUntil(today, task.due), downstreamImpact: impact.downstream(dag, task.id).length, immediatelyUnblocks: impact.immediate(dag, task.id).length });
   }
 
   /** Ready tasks that contend for a resource the policy does not allow them to share. */
@@ -69,16 +67,6 @@ export class FrontierService {
       }
     }
     return out;
-  }
-
-  private openDescendants(dag: Dag, id: string): number {
-    let n = 0;
-    for (const d of dag.descendants(id)) {
-      if (!dag.get(d).isDone()) {
-        n += 1;
-      }
-    }
-    return n;
   }
 
   private daysUntil(todayMs: number, due: string | undefined): number {

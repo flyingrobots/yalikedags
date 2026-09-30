@@ -1,0 +1,41 @@
+/* Viewer adaptation. Palette source: https://github.com/chriskempson/tomorrow-theme
+   Original anchors are preserved; OKLCH lightness is bounded for UI text contrast.
+   Light Dracula/Monokai are viewer companions, not official upstream light variants. */
+:root[data-palette="tomorrow-eighties"][data-theme="dark"] {
+  --ref-theme-bg: #2d2d2d;
+  --ref-theme-fg: #cccccc;
+  --ref-theme-accent: #66cccc;
+  --ref-theme-ready: #99cc99;
+  --ref-theme-progress: #6699cc;
+  --ref-theme-blocked: #f2777a;
+  --ref-theme-unresolved: #cc99cc;
+  --canvas: var(--ref-theme-bg);
+  --surface: color-mix(in oklab, var(--ref-theme-bg) 96%, var(--ref-theme-fg));
+  --raised: color-mix(in oklab, var(--ref-theme-bg) 92%, var(--ref-theme-fg));
+  --ink: oklch(from var(--ref-theme-fg) max(l, .84) c h);
+  --muted: oklch(from var(--ref-theme-fg) max(.78, calc(l * .88)) c h);
+  --accent: oklch(from var(--ref-theme-accent) max(l, .76) c h);
+  --ready: oklch(from var(--ref-theme-ready) max(l, .76) c h);
+  --progress: oklch(from var(--ref-theme-progress) max(l, .76) c h);
+  --blocked: oklch(from var(--ref-theme-blocked) max(l, .80) min(c, .15) h);
+  --unresolved: oklch(from var(--ref-theme-unresolved) max(l, .76) c h);
+}
+:root[data-palette="tomorrow-eighties"][data-theme="light"] {
+  --ref-theme-bg: #ffffff;
+  --ref-theme-fg: #4d4d4c;
+  --ref-theme-accent: #3e999f;
+  --ref-theme-ready: #718c00;
+  --ref-theme-progress: #4271ae;
+  --ref-theme-blocked: #c82829;
+  --ref-theme-unresolved: #8959a8;
+  --canvas: var(--ref-theme-bg);
+  --surface: color-mix(in oklab, var(--ref-theme-bg) 96%, var(--ref-theme-fg));
+  --raised: color-mix(in oklab, var(--ref-theme-bg) 92%, var(--ref-theme-fg));
+  --ink: oklch(from var(--ref-theme-fg) min(l, .42) c h);
+  --muted: oklch(from var(--ref-theme-fg) min(.44, calc(l * 1.1)) c h);
+  --accent: oklch(from var(--ref-theme-accent) min(l, .44) c h);
+  --ready: oklch(from var(--ref-theme-ready) min(l, .44) c h);
+  --progress: oklch(from var(--ref-theme-progress) min(l, .44) c h);
+  --blocked: oklch(from var(--ref-theme-blocked) min(l, .44) c h);
+  --unresolved: oklch(from var(--ref-theme-unresolved) min(l, .44) c h);
+}

@@ -29,6 +29,7 @@ export interface TaskFields {
   /** Exact source estimate, a finite nonnegative number. Absent means unestimated. */
   effort?: number;
   assignee?: string;
+  assigneeId?: string;
   labels?: readonly string[];
   milestone?: string;
   /** ISO date, YYYY-MM-DD. */
@@ -54,6 +55,7 @@ export class Task {
   readonly priority: Priority | undefined;
   readonly effort: number | undefined;
   readonly assignee: string | undefined;
+  readonly assigneeId: string | undefined;
   readonly labels: readonly string[];
   readonly milestone: string | undefined;
   readonly due: string | undefined;
@@ -74,6 +76,7 @@ export class Task {
     this.priority = fields.priority;
     this.effort = fields.effort;
     this.assignee = fields.assignee;
+    this.assigneeId = fields.assigneeId;
     this.labels = unique(fields.labels);
     this.milestone = fields.milestone;
     this.due = fields.due;
@@ -118,6 +121,10 @@ export class Task {
     return new Task({ ...this.toFields(), ...changes });
   }
 
+  private assignmentFields(): Partial<TaskFields> {
+    return this.assigneeId === undefined ? {} : { assigneeId: this.assigneeId };
+  }
+
   /** The plain fields, for adapters that need to serialize. The class itself never does. */
   toFields(): TaskFields {
     const out: TaskFields = {
@@ -133,6 +140,7 @@ export class Task {
     if (this.parent !== undefined) { out.parent = this.parent; }
     if (this.priority !== undefined) { out.priority = this.priority; }
     if (this.effort !== undefined) { out.effort = this.effort; }
+    Object.assign(out, this.assignmentFields());
     if (this.assignee !== undefined) { out.assignee = this.assignee; }
     if (this.milestone !== undefined) { out.milestone = this.milestone; }
     if (this.due !== undefined) { out.due = this.due; }

@@ -49,11 +49,11 @@ describe("LinearTaskRepositoryAdapter", () => {
     expect(http.requests[0]!.headers["Authorization"]).toBe("lin_api_test_token_example");
     expect(http.requests[0]!.url).toBe("https://api.linear.app/graphql");
   });
-  test("asks for at most 50 issues per page, under Linear's query-complexity cap", async () => {
+  test("asks for 25 issues per page, under Linear's query-complexity cap", async () => {
     // oracle: derived from Linear's refusal on 2026-09-23: 100 per page scored 14091 against a cap of 10000.
     const http = new RecordingHttpAdapter([ok(projectLookup), ok(page([], null))]);
     await new LinearTaskRepositoryAdapter(http, "k", "Growth").load();
-    expect(http.requests[1]!.body).toContain("first: 50");
+    expect(http.requests[1]!.body).toContain("first: 25");
     expect(http.requests[1]!.body).not.toContain("first: 100");
   });
   test("follows pagination until hasNextPage is false", async () => {
@@ -84,4 +84,19 @@ describe("LinearTaskRepositoryAdapter", () => {
     const failure = await new LinearTaskRepositoryAdapter(http, "k", "Nope").load().then(() => undefined, (e: unknown) => e);
     expect(String(failure)).toMatch(/linear_project_not_found/);
   });
+});
+
+test("Linear reads public account provenance alongside assignments without exposing credentials", async () => {
+  const response = JSON.stringify({ data: {
+    viewer: { id: "u1", name: "Sam Example" }, organization: { id: "w1", name: "Example workspace" },
+    project: { id: "p1", name: "Growth", issues: { nodes: [issue({ assignee: { name: "Alex Example" } })], pageInfo: { hasNextPage: false } } },
+  } });
+  const http = new RecordingHttpAdapter([ok(projectLookup), ok(response)]);
+  const repo = new LinearTaskRepositoryAdapter(http, "test-private-key", "Growth");
+  const tasks = await repo.load();
+  expect(repo.account).toEqual({ user: { id: "u1", name: "Sam Example" }, workspace: { id: "w1", name: "Example workspace" }, project: { id: "p1", name: "Growth" } });
+  expect(tasks[0]?.assignee).toBe("Alex Example");
+  expect(JSON.stringify(repo.account)).not.toContain("test-private-key");
+  expect(http.requests[1]?.body).toContain("viewer { id name }");
+  expect(http.requests[1]?.body).toContain("organization { id name }");
 });
