@@ -4,6 +4,8 @@ All notable changes to this project are documented here. The format follows Keep
 
 ## [Unreleased]
 
+- Limit cycle refusal diagnostics to tasks on newly cyclic edges, excluding unrelated existing cycles.
+
 - Keep the latest selected snapshot in control of comparison results when file reads finish out of order.
 
 - Clear previous comparison rows when a selected snapshot cannot be read.
