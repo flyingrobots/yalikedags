@@ -23,6 +23,7 @@ export class ChangesController {
       this.list.replaceChildren(...changes.map((change) => this.row(change)));
       this.status.textContent = `${String(changes.length)} changes since ${repo.capturedAt ?? "an unknown capture time"} (${file.name}).`;
     } catch {
+      this.list.replaceChildren();
       this.status.textContent = "Could not compare: choose a valid yalikedags snapshot JSON file.";
     }
   }

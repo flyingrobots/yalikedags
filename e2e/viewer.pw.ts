@@ -486,3 +486,16 @@ test("ordinary reload uses layout changes made after a source refresh", async ({
   await expect(page.locator("body")).toHaveAttribute("data-ready", "true");
   await expect(page.getByRole("tab", { name: "Task table", exact: true })).toHaveCount(0);
 });
+
+test("failed snapshot comparison clears the previous results", async ({ page }) => {
+  // oracle: a rejected file must never display another file's comparison rows.
+  await page.goto(exported);
+  await workspaceAction(page, "Changes");
+  const input = page.getByLabel("Compare snapshot JSON");
+  await input.setInputFiles({ name: "valid.json", mimeType: "application/json", buffer: Buffer.from('{"schema":"yalikedags/snapshot/1","tasks":[]}') });
+  await expect(page.locator("#changes-status")).toContainText("valid.json");
+  expect(await page.locator("#changes-list li").count()).toBeGreaterThan(0);
+  await input.setInputFiles({ name: "invalid.json", mimeType: "application/json", buffer: Buffer.from("invalid") });
+  await expect(page.locator("#changes-status")).toContainText("Could not compare");
+  await expect(page.locator("#changes-list li")).toHaveCount(0);
+});
