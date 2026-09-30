@@ -6,6 +6,8 @@ yalikedags <command> [--project <name|id> | --tasklist <file> | --snapshot <file
 
 Every command except `key`, `help`, `plan` and `apply` takes exactly one source flag. Only `apply --confirm` writes anything.
 
+Boolean switches take no value: use `--confirm`, never `--confirm false` or `--confirm=false`. Omit a switch to leave it off. Value-taking flags require a value, and repeated flags are rejected.
+
 An unrecognised flag is a usage error, exit 2, and the parser suggests the flag you meant when one is obviously close. This matters most for the flags whose absence is the quiet answer: a mistyped `--allow-destructive` or `--prune` would otherwise read to the parser as a decision you never made.
 
 | Command | Purpose |
@@ -26,7 +28,7 @@ An unrecognised flag is a usage error, exit 2, and the parser suggests the flag 
 |---|---|
 | `--project <name or UUID>` | a Linear project. A name must match exactly one project (case-insensitive). Needs the key. |
 | `--tasklist <file>` | a Markdown task list: `- [ ] Title (depends on: Other, Another)`, `[x]` done, `[/]` or `[WIP]` in progress, two-space indent for parent and child |
-| `--snapshot <file>` | a snapshot written by `sync` (schema `yalikedags/snapshot/1`) |
+| `--snapshot <file>` | a snapshot written by `sync` (schema `yalikedags/snapshot/2`, or legacy `/1`) |
 | `--dag <file>` | the task-dag JSON schema: `{ "nodes": [ { "id", "title", "done", "blocked_by", "pri", "resources" } ], "resources": [...] }`. Its `resources` block also supplies the frontier's conflict policy. |
 
 ## Choosing a credential
@@ -71,7 +73,7 @@ Print only the frontier section of the report.
 
 `dot` is GraphViz input (`dot -Tsvg graph.dot > graph.svg`). `svg` is standalone and needs nothing. `text` is the report `audit` prints.
 
-`html` is the whole viewer as one file: the same page `serve` returns, with the CSS, the graph, the snapshot and the script inline. It opens from disk with no process behind it and fetches nothing, so it travels — to a laptop with no key on it, to somebody who does not have this tool, into a directory beside last week's copy. Its only outbound links are the per-card "Open in Linear" ones, which come from the source data. The page is a reading, fixed at the moment you rendered it; `serve` is the same page for as long as the process runs.
+`html` is the whole viewer as one file: the same page `serve` returns, with the CSS, the graph, the snapshot and the script inline. It opens from disk with no process behind it and fetches nothing, so it travels — to a laptop with no key on it, to somebody who does not have this tool, into a directory beside last week's copy. Its only outbound links are the per-card "Open in Linear" ones, which come from the source data. The page is a reading, fixed at the moment you rendered it; `serve` offers explicit source refresh.
 
 ## `serve`
 
@@ -79,7 +81,7 @@ Print only the frontier section of the report.
 |---|---|
 | `--port <n>` | default `0`, which lets the OS pick; the chosen URL is printed |
 
-Binds `127.0.0.1` only. Routes: `/`, `/snapshot.json`, `/graph.svg`, `/graph.dot`. Stop with Ctrl-C.
+Binds `127.0.0.1` only. Read routes: `/`, `/snapshot.json`, `/graph.svg`, `/graph.dot`. The viewer sends an explicit same-origin `POST /refresh` to reread the source; it does not poll or write to the tracker. Stop with Ctrl-C.
 
 ## `key`
 

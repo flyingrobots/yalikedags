@@ -88,7 +88,7 @@ describe("cli [medium]", () => {
     const proc = Bun.spawn(["bun", "src/cli.ts", "render", "--tasklist", "examples/example-tasklist.txt", "--format", "json"], { stdout: "pipe", stderr: "pipe", env: { ...process.env, LINEAR_API_KEY: "" } });
     const out = await new Response(proc.stdout).text();
     expect(await proc.exited).toBe(0);
-    expect(JSON.parse(out)).toMatchObject({ schema: "yalikedags/snapshot/1" });
+    expect(JSON.parse(out)).toMatchObject({ schema: "yalikedags/snapshot/2" });
   });
   // oracle: specified. `render --format html` is the documented way to get the page as a file.
   test("render --format html over the example task list emits one openable page", async () => {

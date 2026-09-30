@@ -14,9 +14,11 @@ describe("Task invariants", () => {
     expect(() => new Task({ id: "a", title: "a", parent: "a" })).toThrow(/own parent/);
     expect(() => new Task({ id: "a", title: "a", children: ["a"] })).toThrow(/own child/);
   });
-  test("effort is an integer from 0 to 3", () => {
-    expect(() => t("a", [], { effort: 4 })).toThrow(/effort/);
-    expect(() => t("a", [], { effort: 1.5 })).toThrow(/effort/);
+  test("effort preserves finite nonnegative source values", () => {
+    expect(t("a", [], { effort: 8 }).effort).toBe(8);
+    expect(() => t("a", [], { effort: -1 })).toThrow(/effort/);
+    expect(() => t("a", [], { effort: Infinity })).toThrow(/effort/);
+    expect(t("a", [], { effort: 1.5 }).effort).toBe(1.5);
     expect(t("a", [], { effort: 0 }).effort).toBe(0);
   });
   test("done and canceled both count as done; open and in-progress do not", () => {

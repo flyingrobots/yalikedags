@@ -9,13 +9,15 @@ export const UNDATED = 9999;
 const DAY_MS = 86_400_000;
 
 export class FrontierEntry {
-  constructor(
-    readonly task: Task,
-    /** Days from the clock's today until `due`; UNDATED when there is no due date. */
-    readonly daysUntilDue: number,
-    /** How many open tasks this one transitively unblocks. */
-    readonly unlocks: number,
-  ) {
+  readonly task: Task;
+  readonly daysUntilDue: number;
+  readonly downstreamImpact: number;
+  readonly immediatelyUnblocks: number;
+  constructor(f: { task: Task; daysUntilDue: number; downstreamImpact: number; immediatelyUnblocks: number }) {
+    this.task = f.task;
+    this.daysUntilDue = f.daysUntilDue;
+    this.downstreamImpact = f.downstreamImpact;
+    this.immediatelyUnblocks = f.immediatelyUnblocks;
     Object.freeze(this);
   }
 }
@@ -23,7 +25,7 @@ export class FrontierEntry {
 /**
  * The frontier is the ready antichain ordered for scheduling: hard-date
  * urgency first, then priority (1 is most urgent, unset sorts last), then
- * fan-out (how many tasks it unblocks), then age, then id. Priority never
+ * immediately unblocked tasks, downstream impact, age, then id. Priority never
  * overrides an edge; it only orders tasks that are all ready.
  */
 export class FrontierService {
@@ -35,23 +37,33 @@ export class FrontierService {
     const today = Date.parse(`${this.clock.today()}T00:00:00Z`);
     const entries = dag.tasks
       .filter((t) => this.state.stateOf(dag, t.id) === "ready")
-      .map((t) => new FrontierEntry(t, this.daysUntil(today, t.due), this.openDescendants(dag, t.id)));
+      .map((t) => this.entry(dag, t, today));
     return entries.sort((a, b) => this.compare(a, b));
+  }
+
+  private entry(dag: Dag, task: Task, today: number): FrontierEntry {
+    const immediate = dag.dependents(task.id).filter((id) => {
+      const dependent = dag.get(id);
+      return dependent.status === "open" && dependent.blockedBy.every((b) => b === task.id || (dag.has(b) && dag.get(b).isDone()));
+    }).length;
+    return new FrontierEntry({ task, daysUntilDue: this.daysUntil(today, task.due), downstreamImpact: this.openDescendants(dag, task.id), immediatelyUnblocks: immediate });
   }
 
   /** Ready tasks that contend for a resource the policy does not allow them to share. */
   resourceConflicts(dag: Dag, policy: ResourcePolicy): Map<string, string[]> {
     const holders = new Map<string, string[]>();
-    for (const entry of this.frontier(dag)) {
-      for (const r of entry.task.resources) {
-        holders.set(r, [...(holders.get(r) ?? []), entry.task.id]);
+    const ready = new Set(this.frontier(dag).map((entry) => entry.task.id));
+    for (const task of dag.tasks.filter((t) => ready.has(t.id) || t.isInProgress())) {
+      for (const r of task.resources) {
+        holders.set(r, [...(holders.get(r) ?? []), task.id]);
       }
     }
     const out = new Map<string, string[]>();
     for (const [resource, tasks] of holders) {
-      const message = policy.conflict(resource, tasks.length);
+      const active = tasks.filter((id) => dag.get(id).isInProgress()).length;
+      const message = policy.conflict(resource, tasks.length, active);
       if (message !== undefined) {
-        for (const id of tasks) {
+        for (const id of tasks.filter((taskId) => ready.has(taskId))) {
           out.set(id, [...(out.get(id) ?? []), message]);
         }
       }
@@ -80,7 +92,8 @@ export class FrontierService {
     return (
       a.daysUntilDue - b.daysUntilDue ||
       (a.task.priority ?? 5) - (b.task.priority ?? 5) ||
-      b.unlocks - a.unlocks ||
+      b.immediatelyUnblocks - a.immediatelyUnblocks ||
+      b.downstreamImpact - a.downstreamImpact ||
       (a.task.createdAt ?? "").localeCompare(b.task.createdAt ?? "") ||
       a.task.id.localeCompare(b.task.id)
     );

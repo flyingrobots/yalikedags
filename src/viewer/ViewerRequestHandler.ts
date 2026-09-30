@@ -4,6 +4,8 @@ import { SvgRendererAdapter } from "../adapters/output/SvgRendererAdapter.ts";
 import { DotRendererAdapter } from "../adapters/output/DotRendererAdapter.ts";
 import { viewerPage } from "./ViewerPage.ts";
 
+import type { ViewerOptions } from "./ViewerMetadata.ts";
+
 export interface ViewerResponse {
   status: number;
   contentType: string;
@@ -19,14 +21,16 @@ export class ViewerRequestHandler {
   private readonly svg = new SvgRendererAdapter();
   private readonly dot = new DotRendererAdapter();
 
-  constructor(private readonly current: () => Analysis) {}
+  constructor(private readonly current: () => Analysis, private readonly options: () => ViewerOptions = () => ({})) {}
 
   handle(path: string): ViewerResponse {
     const a = this.current();
     switch (path) {
       case "/":
       case "/index.html":
-        return { status: 200, contentType: "text/html; charset=utf-8", body: viewerPage(a, this.svg.render(a), this.json.render(a)) };
+        return { status: 200, contentType: "text/html; charset=utf-8", body: viewerPage(a, { svg: this.svg.render(a), snapshotJson: this.json.render(a) }, this.options()) };
+      case "/popout.html":
+        return { status: 200, contentType: "text/html; charset=utf-8", body: '<!doctype html><html lang="en"><head><meta charset="utf-8"><title>yalikedags · View</title></head><body></body></html>' };
       case "/snapshot.json":
         return { status: 200, contentType: this.json.contentType, body: this.json.render(a) };
       case "/graph.svg":

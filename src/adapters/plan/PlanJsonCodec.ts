@@ -30,8 +30,8 @@ function nullableNumber(o: Rec, key: string): number | null {
   if (v === null || v === undefined) {
     return null;
   }
-  if (typeof v !== "number") {
-    throw new Error(`plan: ${key} must be a number or null`);
+  if (typeof v !== "number" || !Number.isFinite(v) || v < 0) {
+    throw new Error(`plan: ${key} must be a finite nonnegative number or null`);
   }
   return v;
 }

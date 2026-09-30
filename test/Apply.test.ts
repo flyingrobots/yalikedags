@@ -150,7 +150,7 @@ describe("ApplyService", () => {
     expect(allowed.writes).toEqual([{ method: "removeBlockingRelation", args: ["a", "b"] }]);
   });
 
-  test("a skipped plan is complete: nothing was attempted, so nothing is outstanding", async () => {
+  test("a skipped plan is incomplete: the reviewed changes have not all landed", async () => {
     const before = new Dag([t("a"), t("b", ["a"])]);
     const receipt = await new ApplyService().apply({
       plan: planOf([new RemoveBlockingRelation("a", "b")]),
@@ -159,7 +159,7 @@ describe("ApplyService", () => {
       reread: () => Promise.resolve(before),
       at: "x",
     });
-    expect(receipt.complete).toBe(true);
+    expect(receipt.complete).toBe(false);
   });
 
   test("when the source cannot be read back, the receipt is unverified and never complete", async () => {

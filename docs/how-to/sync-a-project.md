@@ -22,7 +22,7 @@ loaded 84 tasks from Linear project example-project
 wrote output/example-project.json
 ```
 
-Any `warning:` lines name a card and the coercion made for it, for example an estimate above 3 recorded as 3.
+Estimates are preserved exactly, including fractions and values above 3, without coercion warnings. Any `warning:` lines name source uncertainty, such as an unknown status whose readiness remains unresolved.
 
 ## Verify
 

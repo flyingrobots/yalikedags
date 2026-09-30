@@ -33,13 +33,13 @@ export class ResourcePolicy {
   }
 
   /** The conflict message for `count` ready contenders, or undefined when the mode permits it. */
-  conflict(id: string, count: number): string | undefined {
+  conflict(id: string, count: number, active = 0): string | undefined {
     const r = this.rule(id);
     if (r.mode === "exclusive" && count > 1) {
-      return `${id} (exclusive, ${String(count)} ready contenders)`;
+      return `${id} (exclusive, ${String(count - active)} ready contenders, ${String(active)} in-progress holders)`;
     }
     if (r.mode === "capacity" && count > r.capacity) {
-      return `${id} (capacity ${String(r.capacity)}, ${String(count)} ready contenders)`;
+      return `${id} (capacity ${String(r.capacity)}, ${String(count - active)} ready contenders, ${String(active)} in-progress holders)`;
     }
     return undefined;
   }

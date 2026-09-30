@@ -27,6 +27,6 @@ export class HtmlRendererAdapter implements RendererPort {
   private readonly svg = new SvgRendererAdapter();
 
   render(a: Analysis): string {
-    return viewerPage(a, this.svg.render(a), this.json.render(a));
+    return viewerPage(a, { svg: this.svg.render(a), snapshotJson: this.json.render(a) });
   }
 }

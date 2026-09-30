@@ -36,6 +36,8 @@ export const KNOWN_FLAGS: ReadonlySet<string> = new Set([
   "tasklist",
 ]);
 
+const BOOLEAN_FLAGS = new Set(["allow-destructive", "check", "confirm", "groups-as-milestones", "help", "json", "no-estimates", "no-milestones", "prune", "set", "strict"]);
+
 export class Args {
   readonly command: string | undefined;
   private readonly flags = new Map<string, string | true>();
@@ -52,14 +54,20 @@ export class Args {
       if (!known.has(name)) {
         throw new Error(`usage: unknown flag --${name}${Args.nearest(name, known)}`);
       }
+      if (this.flags.has(name)) { throw new Error(`usage: duplicate flag --${name}`); }
       const next = rest[i + 1];
-      if (next === undefined || next.startsWith("--")) {
+      if (BOOLEAN_FLAGS.has(name)) {
         this.flags.set(name, true);
       } else {
+        if (!Args.isValue(next)) { throw new Error(`usage: --${name} needs a value`); }
         this.flags.set(name, next);
         i += 1;
       }
     }
+  }
+
+  private static isValue(value: string | undefined): value is string {
+    return value !== undefined && value.length > 0 && !value.startsWith("--");
   }
 
   /**

@@ -4,6 +4,76 @@ All notable changes to this project are documented here. The format follows Keep
 
 ## [Unreleased]
 
+- Discard graph drag state when the pointer returns after releasing outside the SVG.
+
+- Resolve critical-path ties in stable task-id order so reordered snapshots do not report false chain changes.
+
+- Confirm successful refresh comparisons with no changes instead of showing the initial comparison prompt.
+
+- Limit cycle refusal diagnostics to tasks on newly cyclic edges, excluding unrelated existing cycles.
+
+- Keep the latest selected snapshot in control of comparison results when file reads finish out of order.
+
+- Clear previous comparison rows when a selected snapshot cannot be read.
+
+- Export snapshot schema 2 for unknown statuses and exact estimates; continue reading legacy schema 1 files.
+
+- Consume refresh restoration state once so later reloads honor the latest saved layout.
+
+- Keep DAG nodes readable when reopening a panel that was closed in the saved layout.
+
+- Give unresolved nodes a readable pale yellow fill in standalone SVG exports.
+
+- Report cancellation as a status change in snapshot comparisons; only entering done counts as completion.
+
+- Add README subheadings for the overview, Linear writes, team use, offline sharing, viewer layout, and bundled example.
+
+- Add active-view pop-out windows to the local viewer, preserve cross-window interactions, and redock views when windows close or the parent reloads.
+
+- Add repeatable Expand view / Restore view controls, including temporary expansion of sidebar views.
+
+- Make inspector views a native collapsible Dockview sidebar and preserve sidebar placement and collapse state.
+
+- Show a centered Reset layout button when all views are closed, and preserve intentionally empty layouts on reload.
+
+- Remove the status strip; keep capture/quality details, Refresh source, and Reset layout in Views, with refresh failures visible in the footer.
+
+- Add a persistent Hide banner option; keep the Views menu reachable in the footer while the banner is hidden.
+
+- Replace the settings cog with a dashboard icon labeled Views menu.
+
+- Move view and layout actions into a header cog dropdown with keyboard navigation, focus restoration, and outside-click dismissal.
+
+- Remove the one-shot Split views action; arrange multiple views by dragging their tabs instead.
+
+- Match task-table row colors to DAG node states, preserving state color when a row is selected.
+
+- Fix sticky table headers by giving each table an unpadded scroll viewport; filter controls and introductions remain outside it.
+
+- Replace speculative scaling guidance with current limits and a reproducible measurement approach.
+
+- Add capture and partial-analysis notices, manual refresh preserving workspace state, and local snapshot comparison for task status, blockers, and critical chains.
+
+- Add a sortable, searchable task table with state, assignee, milestone, and label filters while retaining the wave grid.
+
+- Add a Dockview workspace with shared selection, search, keyboard navigation, graph controls, persistent layouts, and offline browser coverage.
+
+- Preserve source capture timestamps and warnings across snapshot round trips, with explicit unknown legacy capture times.
+
+- Include in-progress resource holders when reporting contention for ready work.
+
+- Separate immediate unblocking from downstream impact in frontier ranking and reports.
+
+- Keep external blockers and unknown statuses unresolved, and reject malformed or truncated Linear connections instead of trusting a partial graph.
+
+- Preserve exact raw estimates, including fractions, through analysis and mutation verification; remove scale-specific split heuristics.
+
+- Reject boolean flag values, missing option values, and duplicate CLI switches.
+
+- Require exactly `YALIKEDAGS_LIVE=1` for live tests and guard teardown when fixture setup fails.
+
+- Fix cycle safety across skipped/failed removals, attempted additions, and final verification. Skipped changes leave receipts incomplete.
+
 ### Added
 - **The grid view.** The viewer now has two views of one selection. Graph is what it was. Grid is workstreams down the side and waves across the top, one card per open task, with a *shared prerequisites* row first for the gatekeepers, which sit in a wave but in no workstream. Reading down a column shows what could run in parallel this round; reading across a row shows one workstream's order of work; an empty cell is a workstream with nothing to do in that round. Cards carry the same state, critical-path and gatekeeper marks as the graph nodes, and selecting a task in either view highlights its ancestors and descendants in both. The grid is computed once by `GridService` from the waves, gatekeepers and workstreams the analysis already has, and shipped as a `grid` field in the snapshot JSON; the page draws the table from that data, as it already did for the frontier and the findings. The one-file export carries the same data, and a test pins that every open task lands in exactly one cell.
 - **`render --format html`: the viewer as one self-contained file.** The same page `serve` returns, from the same function, with the CSS, the graph, the snapshot and the script inline. It opens from disk with no process behind it and fetches nothing, so it travels: to a laptop with no key on it, to somebody who does not have this tool, or into a directory beside last week's copy. Its only outbound links are the per-card "Open in Linear" ones, which come from the source data. A test asserts the file and the server's `/` are byte for byte identical, so neither can drift; another asserts the page requests nothing external. `--format`'s refusal message now derives from the registry rather than repeating it in prose.
@@ -16,7 +86,7 @@ All notable changes to this project are documented here. The format follows Keep
 - A live test tier and an idempotent fixture provisioner (`scripts/live-fixture.ts`, `test/live/`, `bun run test:live`). The fixture is eight issues, two milestones and a team estimate scale, each present for a named reason; provisioning is also a reset, so a run leaves the workspace where it found it. It is fenced by three things: its own credential name (`YALIKEDAGS_LIVE_KEY`, in the keychain or the environment, deliberately never `LINEAR_API_KEY`), a sentinel the project name must contain, and a prefix every issue title it will touch must start with. The key resolves from the keychain, and the team and project from a flag, the environment, or the manifest, so a shell that exported nothing but the `YALIKEDAGS_LIVE` opt-in switch can still run it.
 - TypeScript on bun rewrite of the Python prototype, which remains in the first commit as history. Zero Python.
 - Binding standards under `docs/standards/`: documentation (reader-task), TypeScript code, testing.
-- Domain: `Task` (validated, frozen, effort 0 to 3, Linear-shaped priority) and `Dag` (blockedBy as the only stored edge; derived dependents, closures, Kahn order, Tarjan cycles, transitive redundancy). `ResourcePolicy` for exclusive, capacity, advisory resources.
+- Domain: `Task` (validated, frozen, finite nonnegative raw effort, Linear-shaped priority) and `Dag` (blockedBy as the only stored edge; derived dependents, closures, Kahn order, Tarjan cycles, transitive redundancy). `ResourcePolicy` for exclusive, capacity, advisory resources.
 - Services: state, frontier (due, priority, fan-out, age, id) with resource conflicts, waves and gatekeepers and MECE workstreams, critical path by depth and by summed effort, audit (isolated, redundant, stale and dangling blockers, cycles, split candidates with the observation that would kill each), layered layout, and `Analysis` composing them.
 - Input adapters: Markdown task lists, snapshot JSON (`yalikedags/snapshot/1`), and Linear over GraphQL (read-only; pages at 50 under Linear's complexity cap; blocks relations in both directions; named refusals).
 - Output adapters: snapshot JSON, GraphViz DOT, standalone SVG, plain-text report.

@@ -217,7 +217,7 @@ Diagrams are editorial tools, not ornaments. Use one when spatial, temporal, rel
 
 Write like a competent teammate: direct, precise, approachable. `you` for the reader's actions; the command or component name for the system's. Imperative for procedures. Present tense. No hype, no apology. Reserve MUST, SHOULD, MAY for this document and its siblings; user pages use plain direct language.
 
-Sentence case headings; task-oriented headings for tutorials and how-tos; exact names for reference. Bold for exact visible labels; inline code for commands, options, files, fields, literal values, error ids. Descriptive link text. One canonical term per concept: **frontier** (the ready antichain), **blocker** (an issue in `blockedBy`), **dependent** (the inverse), **workstream** (a connected piece after gatekeepers are cut), **gatekeeper** (an open task with two or more open dependents), **effort** (0 to 3). Copy Linear's labels exactly.
+Sentence case headings; task-oriented headings for tutorials and how-tos; exact names for reference. Bold for exact visible labels; inline code for commands, options, files, fields, literal values, error ids. Descriptive link text. One canonical term per concept: **frontier** (the ready antichain), **blocker** (an issue in `blockedBy`), **dependent** (the inverse), **workstream** (a connected piece after gatekeepers are cut), **gatekeeper** (an open task with two or more open dependents), **effort** (the exact source estimate). Copy Linear's labels exactly.
 
 Callouts: Note, Important, Caution, Warning, in that order of severity, and not for emphasis. Purposeful overlap across page types is fine. Template voice ("Think of this as ...", "Why this matters ...") is not.
 

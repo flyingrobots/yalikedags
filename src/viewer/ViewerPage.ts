@@ -1,106 +1,27 @@
 import type { Analysis } from "../core/services/Analysis.ts";
-import { escapeXml } from "../adapters/output/SvgRendererAdapter.ts";
+import { escapeXml as esc } from "../adapters/output/SvgRendererAdapter.ts";
+import { viewerScript, viewerStyles } from "./generated/assets.ts";
+import { ViewerPanels } from "./ViewerPanels.ts";
 
-const STYLE = `
-html,body{margin:0;height:100%;font:13px Helvetica,Arial,sans-serif;color:#111;background:#fafafa}
-#wrap{display:grid;grid-template-columns:1fr 340px;height:100%}
-#main{display:flex;flex-direction:column;min-width:0;min-height:0}
-#views{padding:6px 12px;border-bottom:1px solid #ddd;background:#f6f6f6}
-#views button{font:inherit;padding:2px 10px;margin-right:6px;border:1px solid #999;border-radius:4px;background:#fff;cursor:pointer}
-#views button.on{background:#06c;color:#fff;border-color:#06c}
-#graph{flex:1;min-height:0;overflow:hidden;cursor:grab;background:#fff}
-#graph svg{width:100%;height:100%}
-#grid{flex:1;min-height:0;overflow:auto;padding:12px;background:#fff}
-#wrap[data-view=graph] #grid{display:none}#wrap[data-view=grid] #graph{display:none}
-#grid-table{border-collapse:collapse;width:100%;table-layout:fixed}#grid-table th,#grid-table td{border:1px solid #ddd;vertical-align:top;padding:4px;text-align:left;overflow-wrap:anywhere}
-#grid-table thead th{position:sticky;top:0;background:#f6f6f6}#grid-table tbody th{background:#f6f6f6;font-weight:600}
-#grid-table tr.shared th{font-style:italic}
-.card{display:block;padding:2px 6px;margin:2px 0;border:1.5px solid #333;border-radius:4px;cursor:pointer}
-.card.ready{background:#d1ecf1}.card.blocked{background:#f8d7da}.card.in-progress{background:#fff3cd}
-.card.critical{border-width:3px}.card.gatekeeper{border-style:dashed}.card.dim{opacity:.18}.card.selected{outline:3px solid #06c}
-#side{border-left:1px solid #ddd;padding:12px;overflow:auto;background:#f6f6f6}
-#side h1{font-size:15px;margin:0 0 8px}#side dt{font-weight:bold;margin-top:8px}#side dd{margin:0}
-.node{cursor:pointer}.node.dim,.edge.dim{opacity:.18}.node.selected rect{stroke:#06c;stroke-width:3}
-.legend span{display:inline-block;padding:1px 6px;margin:2px;border:1px solid #333;border-radius:4px}
-.legend .ready{background:#d1ecf1}.legend .blocked{background:#f8d7da}.legend .in-progress{background:#fff3cd}.legend .done{background:#d4edda}
-kbd{border:1px solid #999;border-radius:3px;padding:0 4px;background:#eee}
-`;
+import { viewerMetadata } from "./ViewerMetadata.ts";
+import type { ViewerOptions } from "./ViewerMetadata.ts";
 
-const SCRIPT = `
-(function(){
-  var snap = JSON.parse(document.getElementById('snapshot').textContent);
-  var byId = {}; snap.tasks.forEach(function(t){ byId[t.id] = t; });
-  var up = {}, down = {};
-  snap.edges.forEach(function(e){ (up[e.to] = up[e.to] || []).push(e.from); (down[e.from] = down[e.from] || []).push(e.to); });
-  function closure(id, m){ var out = {}, st = [id]; while (st.length) { var c = st.pop(); (m[c] || []).forEach(function(n){ if (!out[n]) { out[n] = 1; st.push(n); } }); } return out; }
-  var wrap = document.getElementById('wrap');
-  document.querySelectorAll('#views button').forEach(function(b){ b.addEventListener('click', function(){ wrap.setAttribute('data-view', b.getAttribute('data-view')); document.querySelectorAll('#views button').forEach(function(o){ o.classList.toggle('on', o === b); }); }); });
-  var svg = document.querySelector('#graph svg'); var vb = svg.getAttribute('viewBox').split(' ').map(Number);
-  function setVB(){ svg.setAttribute('viewBox', vb.join(' ')); }
-  var drag = null;
-  svg.addEventListener('mousedown', function(e){ drag = {x:e.clientX, y:e.clientY}; });
-  window.addEventListener('mouseup', function(){ drag = null; });
-  window.addEventListener('mousemove', function(e){ if (!drag) return; var k = vb[2] / svg.clientWidth; vb[0] -= (e.clientX - drag.x) * k; vb[1] -= (e.clientY - drag.y) * k; drag = {x:e.clientX, y:e.clientY}; setVB(); });
-  svg.addEventListener('wheel', function(e){ e.preventDefault(); var f = e.deltaY > 0 ? 1.1 : 0.9; var r = svg.getBoundingClientRect(); var px = vb[0] + (e.clientX - r.left) / r.width * vb[2]; var py = vb[1] + (e.clientY - r.top) / r.height * vb[3]; vb[2] *= f; vb[3] *= f; vb[0] = px - (e.clientX - r.left) / r.width * vb[2]; vb[1] = py - (e.clientY - r.top) / r.height * vb[3]; setVB(); }, {passive:false});
-  function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
-  function clear(){ document.querySelectorAll('.node,.edge,.card').forEach(function(n){ n.classList.remove('dim'); n.classList.remove('selected'); }); document.getElementById('detail').innerHTML = '<p>Nothing selected.</p>'; }
-  function select(id){
-    var t = byId[id]; if (!t) return; var anc = closure(id, up), desc = closure(id, down);
-    document.querySelectorAll('.node,.card').forEach(function(n){ var nid = n.getAttribute('data-id'); n.classList.toggle('dim', !(nid === id || anc[nid] || desc[nid])); n.classList.toggle('selected', nid === id); });
-    document.querySelectorAll('.edge').forEach(function(p){ var f = p.getAttribute('data-from'), to = p.getAttribute('data-to'); var keep = (f === id || anc[f]) && (to === id || anc[to]) || (f === id || desc[f]) && (to === id || desc[to]); p.classList.toggle('dim', !keep); });
-    var rows = [['key', t.key], ['state', t.state], ['status', t.status], ['priority', t.priority], ['effort', t.effort], ['assignee', t.assignee], ['milestone', t.milestone], ['workstream', t.workstream], ['due', t.due], ['blocked by', (t.blockedBy||[]).map(function(b){ return byId[b] ? byId[b].key : b; }).join(', ')], ['blocks', (down[id]||[]).map(function(b){ return byId[b].key; }).join(', ')], ['labels', (t.labels||[]).join(', ')]];
-    var html = '<h2 style="font-size:14px">' + esc(t.key) + ' ' + esc(t.title) + '</h2><dl>' + rows.filter(function(r){ return r[1] !== undefined && r[1] !== null && r[1] !== ''; }).map(function(r){ return '<dt>' + esc(r[0]) + '</dt><dd>' + esc(r[1]) + '</dd>'; }).join('') + '</dl>';
-    if (t.url) { html += '<p><a href="' + esc(t.url) + '" target="_blank" rel="noopener">Open in Linear</a></p>'; }
-    if (t.description) { html += '<pre style="white-space:pre-wrap;font:12px monospace">' + esc(t.description) + '</pre>'; }
-    document.getElementById('detail').innerHTML = html;
-  }
-  function card(id){ var t = byId[id]; var cls = ['card', t.state, t.critical ? 'critical' : '', snap.gatekeepers.indexOf(id) >= 0 ? 'gatekeeper' : ''].filter(Boolean).join(' '); return '<span class="' + cls + '" data-id="' + esc(id) + '" title="' + esc(t.title) + '"><b>' + esc(t.key) + '</b> ' + esc(t.title) + '</span>'; }
-  function gridHtml(g){
-    if (!g || g.waves === 0) return '<p>Nothing open.</p>';
-    var heads = ''; for (var i = 0; i < g.waves; i++) { heads += '<th>Wave ' + (i + 1) + '</th>'; }
-    var rows = g.rows.map(function(r){ var label = r.workstream === null ? 'shared prerequisites' : 'workstream ' + (byId[r.workstream] ? byId[r.workstream].key : r.workstream); return '<tr' + (r.workstream === null ? ' class="shared"' : '') + '><th>' + esc(label) + '</th>' + r.cells.map(function(c){ return '<td>' + c.map(card).join('') + '</td>'; }).join('') + '</tr>'; }).join('');
-    return '<table id="grid-table"><thead><tr><th></th>' + heads + '</tr></thead><tbody>' + rows + '</tbody></table>';
-  }
-  document.getElementById('grid').innerHTML = gridHtml(snap.grid);
-  document.querySelectorAll('.node,.card').forEach(function(n){ n.addEventListener('click', function(e){ e.stopPropagation(); select(n.getAttribute('data-id')); }); });
-  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') clear(); });
-  document.getElementById('frontier').innerHTML = snap.frontier.map(function(f){ var t = byId[f.task]; return '<li><a href="#" data-id="' + esc(f.task) + '">' + esc(t.key) + '</a> ' + esc(t.title) + ' <small>unlocks ' + f.unlocks + (f.conflicts.length ? ' CONFLICT ' + esc(f.conflicts.join('; ')) : '') + '</small></li>'; }).join('');
-  document.getElementById('findings').innerHTML = snap.findings.map(function(f){ var t = byId[f.task]; return '<li><b>' + esc(f.kind) + '</b> ' + (t ? '<a href="#" data-id="' + esc(f.task) + '">' + esc(t.key) + '</a> ' : '') + esc(f.detail) + '</li>'; }).join('');
-  document.getElementById('side').addEventListener('click', function(e){ var a = e.target.closest('a[data-id]'); if (a) { e.preventDefault(); select(a.getAttribute('data-id')); } });
-})();
-`;
-
-/**
- * The viewer page: inline CSS, the server-rendered SVG, the snapshot JSON in a
- * data block, and one inline script that draws the grid, the frontier and the
- * findings from that data and handles the view switch, pan, zoom, selection,
- * and ancestor/descendant highlighting. The server ships data; the page draws. Nothing is
- * fetched. The token never reaches this page; the local process talks to
- * Linear.
- *
- * Two views of one selection: the graph (how the work fits together) and
- * the grid (workstreams down the side, waves across the top: who could be
- * doing what, in which round). Selecting a task in either highlights its
- * ancestors and descendants in both.
- */
-export function viewerPage(a: Analysis, svg: string, snapshotJson: string): string {
-  const title = `${a.source} as of ${a.asOf}`;
+/** Both serve and HTML export carry the same bundled, offline workspace. */
+export function viewerPage(a: Analysis, assets: { svg: string; snapshotJson: string }, options: ViewerOptions = {}): string {
   return `<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><title>${escapeXml(title)}</title>
-<style>${STYLE}</style></head><body>
-<div id="wrap" data-view="graph"><div id="main">
-<nav id="views"><button type="button" data-view="graph" class="on">Graph</button><button type="button" data-view="grid">Grid</button></nav>
-<div id="graph">${svg}</div>
-<div id="grid"></div>
-</div>
-<aside id="side"><h1>${escapeXml(title)}</h1>
-<div class="legend"><span class="ready">ready</span><span class="blocked">blocked</span><span class="in-progress">in progress</span><span class="done">done</span> thick border: critical path; dashed: gatekeeper</div>
-<p>Click a node or a card. Drag to pan, wheel to zoom, <kbd>Esc</kbd> to clear. The grid is workstreams down the side and waves across the top; the shared row is the gatekeepers.</p>
-<div id="detail"><p>Nothing selected.</p></div>
-<h2 style="font-size:13px">Frontier</h2><ol id="frontier"></ol>
-<h2 style="font-size:13px">Findings</h2><ul id="findings"></ul>
-</aside></div>
-<script id="snapshot" type="application/json">${snapshotJson.replace(/</g, "\\u003c")}</script>
-<script>${SCRIPT}</script></body></html>
-`;
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${esc(a.source)} · yalikedags</title><style>${viewerStyles.replace(/<\/style/gi, "<\\/style")}</style></head>
+<body data-source="${esc(a.source)}"><header id="page-banner" class="app-header"><div class="brand">yalikedags<span>DEPENDENCY WORKSPACE</span></div>
+<div class="project"><strong>${esc(a.source)}</strong><span>${String(a.dag.size)} tasks · ${String(a.frontier.length)} ready · as of ${esc(a.asOf)}</span></div>
+<div class="search"><label class="sr-only" for="search">Find a task</label><input id="search" type="search" placeholder="Find a task by key, title or assignee…" autocomplete="off"><div id="search-results" hidden></div></div><div id="workspace-controls" class="workspace-controls"><button id="workspace-views" class="workspace-views" aria-label="Views menu" title="Views and layout" aria-expanded="false" aria-controls="workspace-menu"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="7" height="18" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></button><nav id="workspace-menu" class="workspace-menu" aria-label="Workspace views" hidden>
+<button data-panel="graph" aria-label="Show DAG">DAG</button><button data-panel="grid" aria-label="Show wave grid">Wave grid</button>
+<button data-panel="table" aria-label="Show task table">Task table</button><button data-panel="changes">Changes</button>
+<button data-panel="details">Task details</button><button data-panel="ready">Ready work</button><button data-panel="findings">Findings <span class="count">${String(a.findings.length)}</span></button>
+<button id="filter-summary" data-panel="table" hidden></button><hr><button data-action="reset">Reset layout</button><button id="toggle-banner">Hide banner</button><hr>${viewerMetadata(a, options)}</nav></div></header>
+
+<main id="workspace" aria-label="Task workspace"></main><footer><span id="selection-status" role="status">Select a task to trace its dependencies.</span><span>Drag tabs to arrange views · Esc clears selection</span><span id="viewer-notice" role="status" hidden></span><div id="compact-controls"></div></footer>
+${new ViewerPanels(a, options.changes).render(assets.svg)}
+<noscript>This viewer needs JavaScript to display its panels. The snapshot data is embedded in this file.</noscript>
+<script id="snapshot" type="application/json">${assets.snapshotJson.replace(/</g, "\\u003c")}</script>
+<script>${viewerScript.replace(/<\/script/gi, "<\\/script")}</script></body></html>`;
 }

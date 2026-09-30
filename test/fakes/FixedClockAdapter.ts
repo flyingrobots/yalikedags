@@ -6,4 +6,5 @@ export class FixedClockAdapter implements ClockPort {
   today(): string {
     return this.date;
   }
+  now(): string { return `${this.date}T12:00:00.000Z`; }
 }

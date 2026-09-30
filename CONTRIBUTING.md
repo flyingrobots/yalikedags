@@ -3,6 +3,7 @@
 Tests are the spec. Write the failing test first, then the code, then `bun run check`.
 
 - `bun install` once. `bun test` runs the hermetic suite; `bun run lint` runs ESLint (strict, every warning is an error) and `tsc --noEmit`; `bun run check` runs all of it.
+- Viewer changes: `bun run build:viewer`, then `bunx playwright install chromium` once and `bun run test:browser`. Browser TypeScript and CSS live in `src/viewer/browser/`; the ignored generated bundle is rebuilt by `bun install` and `bun run check`.
 - `bun run test:live` runs the tier that talks to a real Linear workspace. It is skipped by default and needs its own fixture: see [live testing](docs/contributing/live-testing.md). Never point it at a workspace holding real work.
 - Hooks are plain shell scripts in `scripts/hooks/`. Enable them with `git config --local core.hooksPath scripts/hooks`. Pre-commit runs lint, the docs lint and the clean-room check; pre-push runs the tests.
 - **Nothing from the project you happen to be using this on lands here.** `bun run clean-room` refuses a tracked file carrying an issue key of four digits or more, or a tracker URL with a real workspace slug. Examples use short keys like `PRO-1` and the project placeholder `example-project`; invent your numbers rather than pasting a real audit's, because a task count is a fingerprint too.

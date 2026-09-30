@@ -3,7 +3,7 @@ import type { Priority, TaskFields, TaskStatus } from "../../core/domain/Task.ts
 import type { TaskRepositoryPort } from "../../ports/TaskRepositoryPort.ts";
 import { SNAPSHOT_SCHEMA } from "../output/JsonSnapshotAdapter.ts";
 
-const STATUSES: readonly TaskStatus[] = ["open", "in-progress", "done", "canceled"];
+const STATUSES: readonly TaskStatus[] = ["open", "in-progress", "done", "canceled", "unknown"];
 const PRIORITIES: readonly Priority[] = [1, 2, 3, 4];
 
 function isRecord(x: unknown): x is Record<string, unknown> {
@@ -92,6 +92,8 @@ export function decodeTask(raw: unknown): Task {
 }
 
 export class JsonSnapshotRepositoryAdapter implements TaskRepositoryPort {
+  capturedAt: string | null = null;
+  warnings: string[] = [];
   constructor(
     private readonly text: string,
     private readonly name: string,
@@ -103,9 +105,12 @@ export class JsonSnapshotRepositoryAdapter implements TaskRepositoryPort {
 
   load(): Promise<readonly Task[]> {
     const parsed: unknown = JSON.parse(this.text);
-    if (!isRecord(parsed) || parsed["schema"] !== SNAPSHOT_SCHEMA) {
+    if (!isRecord(parsed) || (parsed["schema"] !== SNAPSHOT_SCHEMA && parsed["schema"] !== "yalikedags/snapshot/1")) {
       return Promise.reject(new Error(`snapshot: expected schema ${SNAPSHOT_SCHEMA}`));
     }
+    const capturedAt = str(parsed, "capturedAt");
+    this.capturedAt = capturedAt !== undefined && Number.isFinite(Date.parse(capturedAt)) ? capturedAt : null;
+    this.warnings = strList(parsed, "warnings");
     const tasks = parsed["tasks"];
     if (!Array.isArray(tasks)) {
       return Promise.reject(new Error("snapshot: tasks must be a list"));

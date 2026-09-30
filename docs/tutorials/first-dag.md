@@ -23,8 +23,8 @@ loaded 12 tasks from task list examples/example-tasklist.txt
 task list examples/example-tasklist.txt, as of 2026-09-23: 12 tasks (2 done, 2 ready, 7 blocked, 1 in-progress)
 
 frontier (2 ready tasks, most urgent first):
-  implement-core-dag-builder  Implement core DAG builder  unlocks:7
-  write-documentation  Write documentation  unlocks:2
+  implement-core-dag-builder  Implement core DAG builder  immediately-unblocks:2  downstream-impact:7
+  write-documentation  Write documentation  immediately-unblocks:1  downstream-impact:2
 
 waves: [implement-core-dag-builder, write-documentation] -> [add-github-issue-parser, add-task-list-parser, create-example-files, implement-state-determination-logic] -> [create-graphviz-dot-generator] -> [add-cli-interface] -> [add-unit-tests] -> [deploy-to-production]
 gatekeepers: implement-core-dag-builder
@@ -38,7 +38,7 @@ findings (1):
   stale-blocker  implement-core-dag-builder  blocked by create-basic-project-structure, which is done  [would kill: the relation is kept deliberately as history]
 ```
 
-Read it top to bottom. The **frontier** is what you could start right now; `unlocks:7` means starting the DAG builder frees seven other tasks, so it sorts first. **Waves** are the layers of parallel work if everything went to plan. There is one **gatekeeper**: the task with two or more open dependents, which is why there is only one workstream once it is cut out. The **critical path** is the longest chain of open work; here depth and effort agree because nothing carries an estimate. The one **finding** is a dependency on a task that is already done, which is harmless but worth knowing.
+Read it top to bottom. The **frontier** is what you could start right now; `immediately-unblocks:2` means completing the DAG builder makes two tasks ready. Its `downstream-impact:7` counts all seven open descendants, including work that still has other blockers. **Waves** are the layers of parallel work if everything went to plan. There is one **gatekeeper**: the task with two or more open dependents, which is why there is only one workstream once it is cut out. The **critical path** is the longest chain of open work; here depth and effort agree because nothing carries an estimate. The one **finding** is a dependency on a task that is already done, which is harmless but worth knowing.
 
 ## 2. Open the viewer
 
@@ -71,7 +71,7 @@ Expected: the frontier drops to one ready task, the critical path grows from six
 
 ```text
 frontier (1 ready task, most urgent first):
-  implement-core-dag-builder  Implement core DAG builder  unlocks:9
+  implement-core-dag-builder  Implement core DAG builder  immediately-unblocks:2  downstream-impact:9
 ...
 critical path by depth: 7 tasks: implement-core-dag-builder then implement-state-determination-logic then create-graphviz-dot-generator then add-cli-interface then write-documentation then create-example-files then deploy-to-production
 ```

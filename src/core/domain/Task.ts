@@ -9,12 +9,10 @@
  * It validates in the constructor and freezes itself.
  */
 
-export type TaskStatus = "open" | "in-progress" | "done" | "canceled";
+export type TaskStatus = "open" | "in-progress" | "done" | "canceled" | "unknown";
 
 /** Priority follows Linear: 1 urgent, 2 high, 3 medium, 4 low. Absent means unset. */
 export type Priority = 1 | 2 | 3 | 4;
-
-export const MAX_EFFORT = 3;
 
 export interface TaskFields {
   /** Stable identity (a Linear issue id, or a slug for file-based sources). */
@@ -28,7 +26,7 @@ export interface TaskFields {
   parent?: string;
   children?: readonly string[];
   priority?: Priority;
-  /** Effort on a 0 to 3 scale. Absent means unestimated. */
+  /** Exact source estimate, a finite nonnegative number. Absent means unestimated. */
   effort?: number;
   assignee?: string;
   labels?: readonly string[];
@@ -96,8 +94,8 @@ export class Task {
     if (f.children?.includes(f.id)) {
       throw new Error(`Task ${f.id} cannot be its own child`);
     }
-    if (f.effort !== undefined && (!Number.isInteger(f.effort) || f.effort < 0 || f.effort > MAX_EFFORT)) {
-      throw new Error(`Task ${f.id}: effort must be an integer from 0 to ${String(MAX_EFFORT)}, got ${String(f.effort)}`);
+    if (f.effort !== undefined && (!Number.isFinite(f.effort) || f.effort < 0)) {
+      throw new Error(`Task ${f.id}: effort must be a finite nonnegative number, got ${String(f.effort)}`);
     }
   }
 

@@ -6,8 +6,8 @@ import type { Layout } from "../../core/services/LayeredLayoutService.ts";
 export const escapeXml = (s: string): string =>
   s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
-const NODE_W = 180;
-const NODE_H = 48;
+const NODE_W = 240;
+const NODE_H = 70;
 const GAP_X = 80;
 const GAP_Y = 24;
 const PAD = 24;
@@ -16,6 +16,7 @@ const STYLE = `
 .node rect{stroke:#333;stroke-width:1.5;rx:8}
 .node text{font:12px Helvetica,Arial,sans-serif;fill:#111}
 .node.done rect{fill:#d4edda}.node.in-progress rect{fill:#fff3cd}.node.blocked rect{fill:#f8d7da}.node.ready rect{fill:#d1ecf1}
+.node.unresolved rect{fill:#fff0c9}
 .node.critical rect{stroke-width:3}.node.gatekeeper rect{stroke-dasharray:6 3}
 .edge{fill:none;stroke:#555;stroke-width:1.5;marker-end:url(#arrow)}.edge.critical{stroke:#b00;stroke-width:2.5}
 `;
@@ -73,12 +74,14 @@ export class SvgRendererAdapter implements RendererPort {
     return a.dag.tasks.map((t) => {
       const { x, y } = coords(layout, t.id);
       const classes = ["node", a.stateOf(t.id), a.isCritical(t.id) ? "critical" : "", a.gatekeepers.includes(t.id) ? "gatekeeper" : ""].filter((c) => c.length > 0).join(" ");
-      const title = t.title.length > 26 ? `${t.title.slice(0, 25)}…` : t.title;
+      const title = t.title.length > 36 ? `${t.title.slice(0, 35)}…` : t.title;
       return [
         `<g class="${classes}" data-id="${escapeXml(t.id)}" transform="translate(${String(x)},${String(y)})">`,
+        `<title>${escapeXml(t.key)} · ${escapeXml(t.title)} · ${escapeXml(a.stateOf(t.id))}</title>`,
         `<rect width="${String(NODE_W)}" height="${String(NODE_H)}"/>`,
         `<text x="8" y="18" font-weight="bold">${escapeXml(t.key)}</text>`,
         `<text x="8" y="36">${escapeXml(title)}</text>`,
+        `<text x="8" y="56" font-size="10">${escapeXml(a.stateOf(t.id))}</text>`,
         "</g>",
       ].join("");
     });

@@ -36,7 +36,7 @@ Every finding carries the observation that would kill it. The audit proposes; yo
 | `stale-blocker` | blocked by a card that is done or canceled | harmless; Linear demotes these to Related on its own |
 | `dangling-blocker` | blocked by a card outside this project | intended cross-project dependency, or a mistake |
 | `cycle` | a set of cards that block each other | break the cycle; the graph is invalid until you do (exit `6`) |
-| `split-candidate` | effort 3 with no sub-issues, a title joining two things, or four or more open dependents | split the card, or record why it is one thing |
+| `split-candidate` | a title joining two things, or four or more open dependents | split the card, or record why it is one thing |
 
 ## Verify
 

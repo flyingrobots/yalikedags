@@ -3,7 +3,7 @@ import { defineConfig } from "eslint/config";
 import tseslint from "typescript-eslint";
 
 export default defineConfig(
-  { ignores: ["node_modules/**", "dist/**", "docs/**"] },
+  { ignores: ["node_modules/**", "dist/**", "docs/**", "src/viewer/generated/**", "test-results/**"] },
   js.configs.recommended,
   ...tseslint.configs.strictTypeChecked,
   ...tseslint.configs.stylisticTypeChecked,
@@ -45,7 +45,7 @@ export default defineConfig(
     },
   },
   {
-    files: ["test/**/*.ts"],
+    files: ["test/**/*.ts", "e2e/**/*.ts"],
     rules: { "max-lines-per-function": "off", "@typescript-eslint/no-non-null-assertion": "off" },
   },
   {

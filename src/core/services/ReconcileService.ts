@@ -20,12 +20,13 @@
  *    whole plan applied to the current graph, because that is the graph a
  *    person is left with.
  */
-import { Dag } from "../domain/Dag.ts";
+import type { Dag } from "../domain/Dag.ts";
 import type { Task } from "../domain/Task.ts";
 import type { Mutation } from "../domain/Mutation.ts";
 import { AddBlockingRelation, RemoveBlockingRelation, SetEstimate, SetMilestone } from "../domain/Mutation.ts";
 import { Plan, Unmatched } from "../domain/Plan.ts";
 import type { ClockPort } from "../../ports/ClockPort.ts";
+import { GraphSafetyService } from "./GraphSafetyService.ts";
 
 export interface ReconcileOptions {
   /** Emit removals for edges the source has and the desired graph does not. Off by default. */
@@ -61,7 +62,7 @@ export class ReconcileService {
       ...this.edgeMutations(sources, matching, options.prune === true),
       ...this.fieldMutations(sources, matching, options),
     ].sort((a, b) => a.sortKey().localeCompare(b.sortKey()));
-    this.refuseCycles(current, mutations);
+    new GraphSafetyService().assertSafe(current, mutations);
     return new Plan({
       mutations,
       unmatched: matching.unmatched,
@@ -70,21 +71,6 @@ export class ReconcileService {
       createdAt: this.clock.today(),
       labels: Object.fromEntries(current.tasks.map((t) => [t.id, t.key])),
     });
-  }
-
-  /**
-   * Build the graph this plan would leave behind and refuse it if it does not
-   * schedule. A cycle already at the source is not this plan's doing and is
-   * left to `audit`; only a cycle the plan introduces is a refusal.
-   */
-  private refuseCycles(current: Dag, mutations: readonly Mutation[]): void {
-    const already = new Set(current.validate().cycles.map((c) => [...c].sort().join(",")));
-    const after = new Dag(current.tasks.map((t) => mutations.reduce((acc, m) => m.projectEdges(acc), t)));
-    const introduced = after.validate().cycles.filter((c) => !already.has([...c].sort().join(",")));
-    if (introduced.length > 0) {
-      const shown = introduced.map((c) => c.map((id) => current.get(id).key).join(" -> ")).join("; ");
-      throw new Error(`plan_would_cycle: performing this plan would make the graph unschedulable: ${shown}`);
-    }
   }
 
   /** Counterparts by id first, then by key, case-insensitively. Nothing else. */

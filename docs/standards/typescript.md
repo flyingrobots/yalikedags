@@ -44,7 +44,7 @@ Core domain logic is completely isolated from side effects, ambient state, and h
 
 We reject shape-soup: `interface` plus `factory` plus erased types.
 
-- **Classes for domain values.** If a concept has an invariant, it is a `class`. It validates its state in the constructor and is frozen (`Object.freeze(this)` or `readonly` on every field). `Task` has invariants (cannot block itself, effort is 0 to 3) and is therefore a class, not an interface with a `createTask` helper.
+- **Classes for domain values.** If a concept has an invariant, it is a `class`. It validates its state in the constructor and is frozen (`Object.freeze(this)` or `readonly` on every field). `Task` has invariants (cannot block itself, effort is finite and nonnegative) and is therefore a class, not an interface with a `createTask` helper.
 - **Methods over switches.** Do not `switch` on external type tags. Behaviour belongs on the instantiated class. A `Task` knows whether it `isDone()`; callers do not compare status strings.
 - **Serialization is an adapter's job.** Domain models do not know how to JSON-stringify themselves, emit DOT, or draw SVG. Codecs and renderers live at the boundary in `src/adapters/output`.
 

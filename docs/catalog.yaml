@@ -1,5 +1,6 @@
 schema_version: 1
 pages:
+  - { id: explain-scaling, title: Performance and scaling, type: explanation, capability: graph, audiences: [contributor], status: current, path: scaling.md, source_paths: [src/core/domain/Dag.ts, src/core/services/LayeredLayoutService.ts, e2e/fixtures.ts], intents: [understand-performance] }
   - { id: index, title: yalikedags documentation, type: landing, capability: cli, audiences: [user, contributor, agent], status: current, path: index.md, intents: [find-docs] }
   - { id: tutorial-first-dag, title: See your first DAG, type: tutorial, capability: cli, audiences: [user], status: current, path: tutorials/first-dag.md, source_paths: [src/cli.ts, examples/example-tasklist.txt], intents: [learn, first-success], related: [howto-store-key, explain-derived-views] }
   - { id: howto-store-key, title: Store your Linear key in the keychain, type: how-to, capability: linear, audiences: [user], status: current, path: how-to/store-the-linear-key.md, source_paths: [src/adapters/secrets/VaultSecretsAdapter.ts, src/cli.ts], intents: [setup-key] }

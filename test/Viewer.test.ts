@@ -18,16 +18,25 @@ describe("ViewerRequestHandler", () => {
     expect(res.status).toBe(200);
     expect(res.contentType).toContain("text/html");
     expect(res.body).toContain("<svg");
-    expect(res.body).toContain('"schema": "yalikedags/snapshot/1"');
+    expect(res.body).toContain('"schema": "yalikedags/snapshot/2"');
     expect(res.body).not.toMatch(/src="https?:/);
     expect(res.body).not.toMatch(/href="https?:/);
-    expect(res.body).not.toMatch(/@import|fetch\(/);
+    expect(res.body).not.toMatch(/@import/);
+    expect(res.body).toContain('id="refresh" disabled');
+  });
+  test("GET /popout.html is an empty same-origin shell without task data or scripts", () => {
+    const res = new ViewerRequestHandler(() => analysis).handle("/popout.html");
+    expect(res.status).toBe(200);
+    expect(res.contentType).toContain("text/html");
+    expect(res.body).toContain("<body></body>");
+    expect(res.body).not.toContain("<script");
+    expect(res.body).not.toContain("PRO-1");
   });
   test("GET /snapshot.json returns the snapshot as JSON", () => {
     const res = new ViewerRequestHandler(() => analysis).handle("/snapshot.json");
     expect(res.status).toBe(200);
     expect(res.contentType).toBe("application/json");
-    expect(JSON.parse(res.body)).toMatchObject({ schema: "yalikedags/snapshot/1" });
+    expect(JSON.parse(res.body)).toMatchObject({ schema: "yalikedags/snapshot/2" });
   });
   test("GET /graph.svg and /graph.dot return the renderers' output", () => {
     const h = new ViewerRequestHandler(() => analysis);
@@ -53,7 +62,7 @@ describe("TextReportRendererAdapter", () => {
     expect(text).toContain("PRO-2");
     expect(text).toMatch(/critical path by depth: 1 task/);
     expect(text).toMatch(/by effort: 3/);
-    expect(text).toContain("split-candidate");
+    expect(text).toContain("stale-blocker");
   });
 });
 
@@ -88,7 +97,7 @@ describe("HtmlRendererAdapter", () => {
       "linear:Example",
     );
     const urls = (html: string): string[] =>
-      [...new Set([...html.matchAll(/https?:\/\/[^"'\s)]+/g)].map((m) => m[0]))].filter((u) => u !== "http://www.w3.org/2000/svg");
+      [...new Set([...html.matchAll(/href="(https?:\/\/[^"\s]+)"/g)].flatMap((m) => m[1] === undefined ? [] : [m[1]]))];
     expect(urls(new HtmlRendererAdapter().render(page()))).toEqual([]);
     expect(urls(new HtmlRendererAdapter().render(withUrl))).toEqual(["https://linear.app/x/issue/PRO-1"]);
   });
@@ -145,13 +154,15 @@ describe("viewer grid", () => {
     });
   });
 
-  test("the page ships an empty grid container for the script to fill, not a rendered table", () => {
-    expect(page).toMatch(/<div id="grid"><\/div>/);
-    expect(page).toContain("snap.grid");
+  test("the offline page carries an escaped wave table and keyboard-selectable cards", () => {
+    expect(page).toContain('id="grid-table"');
+    expect(page).toContain('scope="col">Wave 2');
+    expect(page).toContain("Gate &lt;i&gt;");
+    expect(page).toMatch(/<button[^>]*data-task="g"/);
   });
 
   test("offers a switch between the graph and the grid", () => {
-    expect(page).toMatch(/<button[^>]*data-view="graph"/);
-    expect(page).toMatch(/<button[^>]*data-view="grid"/);
+    expect(page).toMatch(/<button[^>]*data-panel="graph"/);
+    expect(page).toMatch(/<button[^>]*data-panel="grid"/);
   });
 });

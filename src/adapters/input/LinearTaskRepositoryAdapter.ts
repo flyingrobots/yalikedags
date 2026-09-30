@@ -1,6 +1,7 @@
 import { Task } from "../../core/domain/Task.ts";
 import type { Priority, TaskFields, TaskStatus } from "../../core/domain/Task.ts";
-import { MAX_EFFORT } from "../../core/domain/Task.ts";
+import { LinearConnection } from "../linear/LinearConnection.ts";
+import { LinearPage } from "../linear/LinearPage.ts";
 import type { HttpPort } from "../../ports/HttpPort.ts";
 import type { TaskRepositoryPort } from "../../ports/TaskRepositoryPort.ts";
 import { LinearGraphqlClient } from "../linear/LinearGraphqlClient.ts";
@@ -15,18 +16,18 @@ const ISSUES = `query($id: String!, $after: String) {
     pageInfo { hasNextPage endCursor }
     nodes {
       id identifier title description url createdAt priority estimate dueDate
-      state { name type } assignee { name } labels { nodes { name } } projectMilestone { name }
-      parent { id } children { nodes { id } }
-      relations { nodes { type relatedIssue { id } } }
-      inverseRelations { nodes { type issue { id } } }
+      state { name type } assignee { name } labels { pageInfo { hasNextPage } nodes { name } } projectMilestone { name }
+      parent { id } children { pageInfo { hasNextPage } nodes { id } }
+      relations { pageInfo { hasNextPage } nodes { type relatedIssue { id } } }
+      inverseRelations { pageInfo { hasNextPage } nodes { type issue { id } } }
     } } } }`;
 
-const STATE_TYPES: Record<string, TaskStatus> = { backlog: "open", unstarted: "open", triage: "open", started: "in-progress", completed: "done", canceled: "canceled", duplicate: "canceled" };
+const STATE_TYPES = new Map<string, TaskStatus>([["backlog", "open"], ["unstarted", "open"], ["triage", "open"], ["started", "in-progress"], ["completed", "done"], ["canceled", "canceled"], ["duplicate", "canceled"]]);
 const PRIORITIES: readonly Priority[] = [1, 2, 3, 4];
 
 /** Linear is the source of truth. This adapter reads a project's issues and their blocking relations, read-only. */
 export class LinearTaskRepositoryAdapter implements TaskRepositoryPort {
-  /** Coercions the codec had to make (an estimate above the scale, an unknown state type). Never secrets. */
+  /** Uncertainty observed during the most recent read. Never secrets. */
   readonly warnings: string[] = [];
   private readonly client: LinearGraphqlClient;
 
@@ -43,24 +44,35 @@ export class LinearTaskRepositoryAdapter implements TaskRepositoryPort {
   }
 
   async load(): Promise<readonly Task[]> {
+    this.warnings.length = 0;
     const projectId = await this.client.resolveProjectId(this.project);
     const out: Task[] = [];
     const forward = new Map<string, string[]>();
     let after: string | null = null;
+    const seen = new Set<string>();
     do {
       const data = await this.client.query(ISSUES, { id: projectId, after });
-      const issues = rec(rec(data["project"])["issues"]);
-      for (const raw of nodes(issues)) {
+      if (data["project"] === null || data["project"] === undefined) { throw new Error("linear_project_not_found: requested project is unavailable"); }
+      const issues: LinearPage = new LinearPage(rec(data["project"])["issues"], after);
+      for (const raw of issues.nodes) {
+        this.checkConnections(raw);
         out.push(this.toTask(raw));
         this.collectForwardBlocks(raw, forward);
       }
-      const info = rec(issues["pageInfo"]);
-      after = info["hasNextPage"] === true ? (str(info["endCursor"]) ?? null) : null;
+      after = issues.next;
+      if (after !== null && seen.has(after)) { throw new Error("linear_incomplete: repeated pagination cursor"); }
+      if (after !== null) { seen.add(after); }
     } while (after !== null);
     return out.map((t) => {
       const extra = forward.get(t.id) ?? [];
       return extra.length === 0 ? t : t.with({ blockedBy: [...t.blockedBy, ...extra] });
     });
+  }
+
+  private checkConnections(raw: Rec): void {
+    for (const field of ["children", "relations", "inverseRelations", "labels"]) {
+      new LinearConnection().check(raw[field], field);
+    }
   }
 
   /** `relations` of type blocks say "this issue blocks relatedIssue"; record it on the other side. */
@@ -76,6 +88,7 @@ export class LinearTaskRepositoryAdapter implements TaskRepositoryPort {
 
   private toTask(raw: Rec): Task {
     const id = str(raw["id"]) ?? "";
+    if (id.length === 0) { throw new Error("linear_incomplete: issue has no identity"); }
     const key = str(raw["identifier"]) ?? id;
     const f: TaskFields = {
       id,
@@ -101,29 +114,25 @@ export class LinearTaskRepositoryAdapter implements TaskRepositoryPort {
       }
     }
     const priority = PRIORITIES.find((p) => p === num(raw["priority"]));
-    const effort = this.effortOf(key, num(raw["estimate"]));
+    const effort = this.estimate(raw["estimate"]);
     return new Task({ ...f, ...(priority && { priority }), ...(effort !== undefined && { effort }) });
+  }
+
+  private estimate(raw: unknown): number | undefined {
+    if (raw === null || raw === undefined) { return undefined; }
+    const value = num(raw);
+    if (value === undefined) { throw new Error("linear_incomplete: invalid estimate"); }
+    return value;
   }
 
   private statusOf(key: string, state: Rec): TaskStatus {
     const type = str(state["type"]) ?? "";
-    const mapped = STATE_TYPES[type];
+    const mapped = STATE_TYPES.get(type);
     if (mapped === undefined) {
-      this.warnings.push(`${key}: unknown state type "${type}"; recorded as open`);
-      return "open";
+      this.warnings.push(`${key}: unknown state type "${type}"; readiness is unresolved`);
+      return "unknown";
     }
     return mapped;
-  }
-
-  private effortOf(key: string, estimate: number | undefined): number | undefined {
-    if (estimate === undefined) {
-      return undefined;
-    }
-    if (estimate > MAX_EFFORT) {
-      this.warnings.push(`${key}: estimate ${String(estimate)} is above the 0 to ${String(MAX_EFFORT)} scale; recorded as ${String(MAX_EFFORT)}`);
-      return MAX_EFFORT;
-    }
-    return Math.max(0, Math.round(estimate));
   }
 
   /** inverseRelations of type blocks name what blocks this issue. The forward direction is merged in load(). */

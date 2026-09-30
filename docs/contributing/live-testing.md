@@ -11,7 +11,7 @@ Warning: never point this at a workspace that holds real work. Two guards make t
 | The token is `YALIKEDAGS_LIVE_KEY`, in the keychain or the environment | A production key sitting in `LINEAR_API_KEY` cannot be picked up by the fixture script or the live suite. They do not read that name, from either place. |
 | The project name must contain `yalikedags-test` | `assertFixtureProject` refuses anything else, before a single query is sent. |
 | Every issue title must start with `yld-fixture` | Even inside the fixture project, an issue a person created is invisible: it is never read into the fixture, never written to, and never a candidate for relation removal. |
-| `bun test` skips the live suite | The suite runs only when `YALIKEDAGS_LIVE` is set, so the default suite stays offline even on a machine where the fixture is provisioned. |
+| `bun test` skips the live suite | The suite runs only when `YALIKEDAGS_LIVE=1`, so the default suite stays offline even on a machine where the fixture is provisioned. |
 
 ## Set it up
 
@@ -65,6 +65,8 @@ It writes `.live-fixture.json` (gitignored) mapping each logical name to the rea
 bun run test:live
 ```
 
+`0`, `false`, an empty value, and an unset `YALIKEDAGS_LIVE` all keep the live tier disabled. The default Bun report includes eight skipped tests and two unnamed setup/teardown entries. Fixture teardown is guarded when configuration fails.
+
 That provisions first, then runs `test/live/` with `YALIKEDAGS_LIVE=1`. To run the suite without re-provisioning: `YALIKEDAGS_LIVE=1 bun test test/live/`. Provisioning is also a **reset**: it drives the fixture back to its declared baseline, removing relations a previous run added and restoring estimates it changed. That is what makes the suite repeatable rather than one-shot.
 
 ## The fixture
@@ -82,7 +84,7 @@ Eight issues, declared in `scripts/live-fixture.ts`, each present for a reason:
 | `G link target` | nothing | the blocker in the prune case |
 | `H prune source` | blocked by G | an edge no desired graph declares, so `--prune` has something to remove |
 
-Plus two project milestones, and the team's estimate scale set to Linear with zero allowed, because the tool's 0 to 3 scale needs a scale that accepts those values.
+Plus two project milestones, and the team's estimate scale set to Linear with zero allowed, because the synthetic tests write values from zero through three. The reader itself preserves any finite nonnegative estimate exactly.
 
 ## Two declared deviations from the testing standard
 

@@ -1,7 +1,7 @@
 import type { Analysis } from "../../core/services/Analysis.ts";
 import type { RendererPort } from "../../ports/RendererPort.ts";
 
-export const SNAPSHOT_SCHEMA = "yalikedags/snapshot/1";
+export const SNAPSHOT_SCHEMA = "yalikedags/snapshot/2";
 
 /**
  * The snapshot is the file the CLI writes and the viewer reads: tasks as
@@ -21,9 +21,16 @@ export class JsonSnapshotAdapter implements RendererPort {
       schema: SNAPSHOT_SCHEMA,
       source: a.source,
       asOf: a.asOf,
+      capturedAt: a.capturedAt,
+      warnings: a.warnings,
+      quality: {
+        unresolvedDependencies: a.dag.tasks.flatMap((t) => t.blockedBy.filter((id) => !a.dag.has(id))).length,
+        unknownStatuses: a.dag.tasks.filter((t) => t.status === "unknown").length,
+        cycles: a.dag.validate().cycles.length,
+      },
       tasks: a.dag.tasks.map((t) => ({ ...t.toFields(), state: a.stateOf(t.id), workstream: a.workstreamOf(t.id) ?? null, critical: a.isCritical(t.id) })),
       edges: a.dag.tasks.flatMap((t) => a.dag.blockers(t.id).map((b) => ({ from: b, to: t.id }))),
-      frontier: a.frontier.map((e) => ({ task: e.task.id, daysUntilDue: e.daysUntilDue, unlocks: e.unlocks, conflicts: a.conflicts.get(e.task.id) ?? [] })),
+      frontier: a.frontier.map((e) => ({ task: e.task.id, daysUntilDue: e.daysUntilDue, immediatelyUnblocks: e.immediatelyUnblocks, downstreamImpact: e.downstreamImpact, unlocks: e.downstreamImpact, conflicts: a.conflicts.get(e.task.id) ?? [] })),
       waves: a.waves,
       gatekeepers: a.gatekeepers,
       workstreams: a.workstreams.map((w) => ({ id: w.id, tasks: w.tasks })),

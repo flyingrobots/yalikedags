@@ -159,4 +159,17 @@ describe("ReconcileService cycle guard", () => {
     const p = plan([t("a"), t("b", ["a"])], current, { prune: true });
     expect(p.mutations.map((m) => m.kind)).toEqual(["remove-blocking-relation"]);
   });
+
+  test("refuses a new cyclic edge even when the cycle still has the same members", () => {
+    const current = [t("a", ["c"]), t("b", ["a"]), t("c", ["b"])];
+    const desired = [t("a", ["c", "b"]), t("b", ["a"]), t("c", ["b"])];
+    expect(() => plan(desired, current)).toThrow(/^plan_would_cycle/);
+  });
+});
+
+test("cycle refusal identifies only the newly cyclic component", () => {
+  // oracle: the untouched old cycle is not introduced by this plan.
+  const current = [t("old-a", ["old-b"]), t("old-b", ["old-a"]), t("new-a"), t("new-b", ["new-a"])];
+  const desired = [t("old-a", ["old-b"]), t("old-b", ["old-a"]), t("new-a", ["new-b"]), t("new-b", ["new-a"])];
+  expect(() => plan(desired, current)).toThrow("plan_would_cycle: these changes would introduce a dependency cycle (new-a, new-b); re-plan or allow the reviewed removals");
 });

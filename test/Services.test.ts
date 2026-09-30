@@ -25,9 +25,9 @@ describe("StateService", () => {
     expect(s.stateOf(dag, "c")).toBe("blocked");
     expect(s.stateOf(dag, "d")).toBe("in-progress");
   });
-  test("a dangling blocker does not block", () => {
+  test("a dangling blocker leaves readiness unresolved", () => {
     const dag = new Dag([t("b", ["ghost"])]);
-    expect(new StateService().stateOf(dag, "b")).toBe("ready");
+    expect(new StateService().stateOf(dag, "b")).toBe("unresolved");
   });
 });
 
@@ -51,7 +51,7 @@ describe("FrontierService", () => {
     const dag = new Dag([t("a", [], { due: "2026-09-25" }), t("b", ["a"]), t("c", ["b"])]);
     const [entry] = new FrontierService(clock).frontier(dag);
     expect(entry!.daysUntilDue).toBe(2);
-    expect(entry!.unlocks).toBe(2);
+    expect(entry!.downstreamImpact).toBe(2);
   });
   test("undated tasks sort after dated ones", () => {
     const dag = new Dag([t("undated"), t("dated", [], { due: "2027-01-01" })]);
@@ -62,7 +62,7 @@ describe("FrontierService", () => {
     const dag = new Dag([t("a", [], { resources: ["db"] }), t("b", [], { resources: ["db"] }), t("c", [], { resources: ["db"] })]);
     const policy = new ResourcePolicy([{ id: "db", mode: "exclusive" }]);
     const conflicts = new FrontierService(clock).resourceConflicts(dag, policy);
-    expect(conflicts.get("a")).toEqual(["db (exclusive, 3 ready contenders)"]);
+    expect(conflicts.get("a")).toEqual(["db (exclusive, 3 ready contenders, 0 in-progress holders)"]);
     expect(conflicts.size).toBe(3);
   });
   test("a capacity resource conflicts only above its capacity, and advisory never does", () => {
@@ -143,14 +143,14 @@ describe("AuditService", () => {
     const stale = new AuditService().audit(dag).filter((x) => x.kind === "stale-blocker");
     expect(stale.map((x) => x.task)).toEqual(["a"]);
   });
-  test("effort 3 with no children, a two-verb title, and wide fan-out are split candidates with reasons", () => {
+  test("split candidates use structural evidence, not an assumed estimate scale", () => {
     const dag = new Dag([
       t("big", [], { effort: 3 }),
       t("two", [], { title: "Build the parser and write the docs" }),
       t("hub"), t("h1", ["hub"]), t("h2", ["hub"]), t("h3", ["hub"]), t("h4", ["hub"]),
     ]);
     const split = new AuditService().audit(dag).filter((x) => x.kind === "split-candidate");
-    expect(split.map((x) => x.task).sort()).toEqual(["big", "hub", "two"]);
+    expect(split.map((x) => x.task).sort()).toEqual(["hub", "two"]);
     for (const f of split) {
       expect(f.detail.length).toBeGreaterThan(0);
       expect(f.wouldKill.length).toBeGreaterThan(0);

@@ -16,3 +16,5 @@ jobs:
       - run: bun run docs:lint
       - run: bun run clean-room
       - run: bun test
+      - run: bunx playwright install --with-deps chromium
+      - run: bun run test:browser
