@@ -499,3 +499,33 @@ test("failed snapshot comparison clears the previous results", async ({ page }) 
   await expect(page.locator("#changes-status")).toContainText("Could not compare");
   await expect(page.locator("#changes-list li")).toHaveCount(0);
 });
+
+for (const staleText of ['{"schema":"yalikedags/snapshot/1","tasks":[]}', "invalid"]) {
+  test(`latest snapshot selection wins over a delayed ${staleText === "invalid" ? "failure" : "success"}`, async ({ page }) => {
+    // oracle: controlled file-read scheduling must not change which selection owns the UI.
+    await page.goto(exported);
+    await workspaceAction(page, "Changes");
+    await page.locator("#compare-snapshot").evaluate((input, text) => {
+      if (!(input instanceof HTMLInputElement)) { throw new Error("missing input"); }
+      class DelayedFile extends File {
+        override async text(): Promise<string> {
+          await new Promise<void>((release) => { window.addEventListener("release-comparison", () => { release(); }, { once: true }); });
+          return text;
+        }
+      }
+      const transfer = new DataTransfer();
+      transfer.items.add(new DelayedFile([text], "older.json", { type: "application/json" }));
+      input.files = transfer.files;
+      input.dispatchEvent(new Event("change"));
+    }, staleText);
+    await page.getByLabel("Compare snapshot JSON").setInputFiles({ name: "latest.json", mimeType: "application/json", buffer: Buffer.from('{"schema":"yalikedags/snapshot/1","tasks":[]}') });
+    await expect(page.locator("#changes-status")).toContainText("latest.json");
+    const rows = await page.locator("#changes-list").textContent();
+    await page.evaluate(async () => {
+      window.dispatchEvent(new Event("release-comparison"));
+      await new Promise<void>((finish) => { requestAnimationFrame(() => { finish(); }); });
+    });
+    await expect(page.locator("#changes-status")).toContainText("latest.json");
+    await expect(page.locator("#changes-list")).toHaveText(rows ?? "");
+  });
+}

@@ -6,6 +6,7 @@ import { element, button } from "./Dom.ts";
 import type { ViewerState } from "./ViewerState.ts";
 
 export class ChangesController {
+  private comparison = 0;
   private readonly list = element("changes-list");
   private readonly status = element("changes-status");
   constructor(private readonly state: ViewerState) {
@@ -15,14 +16,17 @@ export class ChangesController {
   }
 
   private async compare(file: File | undefined): Promise<void> {
+    const comparison = ++this.comparison;
     if (file === undefined) { return; }
     try {
       const repo = new JsonSnapshotRepositoryAdapter(await file.text(), file.name);
       const before = new Dag(await repo.load());
+      if (comparison !== this.comparison) { return; }
       const changes = new SnapshotChangesService().compare(before, this.state.dag);
       this.list.replaceChildren(...changes.map((change) => this.row(change)));
       this.status.textContent = `${String(changes.length)} changes since ${repo.capturedAt ?? "an unknown capture time"} (${file.name}).`;
     } catch {
+      if (comparison !== this.comparison) { return; }
       this.list.replaceChildren();
       this.status.textContent = "Could not compare: choose a valid yalikedags snapshot JSON file.";
     }

@@ -4,6 +4,8 @@ All notable changes to this project are documented here. The format follows Keep
 
 ## [Unreleased]
 
+- Keep the latest selected snapshot in control of comparison results when file reads finish out of order.
+
 - Clear previous comparison rows when a selected snapshot cannot be read.
 
 - Export snapshot schema 2 for unknown statuses and exact estimates; continue reading legacy schema 1 files.
