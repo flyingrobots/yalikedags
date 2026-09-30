@@ -4,6 +4,8 @@ All notable changes to this project are documented here. The format follows Keep
 
 ## [Unreleased]
 
+- Export snapshot schema 2 for unknown statuses and exact estimates; continue reading legacy schema 1 files.
+
 - Consume refresh restoration state once so later reloads honor the latest saved layout.
 
 - Keep DAG nodes readable when reopening a panel that was closed in the saved layout.

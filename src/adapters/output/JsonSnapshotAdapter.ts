@@ -1,7 +1,7 @@
 import type { Analysis } from "../../core/services/Analysis.ts";
 import type { RendererPort } from "../../ports/RendererPort.ts";
 
-export const SNAPSHOT_SCHEMA = "yalikedags/snapshot/1";
+export const SNAPSHOT_SCHEMA = "yalikedags/snapshot/2";
 
 /**
  * The snapshot is the file the CLI writes and the viewer reads: tasks as

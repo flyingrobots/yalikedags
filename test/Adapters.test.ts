@@ -63,7 +63,7 @@ describe("JsonSnapshotAdapter", () => {
   });
   test("the snapshot carries the derived views alongside the tasks", () => {
     const parsed: unknown = JSON.parse(new JsonSnapshotAdapter().render(analyser.analyse([t("a"), t("b", ["a"])], "inline")));
-    expect(parsed).toMatchObject({ schema: "yalikedags/snapshot/1", source: "inline", asOf: "2026-09-23" });
+    expect(parsed).toMatchObject({ schema: "yalikedags/snapshot/2", source: "inline", asOf: "2026-09-23" });
     expect(parsed).toHaveProperty("frontier");
     expect(parsed).toHaveProperty("criticalPath.byDepth.tasks", ["a", "b"]);
   });

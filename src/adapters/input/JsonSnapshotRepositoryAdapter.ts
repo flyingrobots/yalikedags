@@ -105,7 +105,7 @@ export class JsonSnapshotRepositoryAdapter implements TaskRepositoryPort {
 
   load(): Promise<readonly Task[]> {
     const parsed: unknown = JSON.parse(this.text);
-    if (!isRecord(parsed) || parsed["schema"] !== SNAPSHOT_SCHEMA) {
+    if (!isRecord(parsed) || (parsed["schema"] !== SNAPSHOT_SCHEMA && parsed["schema"] !== "yalikedags/snapshot/1")) {
       return Promise.reject(new Error(`snapshot: expected schema ${SNAPSHOT_SCHEMA}`));
     }
     const capturedAt = str(parsed, "capturedAt");

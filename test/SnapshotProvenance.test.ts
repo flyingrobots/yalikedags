@@ -1,3 +1,4 @@
+import { rejection } from "./fakes/rejection.ts";
 import { expect, test } from "bun:test";
 import { Task } from "../src/core/domain/Task.ts";
 import { AnalysisService } from "../src/core/services/AnalysisService.ts";
@@ -15,4 +16,18 @@ test("snapshot timestamps survive reading; legacy snapshots have unknown acquisi
   const old = new JsonSnapshotRepositoryAdapter('{"schema":"yalikedags/snapshot/1","tasks":[]}', "legacy");
   await old.load();
   expect(old.capturedAt).toBeNull();
+});
+
+test("extended task values are exported as schema 2 and round-trip", async () => {
+  // oracle: schema 1 readers cannot represent unknown status or fractional estimates.
+  const analysis = service.analyse([new Task({ id: "a", title: "A", status: "unknown", effort: 8.5 })], "example");
+  const text = new JsonSnapshotAdapter().render(analysis);
+  expect(JSON.parse(text)).toMatchObject({ schema: "yalikedags/snapshot/2" });
+  expect((await new JsonSnapshotRepositoryAdapter(text, "current").load())[0]?.toFields()).toMatchObject({ status: "unknown", effort: 8.5 });
+});
+
+test("schema 1 snapshots remain readable and unknown schema versions are rejected", async () => {
+  const legacy = JSON.stringify({ schema: "yalikedags/snapshot/1", tasks: [{ id: "a", title: "A", effort: 3, status: "open" }] });
+  expect((await new JsonSnapshotRepositoryAdapter(legacy, "legacy").load())[0]?.effort).toBe(3);
+  expect((await rejection(new JsonSnapshotRepositoryAdapter('{"schema":"yalikedags/snapshot/99","tasks":[]}', "future").load())).message).toContain("snapshot: expected schema");
 });

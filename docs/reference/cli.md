@@ -28,7 +28,7 @@ An unrecognised flag is a usage error, exit 2, and the parser suggests the flag 
 |---|---|
 | `--project <name or UUID>` | a Linear project. A name must match exactly one project (case-insensitive). Needs the key. |
 | `--tasklist <file>` | a Markdown task list: `- [ ] Title (depends on: Other, Another)`, `[x]` done, `[/]` or `[WIP]` in progress, two-space indent for parent and child |
-| `--snapshot <file>` | a snapshot written by `sync` (schema `yalikedags/snapshot/1`) |
+| `--snapshot <file>` | a snapshot written by `sync` (schema `yalikedags/snapshot/2`, or legacy `/1`) |
 | `--dag <file>` | the task-dag JSON schema: `{ "nodes": [ { "id", "title", "done", "blocked_by", "pri", "resources" } ], "resources": [...] }`. Its `resources` block also supplies the frontier's conflict policy. |
 
 ## Choosing a credential

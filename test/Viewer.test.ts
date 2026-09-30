@@ -18,7 +18,7 @@ describe("ViewerRequestHandler", () => {
     expect(res.status).toBe(200);
     expect(res.contentType).toContain("text/html");
     expect(res.body).toContain("<svg");
-    expect(res.body).toContain('"schema": "yalikedags/snapshot/1"');
+    expect(res.body).toContain('"schema": "yalikedags/snapshot/2"');
     expect(res.body).not.toMatch(/src="https?:/);
     expect(res.body).not.toMatch(/href="https?:/);
     expect(res.body).not.toMatch(/@import/);
@@ -36,7 +36,7 @@ describe("ViewerRequestHandler", () => {
     const res = new ViewerRequestHandler(() => analysis).handle("/snapshot.json");
     expect(res.status).toBe(200);
     expect(res.contentType).toBe("application/json");
-    expect(JSON.parse(res.body)).toMatchObject({ schema: "yalikedags/snapshot/1" });
+    expect(JSON.parse(res.body)).toMatchObject({ schema: "yalikedags/snapshot/2" });
   });
   test("GET /graph.svg and /graph.dot return the renderers' output", () => {
     const h = new ViewerRequestHandler(() => analysis);

@@ -1,10 +1,10 @@
 # Snapshot JSON
 
-Written by `sync` and `render --format json`; read by `--snapshot` and served at `/snapshot.json`. Schema id `yalikedags/snapshot/1`. Defined in `src/adapters/output/JsonSnapshotAdapter.ts`; decoded (stored tasks and provenance) in `src/adapters/input/JsonSnapshotRepositoryAdapter.ts`.
+Written by `sync` and `render --format json`; read by `--snapshot` and served at `/snapshot.json`. Schema id `yalikedags/snapshot/2`. Defined in `src/adapters/output/JsonSnapshotAdapter.ts`; decoded (stored tasks and provenance) in `src/adapters/input/JsonSnapshotRepositoryAdapter.ts`.
 
 ```json
 {
-  "schema": "yalikedags/snapshot/1",
+  "schema": "yalikedags/snapshot/2",
   "source": "Linear project example-project",
   "asOf": "2026-09-23",
   "capturedAt": "2026-09-23T12:00:00.000Z",
@@ -53,3 +53,5 @@ Only the stored task fields and provenance are read back by `--snapshot`; derive
 `immediatelyUnblocks` counts open direct dependents that become ready if this task completes. `downstreamImpact` counts all open descendants, including tasks with other blockers. `unlocks` remains a deprecated alias for downstream impact for schema-1 consumers; it does not mean those tasks immediately become ready.
 
 Effort-based paths sum raw estimates, using one for unestimated tasks. Estimates from different team scales are not normalized or comparable as durations. Old snapshots that clamped estimates cannot recover the originals; take a fresh source reading.
+
+Schema 2 preserves unknown statuses and finite nonnegative estimates, including fractions and values above 3. Readers accept legacy schema 1 snapshots; writers always emit schema 2. Older schema 1 readers must be upgraded before reading schema 2 exports.
