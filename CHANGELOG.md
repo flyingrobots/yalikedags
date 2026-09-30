@@ -4,6 +4,8 @@ All notable changes to this project are documented here. The format follows Keep
 
 ## [Unreleased]
 
+- Confirm successful refresh comparisons with no changes instead of showing the initial comparison prompt.
+
 - Limit cycle refusal diagnostics to tasks on newly cyclic edges, excluding unrelated existing cycles.
 
 - Keep the latest selected snapshot in control of comparison results when file reads finish out of order.

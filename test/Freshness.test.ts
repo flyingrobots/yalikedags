@@ -22,8 +22,8 @@ test("refresh failure keeps the last good graph and successful refresh computes 
   await Promise.all([live.refresh(), live.refresh()]);
   expect(reads).toBe(1);
   expect(live.current).toBe(next);
-  expect(live.changes.map((change) => change.kind)).toContain("completed");
-  expect(live.changes.map((change) => change.kind)).toContain("added");
+  expect(live.changes?.map((change) => change.kind)).toContain("completed");
+  expect(live.changes?.map((change) => change.kind)).toContain("added");
 });
 
 test("snapshot comparison reports changed blockers, completion, removal and critical chains", () => {
@@ -67,3 +67,17 @@ for (const [before, after, kind] of [
     ]);
   });
 }
+
+test("successful unchanged refresh confirms zero changes while failed reads retain the comparison", async () => {
+  // oracle: no comparison and a completed empty comparison have distinct user-visible meanings.
+  const analysis = service.analyse([], "example");
+  let fail = false;
+  const live = new RefreshingAnalysis(analysis, () => fail ? Promise.reject(new Error("unavailable")) : Promise.resolve(analysis));
+  const handler = new ViewerRequestHandler(() => live.current, () => ({ refresh: true, ...(live.changes !== undefined && { changes: live.changes }) }));
+  expect((/<p id="changes-status"[^>]*>([^<]*)<\/p>/.exec(handler.handle("/").body))?.[1]).toContain("Choose an earlier snapshot");
+  await live.refresh();
+  expect((/<p id="changes-status"[^>]*>([^<]*)<\/p>/.exec(handler.handle("/").body))?.[1]).toContain("No changes since the previous successful refresh.");
+  fail = true;
+  await rejection(live.refresh());
+  expect((/<p id="changes-status"[^>]*>([^<]*)<\/p>/.exec(handler.handle("/").body))?.[1]).toContain("No changes since the previous successful refresh.");
+});

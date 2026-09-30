@@ -4,7 +4,7 @@ import type { SnapshotChange } from "../core/services/SnapshotChangesService.ts"
 
 /** Publish only a complete successful read. Concurrent requests share one read. */
 export class RefreshingAnalysis {
-  changes: readonly SnapshotChange[] = [];
+  changes: readonly SnapshotChange[] | undefined;
   private pending: Promise<void> | undefined;
   constructor(public current: Analysis, private readonly load: () => Promise<Analysis>) {}
 

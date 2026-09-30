@@ -29,7 +29,7 @@ JSON exports use snapshot schema 2 to preserve unknown statuses and exact estima
 
 ### Arrange your workspace
 
-The viewer now has dockable views: DAG, wave grid, task table, task details, ready work, and findings. The task table supports sorting, search, and state/assignee/milestone/label filters. Search for a task, drag tabs to arrange your workspace, and use the header Views button to open views or reset the layout. The exported HTML still carries everything in one offline file.
+The viewer now has dockable views: DAG, wave grid, task table, task details, ready work, and findings. The task table supports sorting, search, and state/assignee/milestone/label filters. Search for a task, drag tabs to arrange your workspace, and use the header Views button to open views or reset the layout. The Changes view compares snapshots and confirms when a source refresh finds no changes. The exported HTML still carries everything in one offline file.
 
 ## Start here
 

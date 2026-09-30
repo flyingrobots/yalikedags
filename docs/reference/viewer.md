@@ -77,7 +77,7 @@ The snapshot is loaded before the page opens. **Views menu → Refresh source** 
 
 Open **Views menu → Snapshot details** for the exact capture timestamp, or **Capture time unknown** for legacy snapshots. Reading or refreshing a snapshot file preserves that file’s capture time; it does not refresh the original tracker. An amber dot on the Views button flags partial data; Snapshot details identifies missing blocker references, unknown statuses, cycles, and source warnings.
 
-**Changes** reports added and removed tasks, completed tasks, status changes, added/removed blockers, and changes in critical-chain membership. After a successful refresh it compares the previous successful read. **Compare snapshot JSON** instead compares a chosen earlier file against the current view; the file stays in the browser. This comparison uses stable task ids. It is not a full field-by-field audit, and different projects can produce misleading comparisons.
+**Changes** reports added and removed tasks, completed tasks, status changes, added/removed blockers, and changes in critical-chain membership. After a successful refresh it compares the previous successful read and explicitly confirms when no changes were found. **Compare snapshot JSON** instead compares a chosen earlier file against the current view; the file stays in the browser. This comparison uses stable task ids. It is not a full field-by-field audit, and different projects can produce misleading comparisons.
 
 Local storage holds only panel layout. A refresh session uses browser history state to retain selected task id, search/filter values, sorting, and layout.
 

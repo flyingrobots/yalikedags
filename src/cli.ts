@@ -135,7 +135,7 @@ function auditCommand(a: Analysis, args: Args): ExitCodeValue {
 
 async function serveCommand(args: Args, read: () => Promise<Analysis>): Promise<ExitCodeValue> {
   const live = new RefreshingAnalysis(await read(), read);
-  const handler = new ViewerRequestHandler(() => live.current, () => ({ refresh: true, changes: live.changes }));
+  const handler = new ViewerRequestHandler(() => live.current, () => ({ refresh: true, ...(live.changes !== undefined && { changes: live.changes }) }));
   const handle = new ViewerServerAdapter(handler, () => live.refresh()).start(Number(args.get("port") ?? "0"));
   console.error(`viewer at ${handle.url}  (127.0.0.1 only; Ctrl-C to stop)`);
   await new Promise<void>((resolve) => {

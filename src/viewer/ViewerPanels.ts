@@ -7,7 +7,7 @@ import type { SnapshotChange } from "../core/services/SnapshotChangesService.ts"
 
 /** Static, escaped panel content. Browser controllers own interaction, never tracker writes. */
 export class ViewerPanels {
-  constructor(private readonly analysis: Analysis, private readonly changes: readonly SnapshotChange[] = []) {}
+  constructor(private readonly analysis: Analysis, private readonly changes?: readonly SnapshotChange[]) {}
 
   render(svg: string): string {
     return `<div id="panel-staging" hidden>
@@ -27,8 +27,10 @@ export class ViewerPanels {
   }
 
   private changePanel(): string {
-    const rows = this.changes.map((c) => `<li>${esc(c.key)} · ${esc(c.kind)}: ${esc(c.detail)}</li>`).join("");
-    return `<section id="changes-panel" class="panel scroll-panel"><label>Compare snapshot JSON<input id="compare-snapshot" type="file" accept=".json,application/json"></label><p id="changes-status" role="status">${this.changes.length ? "Changes since the previous successful refresh." : "Choose an earlier snapshot to compare with this one. Files stay in your browser."}</p><ul id="changes-list">${rows}</ul></section>`;
+    const rows = (this.changes ?? []).map((c) => `<li>${esc(c.key)} · ${esc(c.kind)}: ${esc(c.detail)}</li>`).join("");
+    const status = this.changes === undefined ? "Choose an earlier snapshot to compare with this one. Files stay in your browser."
+      : this.changes.length > 0 ? "Changes since the previous successful refresh." : "No changes since the previous successful refresh.";
+    return `<section id="changes-panel" class="panel scroll-panel"><label>Compare snapshot JSON<input id="compare-snapshot" type="file" accept=".json,application/json"></label><p id="changes-status" role="status">${status}</p><ul id="changes-list">${rows}</ul></section>`;
   }
 
   private card(id: string): string {
