@@ -529,3 +529,23 @@ for (const staleText of ['{"schema":"yalikedags/snapshot/1","tasks":[]}', "inval
     await expect(page.locator("#changes-list")).toHaveText(rows ?? "");
   });
 }
+
+test("releasing outside the graph before the drag threshold does not pan on return", async ({ page }) => {
+  // oracle: a released pointer cannot continue an earlier pan gesture.
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  await page.goto(exported);
+  await expect(page.locator("body")).toHaveAttribute("data-ready", "true");
+  await page.evaluate(() => new Promise<void>((finish) => { requestAnimationFrame(() => { finish(); }); }));
+  const svg = page.locator("#graph svg");
+  const bounds = await svg.boundingBox();
+  if (bounds === null) { throw new Error("graph is not visible"); }
+  const before = await svg.getAttribute("viewBox");
+  await page.mouse.move(bounds.x + 1, bounds.y + bounds.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(bounds.x - 2, bounds.y + bounds.height / 2);
+  await page.mouse.up();
+  await page.mouse.move(bounds.x + 100, bounds.y + bounds.height / 2);
+  await expect(svg).toHaveAttribute("viewBox", before ?? "");
+  expect(errors).toEqual([]);
+});

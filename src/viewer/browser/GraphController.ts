@@ -61,6 +61,8 @@ export class GraphController {
   }
 
   private move(event: PointerEvent): void {
+    // A release outside the SVG can precede pointer capture at the drag threshold.
+    if ((event.buttons & 1) === 0) { this.drag = undefined; return; }
     const drag = this.drag;
     if (drag === undefined) { return; }
     if (!drag.moved && Math.hypot(event.clientX - drag.x, event.clientY - drag.y) < 4) { return; }
