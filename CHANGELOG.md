@@ -4,6 +4,8 @@ All notable changes to this project are documented here. The format follows Keep
 
 ## [Unreleased]
 
+- Resolve critical-path ties in stable task-id order so reordered snapshots do not report false chain changes.
+
 - Confirm successful refresh comparisons with no changes instead of showing the initial comparison prompt.
 
 - Limit cycle refusal diagnostics to tasks on newly cyclic edges, excluding unrelated existing cycles.

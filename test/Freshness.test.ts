@@ -81,3 +81,15 @@ test("successful unchanged refresh confirms zero changes while failed reads reta
   await rejection(live.refresh());
   expect((/<p id="changes-status"[^>]*>([^<]*)<\/p>/.exec(handler.handle("/").body))?.[1]).toContain("No changes since the previous successful refresh.");
 });
+
+for (const tasks of [
+  [new Task({ id: "a", title: "A" }), new Task({ id: "b", title: "B" })],
+  [new Task({ id: "a", title: "A" }), new Task({ id: "b", title: "B" }), new Task({ id: "c", title: "C", blockedBy: ["a", "b"] })],
+]) {
+  test(`snapshot comparison ignores ordering among ${String(tasks.length)} tied tasks`, () => {
+    // oracle: reordering tasks and blocker sets does not change the graph or its critical chains.
+    const before = new Dag(tasks);
+    const after = new Dag([...tasks].reverse().map((task) => task.with({ blockedBy: [...task.blockedBy].reverse() })));
+    expect(new SnapshotChangesService().compare(before, after)).toEqual([]);
+  });
+}

@@ -45,6 +45,8 @@ FOLDS:   done ─┐
 
 ## Failure and degradation behaviour
 
+Critical-path ties use stable task-id traversal for both terminal candidates and blockers. Reordering task arrays or blocker sets therefore does not create comparison changes.
+
 A cycle makes the graph invalid: Kahn ordering stops early, the critical path treats the back edge as absent, and the audit reports the cycle members. `audit` exits 6 until it is broken.
 
 ## Tradeoffs and alternatives

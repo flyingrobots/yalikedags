@@ -39,7 +39,7 @@ export class CriticalPathService {
       }
       visiting.add(id);
       let result = new CriticalPath([id], weight(id));
-      for (const b of dag.blockers(id)) {
+      for (const b of dag.blockers(id).sort()) {
         if (!dag.get(b).isDone()) {
           const sub = best(b);
           if (sub.length + weight(id) > result.length) {
@@ -52,7 +52,9 @@ export class CriticalPathService {
       return result;
     };
     let top = new CriticalPath([], 0);
-    for (const t of dag.tasks) {
+    // Stable traversal resolves equal-length candidates independently of source order.
+    for (const id of dag.tasks.map((task) => task.id).sort()) {
+      const t = dag.get(id);
       if (!t.isDone()) {
         const p = best(t.id);
         if (p.length > top.length) {
