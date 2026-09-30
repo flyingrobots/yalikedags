@@ -1,5 +1,7 @@
 # Contributing
 
+Plan executable work using [one issue, one independently mergeable PR](docs/explanation/atomic-work.md); agent instructions live in [AGENTS.md](AGENTS.md).
+
 Tests are the spec. Write the failing test first, then the code, then `bun run check`.
 
 - `bun install` once. `bun test` runs the hermetic suite; `bun run lint` runs ESLint (strict, every warning is an error) and `tsc --noEmit`; `bun run check` runs all of it.

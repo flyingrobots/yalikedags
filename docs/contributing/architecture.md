@@ -6,6 +6,8 @@ yalikedags reads tasks from a source, computes derived views over the dependency
 
 ## The model
 
+The [atomic work contract](../explanation/atomic-work.md) defines the intended planning unit: one executable issue per independently mergeable PR, with prerequisites for correctness as dependency edges. Automatic discovery and split planning are not implemented yet; current analysis operates on supplied edges.
+
 Two stored facts per task (`status`, `blockedBy`), everything else derived. [Derived views](../explanation/derived-views.md) explains the folds. Ports and adapters keep the folds pure:
 
 ```text

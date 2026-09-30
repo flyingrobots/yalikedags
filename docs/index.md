@@ -20,6 +20,7 @@ yalikedags turns a Linear project into a dependency DAG, reports the ready front
 - [Viewer](reference/viewer.md)
 
 ## Understand
+- [One issue, one independently mergeable PR](explanation/atomic-work.md)
 - [Derived views: frontier, waves, workstreams, critical path, audit](explanation/derived-views.md)
 - [Source of truth: what Linear owns](explanation/source-of-truth.md)
 

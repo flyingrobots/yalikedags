@@ -53,6 +53,8 @@ Get a graph on screen in about two minutes, off the bundled example, no key need
 
 ## Understand it
 
+- [One issue, one independently mergeable PR](docs/explanation/atomic-work.md): the planning and task-splitting contract
+
 - [How the frontier, the workstreams and the critical path are derived](docs/explanation/derived-views.md)
 - [What Linear owns and what this tool derives](docs/explanation/source-of-truth.md)
 

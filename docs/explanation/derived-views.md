@@ -6,6 +6,8 @@ A project of a few hundred cards has more structure than anyone can hold in thei
 
 ## Mental model
 
+These calculations operate on supplied edges. The intended planning unit and dependency meaning are defined in [one issue, one independently mergeable PR](atomic-work.md); automatic discovery of missing edges is planned, not implemented.
+
 Two stored facts per task: its **status** and its **blockedBy** list. Every other word in the report is a fold over those two facts across the graph.
 
 ```text
