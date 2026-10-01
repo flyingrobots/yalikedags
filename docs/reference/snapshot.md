@@ -69,3 +69,14 @@ Fresh Linear reads optionally include `account`, an additive schema-2 field. It 
 Effort-based paths sum raw estimates, using one for unestimated tasks. Estimates from different team scales are not normalized or comparable as durations. Old snapshots that clamped estimates cannot recover the originals; take a fresh source reading.
 
 Schema 2 preserves unknown statuses and finite nonnegative estimates, including fractions and values above 3. Readers accept legacy schema 1 snapshots; writers always emit schema 2. Older schema 1 readers must be upgraded before reading schema 2 exports.
+
+## Structure-only exports
+
+Choose **Structure only** in Import/Export, or pass `--redact` to `sync` or `render`. The schema stays `/2`, but this is a lossy copy, unsuitable for restoring original issue content or matching a live tracker.
+
+- Retained: task order, statuses, blocker edges, parent/child relationships, and unresolved references. Graph shape and counts can still identify a project.
+- Replaced: known IDs and keys become `task-1`, `task-2`, etc.; titles become `Task 1`, `Task 2`, etc. External references receive consistent `external-1`, `external-2`, etc. Mapping is deterministic for the same ordered input, with no original-ID mapping included.
+- Removed: descriptions, URLs, assignments, account metadata, labels, resources, milestones, estimates, priorities, dates, original source, and source warnings.
+- Recomputed: all derived views and findings. Effort defaults to one, due dates are absent, `asOf` is the placeholder `1970-01-01`, `capturedAt` is `null`, and a fixed warning describes the reduction. Resource conflicts and urgency cannot preserve their original meaning.
+
+Full export remains the default and preserves all snapshot fields. Neither choice modifies the loaded project. The regression tests in `test/Redaction.test.ts` verify content removal and relation preservation through CLI JSON/HTML exports; `e2e/export-privacy.pw.ts` verifies both browser choices and unchanged task content in served and offline viewers.

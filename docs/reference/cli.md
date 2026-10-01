@@ -46,6 +46,7 @@ Read the source and write the snapshot.
 | Option | Meaning |
 |---|---|
 | `--out <file>` | write here instead of stdout |
+| `--redact` | write a structure-only snapshot: replace IDs, remove content and provenance |
 
 Output: the snapshot JSON ([reference](snapshot.md)). Stderr: `loaded N tasks from <source>`, any `warning:` lines, `wrote <file>`.
 
@@ -69,11 +70,18 @@ Print only the frontier section of the report.
 | Option | Meaning |
 |---|---|
 | `--format json|dot|svg|html|text` | default `text` |
+| `--redact` | use structure-only data in every output format; see [snapshot export contents](snapshot.md#structure-only-exports) |
 | `--out <file>` | write here instead of stdout |
 
 `dot` is GraphViz input (`dot -Tsvg graph.dot > graph.svg`). `svg` is standalone and needs nothing. `text` is the report `audit` prints.
 
 `html` is the whole viewer as one file: the same page `serve` returns, with the CSS, the graph, the snapshot and the script inline. It opens from disk with no process behind it and fetches nothing, so it travels — to a laptop with no key on it, to somebody who does not have this tool, into a directory beside last week's copy. Its only outbound links are the per-card "Open in Linear" ones, which come from the source data. The page is a reading, fixed at the moment you rendered it; `serve` offers explicit source refresh.
+
+`--redact` is accepted only by `sync` and `render`; using it with another command fails with exit 2 before reading the source. It affects the exported artifact, not source data or diagnostic stderr (which can contain source paths and warnings). Full output remains the default. Structure-only exports preserve graph shape and statuses and are not anonymous or encrypted.
+
+```bash
+yalikedags render --tasklist examples/example-tasklist.txt --redact --format html --out output/structure.html
+```
 
 ## `serve`
 

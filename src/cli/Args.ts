@@ -29,6 +29,7 @@ export const KNOWN_FLAGS: ReadonlySet<string> = new Set([
   "project",
   "prune",
   "receipt",
+  "redact",
   "set",
   "snapshot",
   "strict",
@@ -36,7 +37,7 @@ export const KNOWN_FLAGS: ReadonlySet<string> = new Set([
   "tasklist",
 ]);
 
-const BOOLEAN_FLAGS = new Set(["allow-destructive", "check", "confirm", "groups-as-milestones", "help", "json", "no-estimates", "no-milestones", "prune", "set", "strict"]);
+const BOOLEAN_FLAGS = new Set(["allow-destructive", "check", "confirm", "groups-as-milestones", "help", "json", "no-estimates", "no-milestones", "prune", "redact", "set", "strict"]);
 
 export class Args {
   readonly command: string | undefined;

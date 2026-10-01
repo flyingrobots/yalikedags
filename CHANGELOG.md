@@ -4,6 +4,8 @@ All notable changes to this project are documented here. The format follows Keep
 
 ## [Unreleased]
 
+- Add explicit full/structure-only snapshot export choices and `sync`/`render --redact`. Structure-only exports replace identifiers, remove content and provenance, and recompute analysis without changing the current workspace. Document plaintext export contents and local retention.
+
 - Document the atomic work contract: one executable issue per independently mergeable PR, correctness prerequisites as edges, and explicit antichain/MECE scope. Add root agent guidance and distinguish planned dependency discovery from current analysis.
 
 - Align table filters, counts, and outer cells with shared responsive gutters; inset table and wave pagination controls from the viewport edges.
