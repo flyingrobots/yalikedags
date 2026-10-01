@@ -62,6 +62,8 @@ Get a graph on screen in about two minutes, off the bundled example, no key need
 
 - [Troubleshooting](docs/troubleshooting/index.md): the sync refused, the graph has a cycle, a relation points somewhere odd
 
+For disconnected machines, [build and verify a self-contained offline distribution](docs/how-to/install-offline.md) on a preparation machine, then transfer it with its checksums and notices.
+
 ## What ya need
 
 - [bun](https://bun.sh) 1.2 or newer. That's the runtime. There is no Python in here; the Python that used to be here is in the first commit if ya want to look at it, but ya don't.

@@ -4,6 +4,8 @@ All notable changes to this project are documented here. The format follows Keep
 
 ## [Unreleased]
 
+- Add host-specific offline executable packaging with embedded viewer/runtime, dependency and runtime notices, source archive, manifest, checksums, and disconnected artifact verification.
+
 - Document the atomic work contract: one executable issue per independently mergeable PR, correctness prerequisites as edges, and explicit antichain/MECE scope. Add root agent guidance and distinguish planned dependency discovery from current analysis.
 
 - Align table filters, counts, and outer cells with shared responsive gutters; inset table and wave pagination controls from the viewport edges.
