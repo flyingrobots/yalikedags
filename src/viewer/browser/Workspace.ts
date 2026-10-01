@@ -1,3 +1,4 @@
+import { revealDrawer, stopDrawer } from "./DrawerMotion.ts";
 import { element } from "./Dom.ts";
 import { rec, str } from "../../adapters/linear/GraphqlJson.ts";
 
@@ -28,7 +29,9 @@ export class Workspace {
 
   show(id: string): void {
     if (id === "details") {
-      element("inspector").hidden = false;
+      const panel = element("inspector"); const opening = panel.hidden;
+      panel.hidden = false;
+      if (opening) { revealDrawer(panel); }
       element("toggle-details").setAttribute("aria-expanded", "true");
       element("details-panel").hidden = false;
       return;
@@ -42,10 +45,11 @@ export class Workspace {
       button.setAttribute("aria-current", button.dataset["panel"] === id ? "page" : "false");
     });
     element("view-title").textContent = VIEWS.get(id) ?? "";
+    document.dispatchEvent(new Event("yalikedags:view"));
     try { localStorage.setItem("yalikedags.view.v2", id); } catch { /* storage is optional */ }
   }
 
-  closeDetails(): void { element("inspector").hidden = true; element("toggle-details").setAttribute("aria-expanded", "false"); }
+  closeDetails(): void { stopDrawer(element("inspector")); element("inspector").hidden = true; element("toggle-details").setAttribute("aria-expanded", "false"); }
   toggleDetails(): void { if (element("inspector").hidden) { this.show("details"); } else { this.closeDetails(); } }
   layout(): { view: string } { return { view: this.active }; }
   reset(): void { this.closeDetails(); this.show("ready"); }

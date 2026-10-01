@@ -1,3 +1,6 @@
+import { DebugOverlay } from "./DebugOverlay.ts";
+import { ViewerMotion } from "./ViewerMotion.ts";
+import { SelectionNavigation } from "./SelectionNavigation.ts";
 import { GraphFilters } from "./GraphFilters.ts";
 import { InspectorResize } from "./InspectorResize.ts";
 import { paginateGroups } from "./ElementPagination.ts";
@@ -27,7 +30,9 @@ async function start(): Promise<void> {
   const textSize = new TextSizeController();
   const theme = new ThemeController();
   const analysis = await new ViewerBootstrap().render();
-  theme.bind(); textSize.bind();
+  theme.bind(); textSize.bind(); new ViewerMotion();
+  if (document.documentElement.dataset["development"] === "true") { new DebugOverlay(); }
+  if (analysis === undefined) { document.body.dataset["ready"] = "true"; return; }
   new ExportController(analysis);
   const state = new ViewerState(analysis.dag.tasks, analysis.states);
   const session = new SessionState();
@@ -46,6 +51,7 @@ async function start(): Promise<void> {
   new GraphFilters(analysis, state, neighborhood);
   new SelectionController(state, [...workspace.panels.values()]);
   new InspectorNavigation(state, workspace, graph);
+  new SelectionNavigation(state, workspace, graph);
   new SearchController(state, () => { workspace.show("graph"); workspace.show("details"); graph.focus(); });
   new ViewerInteractions(workspace, graph);
   element("findings-panel").addEventListener("click", (event) => {

@@ -1,6 +1,6 @@
 /* Reference palette and semantic roles. Theme files override these, not selectors. */
 :root {
-  --base-font-size: 16px;
+  --base-font-size: 100%;
   --ref-graphite-950: oklch(17% .009 260);
   --ref-graphite-900: oklch(21% .011 260);
   --ref-graphite-850: oklch(25% .012 260);

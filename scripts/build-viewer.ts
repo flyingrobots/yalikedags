@@ -3,6 +3,12 @@ import { resolve } from "node:path";
 
 /** Bundle once for both server and file export. No runtime asset requests or CDN. */
 const root = resolve(import.meta.dir, "..");
+await mkdir(resolve(root, "src/viewer/generated"), { recursive: true });
+const puppy = (await Bun.file(resolve(root, "assets/puppy-dag.svg")).text())
+  .replace('class="puppy-dag"', 'class="puppy-dag brand-puppy" aria-hidden="true" focusable="false"')
+  .replace('viewBox="0 0 1200 840"', 'viewBox="180 180 870 500"');
+await Bun.write(resolve(root, "src/viewer/generated/puppy.ts"),
+  `// Generated from assets/puppy-dag.svg. Do not edit.\nexport const puppyMarkup = ${JSON.stringify(puppy)};\n`);
 const result = await Bun.build({
   entrypoints: [resolve(root, "src/viewer/browser/main.ts")],
   target: "browser", format: "iife", minify: true, sourcemap: "none",

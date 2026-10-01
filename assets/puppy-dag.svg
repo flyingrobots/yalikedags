@@ -1,0 +1,215 @@
+<svg class="puppy-dag" xmlns="http://www.w3.org/2000/svg" width="1200" height="840" viewBox="0 0 1200 840" role="img" aria-labelledby="puppy-dag-title puppy-dag-description">
+<title id="puppy-dag-title">Ya like dogs? A puppy made of a DAG.</title>
+<desc id="puppy-dag-description">A side-profile puppy faces right, with a round nose, floppy ear, big paws and an upturned tail. Its body is built from 61 vertices and 112 arrows. Every arrow points toward a vertex farther left, so the directed graph is acyclic.</desc>
+<style>
+/* Inline this SVG to inherit the viewer theme. External img documents do not inherit host CSS.
+   Component tokens can be overridden on this SVG; semantic defaults come from theme.css. */
+.puppy-dag {
+  --puppy-dag-edge: var(--edge, currentColor);
+  --puppy-dag-outline: var(--accent, currentColor);
+  --puppy-dag-node: var(--ink, currentColor);
+  --puppy-dag-node-fill: var(--surface, none);
+  --puppy-dag-nose: var(--accent, currentColor);
+  --puppy-dag-ear-fill: var(--hover, none);
+}
+.puppy-dag .edge {fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-width:2.2;stroke:var(--puppy-dag-edge)}
+.puppy-dag .contour,.puppy-dag .ear {stroke:var(--puppy-dag-outline);stroke-width:2.8}
+.puppy-dag .distant {stroke:var(--puppy-dag-edge);stroke-dasharray:4 6;stroke-width:1.8}
+.puppy-dag .node {fill:var(--puppy-dag-node-fill);stroke:var(--puppy-dag-node);stroke-width:2.8}
+.puppy-dag .ear-node {stroke:var(--puppy-dag-outline)}
+.puppy-dag .far-node {stroke:var(--puppy-dag-edge);stroke-width:2}
+.puppy-dag .nose {fill:var(--puppy-dag-nose);stroke:var(--puppy-dag-nose)}
+.puppy-dag .eye {fill:var(--puppy-dag-node-fill);stroke:var(--puppy-dag-node)}
+.puppy-dag .pupil {fill:var(--puppy-dag-node)}
+.puppy-dag .ear-fill {fill:var(--puppy-dag-ear-fill)}
+.puppy-dag .arrow-mesh,.puppy-dag .arrow-distant {fill:var(--puppy-dag-edge)}
+.puppy-dag .arrow-contour,.puppy-dag .arrow-ear {fill:var(--puppy-dag-outline)}
+</style>
+<defs>
+<marker id="puppy-dag-arrow-contour" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto" markerUnits="userSpaceOnUse"><path class="arrow-contour" d="M0 0 7 3.5 0 7 1.8 3.5Z"/></marker>
+<marker id="puppy-dag-arrow-ear" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto" markerUnits="userSpaceOnUse"><path class="arrow-ear" d="M0 0 7 3.5 0 7 1.8 3.5Z"/></marker>
+<marker id="puppy-dag-arrow-mesh" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto" markerUnits="userSpaceOnUse"><path class="arrow-mesh" d="M0 0 7 3.5 0 7 1.8 3.5Z"/></marker>
+<marker id="puppy-dag-arrow-distant" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto" markerUnits="userSpaceOnUse"><path class="arrow-distant" d="M0 0 7 3.5 0 7 1.8 3.5Z"/></marker>
+</defs>
+<g transform="translate(1175 -8) scale(-1 1)">
+<path class="ear-fill" d="M345 202 391 240 437 279 456 343 420 405 375 382 356 311Z"/>
+<g id="puppy-dag-edges"><path class="edge distant" data-from="farFrontHeel" data-to="farFrontWrist" d="M 569.13 629.01 L 574.03 619.55" marker-end="url(#puppy-dag-arrow-distant)"/>
+<path class="edge distant" data-from="farFrontAnkle" data-to="farFrontHeel" d="M 541.16 611.57 L 556.11 627.52" marker-end="url(#puppy-dag-arrow-distant)"/>
+<path class="edge distant" data-from="farFrontPaw" data-to="farFrontHeel" d="M 501.00 637.00 L 552.00 637.00" marker-end="url(#puppy-dag-arrow-distant)"/>
+<path class="edge distant" data-from="farFrontPaw" data-to="farFrontToe" d="M 493.77 628.17 L 493.45 629.75" marker-end="url(#puppy-dag-arrow-distant)"/>
+<path class="edge distant" data-from="farFrontToe" data-to="farFrontAnkle" d="M 504.60 614.35 L 522.57 608.82" marker-end="url(#puppy-dag-arrow-distant)"/>
+<path class="edge distant" data-from="farFrontWrist" data-to="farFrontBack" d="M 583.42 599.68 L 605.06 547.02" marker-end="url(#puppy-dag-arrow-distant)"/>
+<path class="edge distant" data-from="farFrontAnkle" data-to="farFrontWrist" d="M 543.98 605.60 L 567.03 607.14" marker-end="url(#puppy-dag-arrow-distant)"/>
+<path class="edge distant" data-from="farFrontAnkle" data-to="farFrontKnee" d="M 535.61 596.02 L 539.11 544.97" marker-end="url(#puppy-dag-arrow-distant)"/>
+<path class="edge distant" data-from="farRearKnee" data-to="farRearAnkle" d="M 724.19 527.96 L 753.95 584.50" marker-end="url(#puppy-dag-arrow-distant)"/>
+<path class="edge distant" data-from="farRearAnkle" data-to="farRearHock" d="M 768.90 594.63 L 786.15 591.98" marker-end="url(#puppy-dag-arrow-distant)"/>
+<path class="edge distant" data-from="farRearAnkle" data-to="farRearHeel" d="M 766.61 602.11 L 790.46 624.17" marker-end="url(#puppy-dag-arrow-distant)"/>
+<path class="edge distant" data-from="farRearToe" data-to="farRearAnkle" d="M 707.51 614.07 L 747.71 600.23" marker-end="url(#puppy-dag-arrow-distant)"/>
+<path class="edge distant" data-from="farRearPaw" data-to="farRearToe" d="M 696.77 628.17 L 696.45 629.75" marker-end="url(#puppy-dag-arrow-distant)"/>
+<path class="edge distant" data-from="farRearPaw" data-to="farRearHeel" d="M 703.99 636.66 L 787.01 633.49" marker-end="url(#puppy-dag-arrow-distant)"/>
+<path class="edge distant" data-from="farRearBack" data-to="farRearHock" d="M 795.65 543.98 L 798.06 577.03" marker-end="url(#puppy-dag-arrow-distant)"/>
+<path class="edge distant" data-from="farRearHock" data-to="farRearHeel" d="M 799.21 599.00 L 799.70 620.00" marker-end="url(#puppy-dag-arrow-distant)"/>
+<path class="edge distant" data-from="farRearKnee" data-to="farRearHock" d="M 726.74 525.97 L 789.27 581.38" marker-end="url(#puppy-dag-arrow-distant)"/><path class="edge distant" data-from="farRearKnee" data-to="farRearBack" d="M 728.83 521.77 L 782.25 532.45" marker-end="url(#puppy-dag-arrow-distant)"/>
+
+<path class="edge contour" data-from="nose" data-to="bridge" d="M 171.55 319.08 L 191.54 305.04" marker-end="url(#puppy-dag-arrow-contour)"/>
+<path class="edge contour" data-from="bridge" data-to="brow" d="M 207.11 287.88 L 219.83 259.67" marker-end="url(#puppy-dag-arrow-contour)"/>
+<path class="edge contour" data-from="brow" data-to="forehead" d="M 234.40 238.89 L 266.55 211.69" marker-end="url(#puppy-dag-arrow-contour)"/>
+<path class="edge contour" data-from="forehead" data-to="crown" d="M 289.00 202.00 L 329.00 202.00" marker-end="url(#puppy-dag-arrow-contour)"/>
+<path class="edge contour" data-from="crown" data-to="earRoot" d="M 354.25 209.64 L 377.89 229.17" marker-end="url(#puppy-dag-arrow-contour)"/>
+<path class="edge contour" data-from="earRoot" data-to="earOuter" d="M 400.92 248.41 L 425.56 269.30" marker-end="url(#puppy-dag-arrow-contour)"/>
+<path class="edge contour" data-from="earOuter" data-to="neck" d="M 442.50 288.53 L 470.50 337.01" marker-end="url(#puppy-dag-arrow-contour)"/>
+<path class="edge contour" data-from="neck" data-to="withers" d="M 488.86 351.73 L 506.20 354.49" marker-end="url(#puppy-dag-arrow-contour)"/>
+<path class="edge contour" data-from="withers" data-to="back" d="M 533.97 356.18 L 638.04 349.03" marker-end="url(#puppy-dag-arrow-contour)"/>
+<path class="edge contour" data-from="back" data-to="hip" d="M 663.97 348.78 L 764.04 355.87" marker-end="url(#puppy-dag-arrow-contour)"/>
+<path class="edge contour" data-from="hip" data-to="tailRoot" d="M 791.93 358.31 L 838.09 363.37" marker-end="url(#puppy-dag-arrow-contour)"/>
+<path class="edge contour" data-from="tailRoot" data-to="tailBend" d="M 859.87 356.41 L 895.63 311.71" marker-end="url(#puppy-dag-arrow-contour)"/>
+<path class="edge contour" data-from="tailBend" data-to="tailTip" d="M 909.36 289.90 L 933.26 234.61" marker-end="url(#puppy-dag-arrow-contour)"/>
+<path class="edge contour" data-from="tailTip" data-to="tailOuter" d="M 950.82 226.21 L 957.52 230.68" marker-end="url(#puppy-dag-arrow-contour)"/>
+<path class="edge contour" data-from="tailArc" data-to="tailOuter" d="M 940.30 333.51 L 965.50 253.31" marker-end="url(#puppy-dag-arrow-contour)"/>
+<path class="edge contour" data-from="tailJoin" data-to="tailArc" d="M 888.45 411.09 L 928.21 356.15" marker-end="url(#puppy-dag-arrow-contour)"/>
+<path class="edge contour" data-from="rump" data-to="tailJoin" d="M 848.95 417.06 L 867.06 418.67" marker-end="url(#puppy-dag-arrow-contour)"/>
+<path class="edge contour" data-from="rump" data-to="rearTop" d="M 839.01 427.83 L 851.49 501.21" marker-end="url(#puppy-dag-arrow-contour)"/>
+<path class="edge contour" data-from="rearHock" data-to="rearTop" d="M 849.67 581.02 L 853.00 530.97" marker-end="url(#puppy-dag-arrow-contour)"/>
+<path class="edge contour" data-from="rearHock" data-to="rearHeel" d="M 849.45 600.99 L 851.27 641.02" marker-end="url(#puppy-dag-arrow-contour)"/>
+<path class="edge contour" data-from="rearPaw" data-to="rearHeel" d="M 786.00 657.00 L 836.00 657.00" marker-end="url(#puppy-dag-arrow-contour)"/>
+<path class="edge contour" data-from="rearToe" data-to="rearPaw" d="M 772.55 645.73 L 771.81 642.34" marker-end="url(#puppy-dag-arrow-contour)"/>
+<path class="edge contour" data-from="rearToe" data-to="rearAnkle" d="M 780.36 627.94 L 798.05 617.58" marker-end="url(#puppy-dag-arrow-contour)"/>
+<path class="edge contour" data-from="rearKnee" data-to="rearAnkle" d="M 794.33 557.48 L 806.46 595.70" marker-end="url(#puppy-dag-arrow-contour)"/>
+<path class="edge contour" data-from="flank" data-to="rearKnee" d="M 742.64 496.91 L 780.58 536.21" marker-end="url(#puppy-dag-arrow-contour)"/>
+<path class="edge contour" data-from="belly" data-to="flank" d="M 603.98 496.38 L 720.02 489.84" marker-end="url(#puppy-dag-arrow-contour)"/>
+<path class="edge contour" data-from="frontTop" data-to="belly" d="M 493.99 492.50 L 578.02 496.32" marker-end="url(#puppy-dag-arrow-contour)"/>
+<path class="edge contour" data-from="frontBack" data-to="frontTop" d="M 471.20 590.07 L 481.21 506.89" marker-end="url(#puppy-dag-arrow-contour)"/>
+<path class="edge contour" data-from="frontHeel" data-to="frontBack" d="M 462.87 645.15 L 467.82 613.83" marker-end="url(#puppy-dag-arrow-contour)"/>
+<path class="edge contour" data-from="frontPaw" data-to="frontHeel" d="M 399.00 657.00 L 445.00 657.00" marker-end="url(#puppy-dag-arrow-contour)"/>
+<path class="edge contour" data-from="frontToe" data-to="frontPaw" d="M 384.24 643.56 L 383.96 642.56" marker-end="url(#puppy-dag-arrow-contour)"/>
+<path class="edge contour" data-from="frontToe" data-to="frontAnkle" d="M 391.02 625.40 L 409.47 613.25" marker-end="url(#puppy-dag-arrow-contour)"/>
+<path class="edge contour" data-from="frontAnkle" data-to="frontKnee" d="M 422.96 594.04 L 428.69 528.94" marker-end="url(#puppy-dag-arrow-contour)"/>
+<path class="edge contour" data-from="chest" data-to="frontKnee" d="M 412.45 455.49 L 425.69 499.63" marker-end="url(#puppy-dag-arrow-contour)"/>
+<path class="edge contour" data-from="cheek" data-to="chest" d="M 329.51 378.97 L 396.62 433.87" marker-end="url(#puppy-dag-arrow-contour)"/>
+<path class="edge contour" data-from="jaw" data-to="cheek" d="M 254.71 387.50 L 306.39 375.41" marker-end="url(#puppy-dag-arrow-contour)"/>
+<path class="edge contour" data-from="muzzle" data-to="jaw" d="M 191.84 380.89 L 229.22 387.42" marker-end="url(#puppy-dag-arrow-contour)"/>
+<path class="edge contour" data-from="nose" data-to="muzzle" d="M 164.63 346.92 L 174.18 365.64" marker-end="url(#puppy-dag-arrow-contour)"/>
+<path class="edge ear" data-from="crown" data-to="earFold" d="M 346.20 213.94 L 354.59 297.07" marker-end="url(#puppy-dag-arrow-ear)"/>
+<path class="edge ear" data-from="earFold" data-to="earInner" d="M 358.59 320.66 L 371.12 367.51" marker-end="url(#puppy-dag-arrow-ear)"/>
+<path class="edge ear" data-from="earInner" data-to="earTip" d="M 384.79 387.01 L 404.86 397.26" marker-end="url(#puppy-dag-arrow-ear)"/>
+<path class="edge ear" data-from="earTip" data-to="earBend" d="M 426.53 393.76 L 448.47 355.97" marker-end="url(#puppy-dag-arrow-ear)"/>
+<path class="edge ear" data-from="earOuter" data-to="earBend" d="M 440.13 289.55 L 451.73 328.62" marker-end="url(#puppy-dag-arrow-ear)"/>
+<path class="edge ear" data-from="earFold" data-to="earRoot" d="M 360.42 302.03 L 383.48 255.25" marker-end="url(#puppy-dag-arrow-ear)"/>
+<path class="edge ear" data-from="earFold" data-to="earBend" d="M 365.52 314.05 L 441.71 338.43" marker-end="url(#puppy-dag-arrow-ear)"/>
+<path class="edge mesh" data-from="nose" data-to="eye" d="M 173.84 323.47 L 261.16 291.53" marker-end="url(#puppy-dag-arrow-mesh)"/>
+<path class="edge mesh" data-from="bridge" data-to="eye" d="M 212.88 295.44 L 260.23 287.96" marker-end="url(#puppy-dag-arrow-mesh)"/>
+<path class="edge mesh" data-from="brow" data-to="eye" d="M 234.86 252.52 L 263.70 273.74" marker-end="url(#puppy-dag-arrow-mesh)"/>
+<path class="edge mesh" data-from="forehead" data-to="eye" d="M 278.13 213.00 L 278.77 266.00" marker-end="url(#puppy-dag-arrow-mesh)"/>
+<path class="edge mesh" data-from="eye" data-to="crown" d="M 288.34 273.26 L 335.04 214.52" marker-end="url(#puppy-dag-arrow-mesh)"/>
+<path class="edge mesh" data-from="eye" data-to="earFold" d="M 293.21 289.80 L 342.74 306.52" marker-end="url(#puppy-dag-arrow-mesh)"/>
+<path class="edge mesh" data-from="eye" data-to="cheek" d="M 285.52 298.51 L 314.48 358.49" marker-end="url(#puppy-dag-arrow-mesh)"/>
+<path class="edge mesh" data-from="jaw" data-to="eye" d="M 247.48 379.56 L 272.99 303.02" marker-end="url(#puppy-dag-arrow-mesh)"/>
+<path class="edge mesh" data-from="muzzle" data-to="eye" d="M 188.94 371.39 L 265.29 298.15" marker-end="url(#puppy-dag-arrow-mesh)"/>
+<path class="edge mesh" data-from="cheek" data-to="earInner" d="M 331.82 374.00 L 360.25 379.27" marker-end="url(#puppy-dag-arrow-mesh)"/>
+<path class="edge mesh" data-from="chest" data-to="earTip" d="M 412.26 432.45 L 415.39 421.36" marker-end="url(#puppy-dag-arrow-mesh)"/>
+<path class="edge mesh" data-from="earBend" data-to="neck" d="M 466.48 346.34 L 463.71 345.45" marker-end="url(#puppy-dag-arrow-mesh)"/>
+<path class="edge mesh" data-from="earTip" data-to="shoulder" d="M 432.58 408.28 L 473.52 418.96" marker-end="url(#puppy-dag-arrow-mesh)"/>
+<path class="edge mesh" data-from="neck" data-to="shoulder" d="M 479.64 360.88 L 486.62 407.18" marker-end="url(#puppy-dag-arrow-mesh)"/>
+<path class="edge mesh" data-from="chest" data-to="shoulder" d="M 420.61 440.95 L 473.52 427.06" marker-end="url(#puppy-dag-arrow-mesh)"/>
+<path class="edge mesh" data-from="chest" data-to="frontTop" d="M 419.07 450.53 L 470.42 483.84" marker-end="url(#puppy-dag-arrow-mesh)"/>
+<path class="edge mesh" data-from="frontKnee" data-to="frontTop" d="M 440.16 509.78 L 469.15 497.75" marker-end="url(#puppy-dag-arrow-mesh)"/>
+<path class="edge mesh" data-from="frontAnkle" data-to="frontBack" d="M 432.94 603.86 L 456.08 601.45" marker-end="url(#puppy-dag-arrow-mesh)"/>
+<path class="edge mesh" data-from="frontToe" data-to="frontHeel" d="M 392.45 635.58 L 445.73 652.23" marker-end="url(#puppy-dag-arrow-mesh)"/>
+<path class="edge mesh" data-from="shoulder" data-to="withers" d="M 494.37 412.27 L 514.84 371.31" marker-end="url(#puppy-dag-arrow-mesh)"/>
+<path class="edge mesh" data-from="shoulder" data-to="rib" d="M 501.00 422.89 L 579.00 422.14" marker-end="url(#puppy-dag-arrow-mesh)"/>
+<path class="edge mesh" data-from="frontTop" data-to="shoulder" d="M 483.95 481.04 L 487.61 438.94" marker-end="url(#puppy-dag-arrow-mesh)"/>
+<path class="edge mesh" data-from="withers" data-to="rib" d="M 530.91 365.04 L 582.87 411.95" marker-end="url(#puppy-dag-arrow-mesh)"/>
+<path class="edge mesh" data-from="rib" data-to="back" d="M 600.86 413.40 L 643.65 359.73" marker-end="url(#puppy-dag-arrow-mesh)"/>
+<path class="edge mesh" data-from="belly" data-to="rib" d="M 593.15 486.00 L 593.80 437.00" marker-end="url(#puppy-dag-arrow-mesh)"/>
+<path class="edge mesh" data-from="frontTop" data-to="rib" d="M 492.30 486.13 L 581.31 430.00" marker-end="url(#puppy-dag-arrow-mesh)"/>
+<path class="edge mesh" data-from="belly" data-to="waist" d="M 602.00 490.67 L 688.73 429.63" marker-end="url(#puppy-dag-arrow-mesh)"/>
+<path class="edge mesh" data-from="rib" data-to="waist" d="M 605.00 421.90 L 686.00 421.14" marker-end="url(#puppy-dag-arrow-mesh)"/>
+<path class="edge mesh" data-from="back" data-to="waist" d="M 659.04 357.19 L 692.76 408.47" marker-end="url(#puppy-dag-arrow-mesh)"/>
+<path class="edge mesh" data-from="waist" data-to="hip" d="M 709.55 414.08 L 767.57 367.07" marker-end="url(#puppy-dag-arrow-mesh)"/>
+<path class="edge mesh" data-from="waist" data-to="haunch" d="M 711.02 425.54 L 772.43 453.39" marker-end="url(#puppy-dag-arrow-mesh)"/>
+<path class="edge mesh" data-from="waist" data-to="flank" d="M 705.92 430.84 L 728.29 475.58" marker-end="url(#puppy-dag-arrow-mesh)"/>
+<path class="edge mesh" data-from="flank" data-to="haunch" d="M 744.61 483.64 L 773.03 467.79" marker-end="url(#puppy-dag-arrow-mesh)"/>
+<path class="edge mesh" data-from="hip" data-to="haunch" d="M 780.81 368.97 L 785.92 444.04" marker-end="url(#puppy-dag-arrow-mesh)"/>
+<path class="edge mesh" data-from="haunch" data-to="rump" d="M 796.01 452.07 L 824.99 426.57" marker-end="url(#puppy-dag-arrow-mesh)"/>
+<path class="edge mesh" data-from="tailRoot" data-to="tailJoin" d="M 858.13 374.73 L 875.00 406.73" marker-end="url(#puppy-dag-arrow-mesh)"/>
+<path class="edge mesh" data-from="tailBend" data-to="tailArc" d="M 911.47 308.90 L 928.18 331.87" marker-end="url(#puppy-dag-arrow-mesh)"/>
+<path class="edge mesh" data-from="haunch" data-to="rearTop" d="M 796.21 467.70 L 842.49 506.38" marker-end="url(#puppy-dag-arrow-mesh)"/>
+<path class="edge mesh" data-from="haunch" data-to="rearKnee" d="M 787.55 471.99 L 790.31 532.02" marker-end="url(#puppy-dag-arrow-mesh)"/>
+<path class="edge mesh" data-from="rearKnee" data-to="rearTop" d="M 800.87 542.14 L 840.54 522.62" marker-end="url(#puppy-dag-arrow-mesh)"/>
+<path class="edge mesh" data-from="rearKnee" data-to="rearHock" d="M 799.76 553.65 L 837.85 582.54" marker-end="url(#puppy-dag-arrow-mesh)"/>
+<path class="edge mesh" data-from="rearAnkle" data-to="rearHock" d="M 820.84 605.08 L 836.48 597.26" marker-end="url(#puppy-dag-arrow-mesh)"/>
+<path class="edge mesh" data-from="rearToe" data-to="rearHeel" d="M 781.55 637.24 L 836.59 652.68" marker-end="url(#puppy-dag-arrow-mesh)"/>
+<path class="edge distant" data-from="frontTop" data-to="farFrontKnee" d="M 492.00 498.32 L 529.36 524.53" marker-end="url(#puppy-dag-arrow-distant)"/>
+
+<path class="edge distant" data-from="farFrontToe" data-to="farFrontHeel" d="M 504.64 619.51 L 552.51 633.38" marker-end="url(#puppy-dag-arrow-distant)"/>
+
+<path class="edge distant" data-from="farFrontKnee" data-to="farFrontBack" d="M 548.99 532.39 L 597.01 534.44" marker-end="url(#puppy-dag-arrow-distant)"/>
+<path class="edge distant" data-from="farRearKnee" data-to="flank" d="M 723.92 511.90 L 728.47 502.50" marker-end="url(#puppy-dag-arrow-distant)"/>
+
+<path class="edge distant" data-from="farRearToe" data-to="farRearHeel" d="M 707.89 618.41 L 787.16 630.97" marker-end="url(#puppy-dag-arrow-distant)"/>
+<path class="edge distant" data-from="rearKnee" data-to="farRearHeel" d="M 792.14 557.94 L 798.65 620.07" marker-end="url(#puppy-dag-arrow-distant)"/></g>
+<g id="puppy-dag-nodes"><circle id="puppy-dag-node-nose" class="node nose" cx="156" cy="330" r="16"/>
+<circle id="puppy-dag-node-bridge" class="node " cx="203" cy="297" r="7"/>
+<circle id="puppy-dag-node-brow" class="node " cx="226" cy="246" r="8"/>
+<circle id="puppy-dag-node-forehead" class="node " cx="278" cy="202" r="8"/>
+<circle id="puppy-dag-node-crown" class="node " cx="345" cy="202" r="9"/>
+<circle id="puppy-dag-node-earRoot" class="node ear-node" cx="391" cy="240" r="10"/>
+<circle id="puppy-dag-node-eye" class="node eye" cx="279" cy="285" r="12"/>
+<circle id="puppy-dag-node-muzzle" class="node " cx="181" cy="379" r="8"/>
+<circle id="puppy-dag-node-jaw" class="node " cx="244" cy="390" r="8"/>
+<circle id="puppy-dag-node-cheek" class="node " cx="321" cy="372" r="8"/>
+<circle id="puppy-dag-node-chest" class="node " cx="409" cy="444" r="9"/>
+<circle id="puppy-dag-node-earOuter" class="node ear-node" cx="437" cy="279" r="8"/>
+<circle id="puppy-dag-node-earBend" class="node ear-node" cx="456" cy="343" r="8"/>
+<circle id="puppy-dag-node-earTip" class="node ear-node" cx="420" cy="405" r="10"/>
+<circle id="puppy-dag-node-earInner" class="node ear-node" cx="375" cy="382" r="8"/>
+<circle id="puppy-dag-node-earFold" class="node ear-node" cx="356" cy="311" r="7"/>
+<circle id="puppy-dag-node-neck" class="node " cx="478" cy="350" r="8"/>
+<circle id="puppy-dag-node-withers" class="node " cx="522" cy="357" r="9"/>
+<circle id="puppy-dag-node-back" class="node " cx="653" cy="348" r="8"/>
+<circle id="puppy-dag-node-hip" class="node " cx="780" cy="357" r="9"/>
+<circle id="puppy-dag-node-rump" class="node " cx="837" cy="416" r="9"/>
+<circle id="puppy-dag-node-tailRoot" class="node " cx="853" cy="365" r="8"/>
+<circle id="puppy-dag-node-tailBend" class="node " cx="905" cy="300" r="8"/>
+<circle id="puppy-dag-node-tailTip" class="node " cx="940" cy="219" r="10"/>
+<circle id="puppy-dag-node-tailOuter" class="node " cx="970" cy="239" r="8"/>
+<circle id="puppy-dag-node-tailArc" class="node " cx="937" cy="344" r="8"/>
+<circle id="puppy-dag-node-tailJoin" class="node " cx="882" cy="420" r="8"/>
+<circle id="puppy-dag-node-shoulder" class="node " cx="489" cy="423" r="9"/>
+<circle id="puppy-dag-node-rib" class="node " cx="594" cy="422" r="8"/>
+<circle id="puppy-dag-node-waist" class="node " cx="701" cy="421" r="8"/>
+<circle id="puppy-dag-node-haunch" class="node " cx="787" cy="460" r="9"/>
+<circle id="puppy-dag-node-frontKnee" class="node " cx="430" cy="514" r="8"/>
+<circle id="puppy-dag-node-frontAnkle" class="node " cx="422" cy="605" r="8"/>
+<circle id="puppy-dag-node-frontToe" class="node " cx="381" cy="632" r="9"/>
+<circle id="puppy-dag-node-frontPaw" class="node " cx="388" cy="657" r="8"/>
+<circle id="puppy-dag-node-frontHeel" class="node " cx="461" cy="657" r="9"/>
+<circle id="puppy-dag-node-frontBack" class="node " cx="470" cy="600" r="7"/>
+<circle id="puppy-dag-node-frontTop" class="node " cx="483" cy="492" r="8"/>
+<circle id="puppy-dag-node-belly" class="node " cx="593" cy="497" r="8"/>
+<circle id="puppy-dag-node-flank" class="node " cx="735" cy="489" r="8"/>
+<circle id="puppy-dag-node-rearKnee" class="node " cx="791" cy="547" r="8"/>
+<circle id="puppy-dag-node-rearAnkle" class="node " cx="811" cy="610" r="8"/>
+<circle id="puppy-dag-node-rearToe" class="node " cx="770" cy="634" r="9"/>
+<circle id="puppy-dag-node-rearPaw" class="node " cx="775" cy="657" r="8"/>
+<circle id="puppy-dag-node-rearHeel" class="node " cx="852" cy="657" r="9"/>
+<circle id="puppy-dag-node-rearHock" class="node " cx="849" cy="591" r="7"/>
+<circle id="puppy-dag-node-rearTop" class="node " cx="854" cy="516" r="8"/>
+<circle id="puppy-dag-node-farFrontAnkle" class="node far-node" cx="535" cy="605" r="6"/>
+<circle id="puppy-dag-node-farFrontWrist" class="node far-node" cx="580" cy="608" r="6"/>
+<circle id="puppy-dag-node-farFrontPaw" class="node far-node" cx="492" cy="637" r="6"/>
+<circle id="puppy-dag-node-farFrontKnee" class="node far-node" cx="540" cy="532" r="6"/>
+<circle id="puppy-dag-node-farFrontHeel" class="node far-node" cx="565" cy="637" r="6"/>
+<circle id="puppy-dag-node-farFrontToe" class="node far-node" cx="496" cy="617" r="6"/>
+<circle id="puppy-dag-node-farFrontBack" class="node far-node" cx="610" cy="535" r="6"/>
+<circle id="puppy-dag-node-farRearKnee" class="node far-node" cx="720" cy="520" r="6"/>
+<circle id="puppy-dag-node-farRearToe" class="node far-node" cx="699" cy="617" r="6"/>
+<circle id="puppy-dag-node-farRearBack" class="node far-node" cx="795" cy="535" r="6"/>
+<circle id="puppy-dag-node-farRearHeel" class="node far-node" cx="800" cy="633" r="6"/>
+<circle id="puppy-dag-node-farRearAnkle" class="node far-node" cx="760" cy="596" r="6"/>
+<circle id="puppy-dag-node-farRearHock" class="node far-node" cx="799" cy="590" r="6"/>
+<circle id="puppy-dag-node-farRearPaw" class="node far-node" cx="695" cy="637" r="6"/>
+<circle class="pupil" cx="276" cy="285" r="5"/>
+</g>
+</g>
+</svg>

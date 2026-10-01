@@ -37,6 +37,7 @@ function viewport(value: string | null): number[] {
 }
 
 test("neighborhood relayout expands by hops and preserves the whole-project viewport", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
   await page.getByRole("button", { name: "Dependencies", exact: true }).click();
   await page.getByRole("button", { name: "Zoom out", exact: true }).click();
   const before = await page.locator("#graph svg").getAttribute("viewBox");
@@ -45,6 +46,7 @@ test("neighborhood relayout expands by hops and preserves the whole-project view
   await expect(page.locator("#graph svg")).toHaveAttribute("viewBox", before ?? "");
   await page.locator('#graph [data-id="a"]').focus();
   await page.keyboard.press("Enter");
+  await page.getByRole("button", { name: "Focus selection", exact: true }).click();
   const full = await page.locator("#graph svg").getAttribute("viewBox");
   await page.getByRole("button", { name: "Focus neighborhood" }).click();
   await expect(page.locator("#graph .node")).toHaveCount(2);
@@ -125,7 +127,9 @@ test("larger adjustable text persists and mobile controls stay within the viewpo
   await page.setViewportSize({ width: 390, height: 844 });
   await page.locator('#frontier [data-task="a"].card').click();
   await page.getByRole('button', { name: 'Theme and display mode' }).click();
-  await page.getByLabel('Base text size').selectOption('20');
+  await page.getByRole('slider', { name: 'Text size', exact: true }).focus();
+  await page.keyboard.press('Home');
+  for (let step = 0; step < 15; step += 1) { await page.keyboard.press('ArrowRight'); }
   await expect(page.locator('html')).toHaveCSS('font-size', '20px');
   await page.keyboard.press('Escape');
   await page.reload();

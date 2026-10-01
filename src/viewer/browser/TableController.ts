@@ -37,6 +37,7 @@ export class TableController {
       });
     });
     state.subscribe(() => { this.highlight(); });
+    this.panel.addEventListener("yalikedags:reveal", () => { this.pagination.reveal(task => task.id === this.panel.dataset["revealTask"]); });
     this.render();
   }
 

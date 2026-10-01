@@ -89,6 +89,10 @@ yalikedags render --tasklist examples/example-tasklist.txt --redact --format htm
 |---|---|
 | `--port <n>` | default `0`, which lets the OS pick; the chosen URL is printed |
 
+For `serve --project`, a missing credential (after environment and keychain lookup) or rejected Linear key opens a browser setup screen instead of exiting. It shows the requested `--key-target` (default `LINEAR_API_KEY`). After setting the environment variable, restart the server from that same shell; existing processes cannot inherit later exports. Other startup errors still exit normally. If a later refresh fails, the last good snapshot remains visible. File sources never require a Linear key.
+
+Set `YALIKEDAGS_DEV=1` when starting `serve` to enable the floating developer toolbar, diagnostics, and puppy rig controls. It is off by default and never enabled by HTML export. See [developer overlay](viewer.md#developer-overlay).
+
 Binds `127.0.0.1` only. Read routes: `/`, `/snapshot.json`, `/graph.svg`, `/graph.dot`. The viewer sends an explicit same-origin `POST /refresh` to reread the source; it does not poll or write to the tracker. Stop with Ctrl-C.
 
 ## `key`

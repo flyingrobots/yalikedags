@@ -1,3 +1,5 @@
+import { viewerPage } from "../src/viewer/ViewerPage.ts";
+import { SetupData } from "../src/viewer/SetupData.ts";
 import { workspaceAction } from "../e2e/workspace.ts";
 import { mkdir } from "node:fs/promises";
 import { resolve } from "node:path";
@@ -15,7 +17,7 @@ await Bun.write("dist/viewer-example.html", new HtmlRendererAdapter().render(ana
 await mkdir("docs/images", { recursive: true });
 const browser = await chromium.launch();
 try {
-  const page = await browser.newPage({ viewport: { width: 1440, height: 960 }, deviceScaleFactor: 1 });
+  const page = await browser.newPage({ viewport: { width: 1440, height: 960 }, deviceScaleFactor: 1, reducedMotion: "reduce" });
   await page.goto(pathToFileURL(resolve("dist/viewer-example.html")).href);
   await page.locator("body[data-ready]").waitFor();
   await page.screenshot({ path: "docs/images/viewer-overview.png" });
@@ -29,5 +31,9 @@ try {
   await page.screenshot({ path: "docs/images/viewer-split.png" });
   await workspaceAction(page, "Show task table");
   await page.screenshot({ path: "docs/images/viewer-table.png" });
+  await Bun.write("dist/viewer-setup.html", viewerPage(new SetupData().render({ kind: "setup", reason: "missing", keyTarget: "LINEAR_API_KEY" })));
+  await page.goto(pathToFileURL(resolve("dist/viewer-setup.html")).href);
+  await page.locator("body[data-ready]").waitFor();
+  await page.screenshot({ path: "docs/images/viewer-setup.png" });
 } finally { await browser.close(); }
 console.log("viewer screenshots written to docs/images/");

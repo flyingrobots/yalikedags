@@ -4,6 +4,24 @@ All notable changes to this project are documented here. The format follows Keep
 
 ## [Unreleased]
 
+- Give the far foreleg a distinct wrist and paw; keep pose and secondary animation controls available when rig visualization is off.
+
+- Close the far foreleg shoulder mesh and give the far hind leg a tapered shin, hock, and distinct paw instead of a rectangular silhouette.
+- Add two-bone limb joints and bind-space skinning; widen far-side legs and the bow stance while preserving torso depth.
+- Fill rig debug nodes and add region-colored triangle surfaces that deform with the puppy while keeping edges readable.
+- Add an opt-in development toolbar with GSAP dragging, keyboard movement, tool widgets, and bounded diagnostics. Move puppy rig controls out of Appearance into the developer overlay. Enable with YALIKEDAGS_DEV=1 when serving.
+- Add a layered puppy rig with independent body/limb, head, ear, and tail tracks; persistent standing/sitting/bowing poses; and theme-aware region/bone debug controls in the development overlay.
+- Blend repeated puppy clicks and replacement clips from their current animated positions, avoiding a snap to standing.
+- Add a five-keyframe GSAP sitting animation on puppy click, with rounded haunches, an upright chest and head over the forelegs, folded rear legs, and staggered front-paw adjustments.
+- Animate the embedded DAG puppy’s tail with reusable node keyframe clips played by GSAP timelines; connected arrows follow the wag and reduced motion restores the resting pose.
+- Bundle GSAP locally for DAG/puppy hover wiggles, expanding click/theme waves, and semantic theme-color transitions. Follow selection across paginated views with animated scrolling and DAG centering. Default the resizable task drawer to its maximum width, preserving saved sizes. Respect reduced motion and cancel effects on user navigation.
+
+- Replace fixed text-size choices with a live relative-scale slider and reset control. Respect browser font preferences, migrate saved sizes, and widen the desktop navigation using rem units so it scales with the text.
+
+- Face the DAG puppy right and show a centered, full-height credential setup screen when `serve --project` has no usable Linear credential. Include the actual key target, safe keychain alternative, restart guidance, and a local-file example.
+
+- Embed the DAG puppy inline above the navigation wordmark, with a compact mobile layout and colors inherited from the active theme. Offline exports include the same artwork without an asset request.
+
 - Add explicit full/structure-only snapshot export choices and `sync`/`render --redact`. Structure-only exports replace identifiers, remove content and provenance, and recompute analysis without changing the current workspace. Document plaintext export contents and local retention.
 
 - Document the atomic work contract: one executable issue per independently mergeable PR, correctness prerequisites as edges, and explicit antichain/MECE scope. Add root agent guidance and distinguish planned dependency discovery from current analysis.

@@ -23,6 +23,14 @@ Now, if the dependencies live in a file on your machine and not in Linear where 
 
 It's for the whole team. Everyone's got their own Linear key in their own keychain, everyone points it at the same project, everyone sees the same graph. Linear is the source of truth; this just has the good sense to draw it.
 
+Missing a Linear key? `serve --project example-project` opens a setup screen with environment/keychain instructions and a local-file alternative. Restart from the same terminal after exporting a key.
+
+The DAG and puppy use locally bundled GSAP for hover motion, expanding click/theme pulses, and smooth selection navigation. Reduced-motion preferences disable decorative effects. Task details opens at its maximum width unless you have saved a smaller size.
+
+**Theme → Text size** adjusts a relative-scale slider; the wider desktop navigation grows with the text.
+
+The navigation's [DAG puppy](assets/puppy-dag.svg) is inline SVG: it follows the selected theme and travels with offline exports.
+
 ### Share it as an offline file
 
 And when ya want someone else to see it who hasn't got the tool, or the key, or the first idea what a terminal is: `render --format html --out dag.html`. One file. Whole viewer in it, graph and all. Opens by double-clicking, asks the internet for nothing, works on a plane. Send it to whoever ya like.

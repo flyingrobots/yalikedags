@@ -20,7 +20,7 @@ import { VaultSecretsAdapter } from "./adapters/secrets/VaultSecretsAdapter.ts";
 import { ChainSecretsAdapter } from "./adapters/secrets/ChainSecretsAdapter.ts";
 import { LinearTaskRepositoryAdapter } from "./adapters/input/LinearTaskRepositoryAdapter.ts";
 import { ViewerRequestHandler } from "./viewer/ViewerRequestHandler.ts";
-import { RefreshingAnalysis } from "./viewer/RefreshingAnalysis.ts";
+import { ViewerSession } from "./viewer/ViewerSession.ts";
 import { ViewerServerAdapter } from "./viewer/ViewerServerAdapter.ts";
 import { Args } from "./cli/Args.ts";
 import { ExitCode, exitCodeFor } from "./cli/ExitCode.ts";
@@ -136,8 +136,9 @@ function auditCommand(a: Analysis, args: Args): ExitCodeValue {
 }
 
 async function serveCommand(args: Args, read: () => Promise<Analysis>): Promise<ExitCodeValue> {
-  const live = new RefreshingAnalysis(await read(), read);
-  const handler = new ViewerRequestHandler(() => live.current, () => ({ refresh: true, ...(live.changes !== undefined && { changes: live.changes }), ...(live.previous !== undefined && { previous: live.previous }) }));
+  const live = new ViewerSession(read, args.get("key-target") ?? "LINEAR_API_KEY");
+  await live.refresh();
+  const handler = new ViewerRequestHandler(() => live.current(), () => live.options(), process.env["YALIKEDAGS_DEV"] === "1");
   const handle = new ViewerServerAdapter(handler, () => live.refresh()).start(Number(args.get("port") ?? "0"));
   console.error(`viewer at ${handle.url}  (127.0.0.1 only; Ctrl-C to stop)`);
   await new Promise<void>((resolve) => {

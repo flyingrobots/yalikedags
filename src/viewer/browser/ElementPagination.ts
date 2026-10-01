@@ -10,6 +10,13 @@ export class ElementPagination {
     });
     before.before(this.pagination.control);
     this.set(items);
+    const panel = before.closest<HTMLElement>(".panel");
+    panel?.addEventListener("yalikedags:reveal", () => {
+      const id = panel.dataset["revealTask"];
+      if (id === undefined) { return; }
+      const selector = `[data-id="${CSS.escape(id)}"],[data-task="${CSS.escape(id)}"]`;
+      this.pagination.reveal(item => item.matches(selector) || Array.from(item.querySelectorAll<HTMLElement>(selector)).some(child => !child.hidden));
+    });
   }
   set(items: readonly HTMLElement[]): void { this.pagination.set(items); }
 }

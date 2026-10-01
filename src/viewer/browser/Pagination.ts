@@ -28,6 +28,13 @@ export class Pagination<T> {
 
   set(items: readonly T[]): void { this.items = items; this.page = 0; this.render(); }
 
+  reveal(matches: (item: T) => boolean): void {
+    const index = this.items.findIndex(matches);
+    if (index < 0) { return; }
+    const page = Math.floor(index / this.size);
+    if (page !== this.page) { this.page = page; this.render(); }
+  }
+
   private pages(): number { return Math.max(1, Math.ceil(this.items.length / this.size)); }
 
   private bind(button: HTMLButtonElement, label: string, page: () => number): void {

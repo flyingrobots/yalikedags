@@ -30,6 +30,7 @@
   "dependencies": {
     "@git-stunts/vault": "^1.0.1",
     "dompurify": "^3.4.16",
+    "gsap": "^3.15.0",
     "marked": "^18.0.14"
   },
   "devDependencies": {

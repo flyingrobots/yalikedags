@@ -1,3 +1,5 @@
+import { SetupData } from "../SetupData.ts";
+import { SetupMarkup } from "../SetupMarkup.ts";
 import { ViewerDataCodec } from "../ViewerDataCodec.ts";
 import { ViewerMarkup } from "../ViewerMarkup.ts";
 import type { Analysis } from "../../core/services/Analysis.ts";
@@ -5,9 +7,16 @@ import { element } from "./Dom.ts";
 
 /** Load only same-origin data; exports use the embedded payload and never fetch. */
 export class ViewerBootstrap {
-  async render(): Promise<Analysis> {
+  async render(): Promise<Analysis | undefined> {
     const embedded = document.getElementById("viewer-data");
     const text = embedded === null ? await this.fetchData() : embedded.textContent;
+    const setup = new SetupData().decode(text);
+    if (setup !== undefined) {
+      element("app").innerHTML = new SetupMarkup().render(setup);
+      document.title = "Connect Linear · yalikedags";
+      document.body.dataset["setup"] = "true";
+      return undefined;
+    }
     const { analysis, options } = await new ViewerDataCodec().decode(text);
     // A copied offline file cannot gain server capabilities from its payload.
     if (embedded !== null) { options.refresh = false; }
