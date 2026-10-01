@@ -62,6 +62,8 @@ Get a graph on screen in about two minutes, off the bundled example, no key need
 
 - [Troubleshooting](docs/troubleshooting/index.md): the sync refused, the graph has a cycle, a relation points somewhere odd
 
+Snapshot comparisons stay local, run off the UI thread, and can be canceled. Oversized imports are refused; see [import budgets](docs/reference/snapshot.md#import-budgets).
+
 ## What ya need
 
 - [bun](https://bun.sh) 1.2 or newer. That's the runtime. There is no Python in here; the Python that used to be here is in the first commit if ya want to look at it, but ya don't.

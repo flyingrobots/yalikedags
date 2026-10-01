@@ -4,6 +4,8 @@ All notable changes to this project are documented here. The format follows Keep
 
 ## [Unreleased]
 
+- Bound snapshot file size, graph cardinality, strings, and JSON structure; compare imports in an embedded local worker with cancel, timeout, and stale-result protection.
+
 - Document the atomic work contract: one executable issue per independently mergeable PR, correctness prerequisites as edges, and explicit antichain/MECE scope. Add root agent guidance and distinguish planned dependency discovery from current analysis.
 
 - Align table filters, counts, and outer cells with shared responsive gutters; inset table and wave pagination controls from the viewport edges.
