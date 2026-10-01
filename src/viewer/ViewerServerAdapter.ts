@@ -1,3 +1,4 @@
+import { ViewerSecurityPolicy } from "./ViewerSecurityPolicy.ts";
 import type { ViewerRequestHandler } from "./ViewerRequestHandler.ts";
 
 export interface ServerHandle {
@@ -25,9 +26,10 @@ export class ViewerServerAdapter {
       hostname: "127.0.0.1",
       port,
       fetch: async (req) => {
-        if (new URL(req.url).pathname === "/refresh") { return this.refreshResponse(req); }
+        const security = new ViewerSecurityPolicy();
+        if (new URL(req.url).pathname === "/refresh") { return security.protect(await this.refreshResponse(req)); }
         const res = this.handler.handle(new URL(req.url).pathname);
-        return new Response(res.body, { status: res.status, headers: { "Content-Type": res.contentType, "Cache-Control": "no-store" } });
+        return security.protect(new Response(res.body, { status: res.status, headers: { "Content-Type": res.contentType, "Cache-Control": "no-store" } }));
       },
     });
     return { url: `http://127.0.0.1:${String(server.port)}/`, stop: () => void server.stop(true) };
