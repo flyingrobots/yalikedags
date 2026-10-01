@@ -1,3 +1,4 @@
+import { LoopbackRequestPolicy } from "./LoopbackRequestPolicy.ts";
 import type { ViewerRequestHandler } from "./ViewerRequestHandler.ts";
 
 export interface ServerHandle {
@@ -24,7 +25,9 @@ export class ViewerServerAdapter {
     const server = Bun.serve({
       hostname: "127.0.0.1",
       port,
-      fetch: async (req) => {
+      fetch: async (req, instance) => {
+        const refusal = new LoopbackRequestPolicy(instance.port ?? 0).refusal(req);
+        if (refusal !== undefined) { return refusal; }
         if (new URL(req.url).pathname === "/refresh") { return this.refreshResponse(req); }
         const res = this.handler.handle(new URL(req.url).pathname);
         return new Response(res.body, { status: res.status, headers: { "Content-Type": res.contentType, "Cache-Control": "no-store" } });

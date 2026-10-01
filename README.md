@@ -62,6 +62,8 @@ Get a graph on screen in about two minutes, off the bundled example, no key need
 
 - [Troubleshooting](docs/troubleshooting/index.md): the sync refused, the graph has a cycle, a relation points somewhere odd
 
+The local viewer accepts only its bound loopback host and port; use the address printed by `serve`.
+
 ## What ya need
 
 - [bun](https://bun.sh) 1.2 or newer. That's the runtime. There is no Python in here; the Python that used to be here is in the first commit if ya want to look at it, but ya don't.
