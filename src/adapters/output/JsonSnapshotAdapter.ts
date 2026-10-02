@@ -20,6 +20,7 @@ export class JsonSnapshotAdapter implements RendererPort {
     return {
       schema: SNAPSHOT_SCHEMA,
       source: a.source,
+      ...(a.account !== undefined && { account: a.account }),
       asOf: a.asOf,
       capturedAt: a.capturedAt,
       warnings: a.warnings,

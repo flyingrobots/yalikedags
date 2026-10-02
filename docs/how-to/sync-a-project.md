@@ -42,7 +42,7 @@ The first line names the snapshot and the task count you just saw.
 
 - Exit `3`, `linear_unauthorized`: the key was rejected. Re-store it.
 - Exit `4`, `linear_project_not_found`: zero or several projects matched the name. Use the UUID.
-- `linear_http_error: HTTP 400 ... Query too complex`: should not happen at the default page size of 50; report it with the message.
+- `linear_http_error: HTTP 400 ... Query too complex`: should not happen at the default page size of 25; report it with the message.
 
 ## Related reference
 

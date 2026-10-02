@@ -1,3 +1,4 @@
+import { SvgTaskTitle } from "./SvgTaskTitle.ts";
 import type { Analysis } from "../../core/services/Analysis.ts";
 import type { RendererPort } from "../../ports/RendererPort.ts";
 import { LayeredLayoutService } from "../../core/services/LayeredLayoutService.ts";
@@ -6,8 +7,8 @@ import type { Layout } from "../../core/services/LayeredLayoutService.ts";
 export const escapeXml = (s: string): string =>
   s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
-const NODE_W = 240;
-const NODE_H = 70;
+const NODE_W = 320;
+const NODE_H = 100;
 const GAP_X = 80;
 const GAP_Y = 24;
 const PAD = 24;
@@ -62,7 +63,7 @@ export class SvgRendererAdapter implements RendererPort {
         const y1 = from.y + NODE_H / 2;
         const x2 = to.x;
         const y2 = to.y + NODE_H / 2;
-        const mid = (x1 + x2) / 2;
+        const mid = x1 + Math.min((x2 - x1) / 2, 30 + (Math.abs(to.y - from.y) / (NODE_H + GAP_Y)) * 8);
         const critical = a.isCritical(b) && a.isCritical(t.id) ? " critical" : "";
         out.push(`<path class="edge${critical}" data-from="${escapeXml(b)}" data-to="${escapeXml(t.id)}" d="M${String(x1)},${String(y1)} C${String(mid)},${String(y1)} ${String(mid)},${String(y2)} ${String(x2)},${String(y2)}"/>`);
       }
@@ -74,14 +75,14 @@ export class SvgRendererAdapter implements RendererPort {
     return a.dag.tasks.map((t) => {
       const { x, y } = coords(layout, t.id);
       const classes = ["node", a.stateOf(t.id), a.isCritical(t.id) ? "critical" : "", a.gatekeepers.includes(t.id) ? "gatekeeper" : ""].filter((c) => c.length > 0).join(" ");
-      const title = t.title.length > 36 ? `${t.title.slice(0, 35)}…` : t.title;
+      const lines = new SvgTaskTitle().lines(t.title);
       return [
         `<g class="${classes}" data-id="${escapeXml(t.id)}" transform="translate(${String(x)},${String(y)})">`,
-        `<title>${escapeXml(t.key)} · ${escapeXml(t.title)} · ${escapeXml(a.stateOf(t.id))}</title>`,
+        `<title>${escapeXml(t.key)} · ${escapeXml(t.title)} · ${escapeXml(a.stateOf(t.id))} · ${escapeXml(t.assignee ?? "Unassigned")}</title>`,
         `<rect width="${String(NODE_W)}" height="${String(NODE_H)}"/>`,
-        `<text x="8" y="18" font-weight="bold">${escapeXml(t.key)}</text>`,
-        `<text x="8" y="36">${escapeXml(title)}</text>`,
-        `<text x="8" y="56" font-size="10">${escapeXml(a.stateOf(t.id))}</text>`,
+        `<text x="8" y="18" font-weight="bold">${escapeXml(t.key.length > 36 ? `${t.key.slice(0, 35)}…` : t.key)}</text>`,
+        ...lines.map((line, i) => `<text x="10" y="${String(38 + i * 17)}">${escapeXml(line)}</text>`),
+        `<text x="10" y="83" font-size="10">${escapeXml(a.stateOf(t.id))} · ${escapeXml((t.assignee ?? "Unassigned").slice(0, 28))}</text>`,
         "</g>",
       ].join("");
     });

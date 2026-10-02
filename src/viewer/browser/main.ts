@@ -1,9 +1,17 @@
-import { BannerController } from "./BannerController.ts";
-import { WorkspaceMenu } from "./WorkspaceMenu.ts";
-import "dockview/dist/styles/dockview.css";
+import { GraphFilters } from "./GraphFilters.ts";
+import { InspectorResize } from "./InspectorResize.ts";
+import { paginateGroups } from "./ElementPagination.ts";
+import { LayoutControls } from "./LayoutControls.ts";
+import { TextSizeController } from "./TextSizeController.ts";
+import { ThemeController } from "./ThemeController.ts";
+import { OwnerFilter } from "./OwnerFilter.ts";
+import { GraphNeighborhood } from "./GraphNeighborhood.ts";
+import { InspectorNavigation } from "./InspectorNavigation.ts";
+import { ViewerInteractions } from "./ViewerInteractions.ts";
+import { ExportController } from "./ExportController.ts";
 import "./viewer.css";
-import { JsonSnapshotRepositoryAdapter } from "../../adapters/input/JsonSnapshotRepositoryAdapter.ts";
-import { element, isElement } from "./Dom.ts";
+import { ViewerBootstrap } from "./ViewerBootstrap.ts";
+import { element } from "./Dom.ts";
 import { ViewerState } from "./ViewerState.ts";
 import { Workspace } from "./Workspace.ts";
 import { SelectionController } from "./SelectionController.ts";
@@ -16,40 +24,39 @@ import { RefreshController } from "./RefreshController.ts";
 import { ChangesController } from "./ChangesController.ts";
 
 async function start(): Promise<void> {
-  new WorkspaceMenu();
-  new BannerController();
-  const state = new ViewerState(await new JsonSnapshotRepositoryAdapter(element("snapshot").textContent, "embedded").load());
+  const textSize = new TextSizeController();
+  const theme = new ThemeController();
+  const analysis = await new ViewerBootstrap().render();
+  theme.bind(); textSize.bind();
+  new ExportController(analysis);
+  const state = new ViewerState(analysis.dag.tasks, analysis.states);
   const session = new SessionState();
   const workspace = new Workspace(session.layout());
-  new TableController(state, [...workspace.panels.values()]);
+  new LayoutControls().bind(workspace); new InspectorResize();
+  new TableController(state);
+  new OwnerFilter(analysis, "ready"); new OwnerFilter(analysis, "grid");
+  paginateGroups(document);
   new ChangesController(state);
   new RefreshController(state, workspace, session);
   const svg = element("graph").querySelector("svg");
   if (svg === null) { throw new Error("Missing graph SVG"); }
   const graph = new GraphController(svg);
-  requestAnimationFrame(() => { graph.readable(); });
+  requestAnimationFrame(() => { graph.reveal(); });
+  const neighborhood = new GraphNeighborhood(analysis, state, graph);
+  new GraphFilters(analysis, state, neighborhood);
   new SelectionController(state, [...workspace.panels.values()]);
-  state.subscribe(() => { if (state.selected !== undefined) { workspace.show("details"); } });
+  new InspectorNavigation(state, workspace, graph);
   new SearchController(state, () => { workspace.show("graph"); workspace.show("details"); graph.focus(); });
-  const actions = new Map<string, () => void>([
-    ["fit", (): void => { graph.fit(); }], ["focus", (): void => { graph.focus(); }],
-    ["zoom-in", (): void => { graph.zoom(1 / 1.25); }], ["zoom-out", (): void => { graph.zoom(1.25); }],
-    ["reset", (): void => { workspace.reset(); graph.readable(); }],
-  ]);
-  const handleAction = (event: MouseEvent): void => {
-    if (!isElement(event.target)) { return; }
-    const control = event.target.closest("button");
-    const panel = control?.dataset["panel"];
-    if (panel !== undefined) { workspace.show(panel); }
-    const action = actions.get(control?.dataset["action"] ?? "");
-    if (action !== undefined) { event.stopPropagation(); action(); }
-  };
-  document.addEventListener("click", handleAction);
-  workspace.panels.forEach((panel) => { panel.addEventListener("click", handleAction); });
+  new ViewerInteractions(workspace, graph);
+  element("findings-panel").addEventListener("click", (event) => {
+    if (event.target instanceof Element && event.target.closest("[data-inspect-graph]") !== null) {
+      workspace.show("graph"); neighborhood.focus();
+    }
+  });
   session.restore(state);
   document.body.dataset["ready"] = "true";
 }
 
 void start().catch((error: unknown) => {
-  element("workspace").textContent = `The viewer could not start: ${error instanceof Error ? error.message : "invalid snapshot"}. Regenerate the export from a valid snapshot.`;
+  element("app").textContent = `The viewer could not start: ${error instanceof Error ? error.message : "invalid snapshot"}. Regenerate the export from a valid snapshot.`;
 });

@@ -1,0 +1,27 @@
+/* Exact supplied anchors; perceptual mixes derive surfaces and readable text.
+   Status hues retain their meanings rather than assigning five similar hues to five states. */
+:root[data-palette="palm"] {
+  --ref-carbon-black: #1b2021;
+  --ref-ebony: #51513d;
+  --ref-palm-leaf: #a6a867;
+  --ref-vanilla-custard: #e3dc95;
+  --ref-sand-dune: #e3dcc2;
+}
+:root[data-palette="palm"][data-theme="dark"] {
+  --canvas: var(--ref-carbon-black);
+  --surface: color-mix(in oklab, var(--ref-carbon-black) 85%, var(--ref-ebony));
+  --raised: color-mix(in oklab, var(--ref-carbon-black) 65%, var(--ref-ebony));
+  --ink: var(--ref-sand-dune);
+  --muted: color-mix(in oklab, var(--ref-sand-dune) 80%, var(--ref-palm-leaf));
+  --accent: var(--ref-vanilla-custard);
+  --ready: var(--ref-palm-leaf);
+}
+:root[data-palette="palm"][data-theme="light"] {
+  --canvas: var(--ref-sand-dune);
+  --surface: color-mix(in oklab, var(--ref-sand-dune) 85%, white);
+  --raised: color-mix(in oklab, var(--ref-sand-dune) 70%, var(--ref-vanilla-custard));
+  --ink: var(--ref-carbon-black);
+  --muted: var(--ref-ebony);
+  --accent: color-mix(in oklab, var(--ref-ebony) 85%, var(--ref-carbon-black));
+  --ready: color-mix(in oklab, var(--ref-palm-leaf) 30%, var(--ref-carbon-black));
+}

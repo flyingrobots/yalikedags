@@ -1,0 +1,16 @@
+/* Graphite: light companion to dark.css, with matching hue roles. */
+:root[data-theme="light"] {
+  --ref-graphite-950: oklch(97% .006 260);
+  --ref-graphite-900: oklch(100% 0 0);
+  --ref-graphite-850: oklch(94% .008 260);
+  --ref-graphite-100: oklch(25% .018 260);
+  --ref-slate-300: oklch(45% .024 260);
+  --ref-cyan: oklch(42% .075 205);
+  --ref-mint: oklch(42% .085 165);
+  --ref-blue: oklch(44% .12 250);
+  --ref-coral: oklch(45% .13 25);
+  --ref-pink: oklch(45% .12 325);
+  --color-scheme: light;
+  --shadow-menu: 0 16px 50px #15203320;
+  --shadow-inspector: -12px 0 40px #15203318;
+}

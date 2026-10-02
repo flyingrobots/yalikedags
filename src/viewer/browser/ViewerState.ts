@@ -1,3 +1,4 @@
+import type { TaskState } from "../../core/services/StateService.ts";
 import { Dag } from "../../core/domain/Dag.ts";
 import type { Task } from "../../core/domain/Task.ts";
 
@@ -7,7 +8,7 @@ export class ViewerState {
   selected: string | undefined;
   private readonly listeners = new Set<() => void>();
 
-  constructor(tasks: readonly Task[]) { this.dag = new Dag(tasks); }
+  constructor(tasks: readonly Task[], readonly states: ReadonlyMap<string, TaskState>) { this.dag = new Dag(tasks); }
 
   select(id: string | undefined): void {
     if (id !== undefined && !this.dag.has(id)) { return; }

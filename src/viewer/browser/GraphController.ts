@@ -1,8 +1,9 @@
 /** SVG coordinates account for letterboxing and docked panel dimensions. */
 export class GraphController {
-  private readonly initial: DOMRect;
+  private initial: DOMRect;
   private drag: { x: number; y: number; moved: boolean } | undefined;
   private suppressClick = false;
+  private initialized = false;
 
   constructor(private readonly svg: SVGSVGElement) {
     const v = svg.viewBox.baseVal;
@@ -15,39 +16,70 @@ export class GraphController {
     svg.addEventListener("click", (e) => {
       if (this.suppressClick) { e.stopPropagation(); this.suppressClick = false; }
     }, true);
-    svg.querySelectorAll(".node").forEach((node) => {
+    this.bindNodes();
+    new ResizeObserver(() => { if (this.initialized && this.svg.clientWidth > 0) { this.resize(); } }).observe(svg);
+  }
+
+  private bindNodes(): void {
+    this.svg.querySelectorAll(".node").forEach((node) => {
       node.setAttribute("tabindex", "0"); node.setAttribute("role", "button");
       node.setAttribute("aria-label", node.querySelector("title")?.textContent ?? "Task");
     });
   }
 
-  fit(): void { this.set(this.initial); }
+  scene(markup: string): void {
+    const parsed = new DOMParser().parseFromString(markup, "image/svg+xml").documentElement;
+    this.svg.innerHTML = parsed.innerHTML;
+    const box = parsed.getAttribute("viewBox") ?? "0 0 500 300";
+    this.svg.setAttribute("viewBox", box);
+    const v = this.svg.viewBox.baseVal;
+    this.initial = new DOMRect(v.x, v.y, v.width, v.height);
+    this.bindNodes();
+  }
+
+  reveal(): void { if (!this.initialized && this.svg.clientWidth > 0) { this.readable(); } }
+  viewport(): string { return this.svg.getAttribute("viewBox") ?? ""; }
+  restoreViewport(value: string): void { if (value) { this.svg.setAttribute("viewBox", value); this.resize(); } }
+
+  fit(): void {
+    this.initialized = true;
+    const width = Math.max(this.width() / 2, this.fitWidth());
+    this.center(new DOMPoint(this.initial.x + this.initial.width / 2, this.initial.y + this.initial.height / 2), width);
+  }
 
   /** Open at a readable scale; Fit all remains available for the complete overview. */
   readable(): void {
-    const viewportWidth = this.svg.clientWidth || 500;
-    const width = Math.min(this.initial.width, Math.max(500, viewportWidth));
-    const height = Math.max(300, this.svg.clientHeight) * width / viewportWidth;
-    this.set(new DOMRect(0, 0, width, height));
+    this.initialized = true;
+    this.center(this.selectedCenter() ?? new DOMPoint(this.initial.width / 2, Math.min(this.initial.height / 2, this.height() / 2)), this.width());
   }
 
   zoom(factor: number, anchor?: DOMPoint): void {
     const v = this.svg.viewBox.baseVal;
-    const width = Math.max(120, Math.min(this.initial.width * 8, v.width * factor));
+    const width = Math.max(this.width() / 2, Math.min(this.maximum(), v.width * factor));
     const ratio = width / v.width;
     const center = anchor ?? new DOMPoint(v.x + v.width / 2, v.y + v.height / 2);
     this.set(new DOMRect(center.x - (center.x - v.x) * ratio, center.y - (center.y - v.y) * ratio, width, v.height * ratio));
   }
 
-  focus(): void {
+  focus(): void { if (this.selectedCenter() !== undefined) { this.readable(); } }
+
+  private selectedCenter(): DOMPoint | undefined {
     const node = this.svg.querySelector(".node.selected");
-    if (!(node instanceof SVGGraphicsElement)) { return; }
+    if (!(node instanceof SVGGraphicsElement)) { return undefined; }
     const bounds = node.getBBox();
-    const matrix = node.transform.baseVal.consolidate()?.matrix;
-    const origin = new DOMPoint(bounds.x, bounds.y).matrixTransform(matrix);
-    const width = Math.max(700, this.svg.clientWidth);
-    const height = Math.max(300, this.svg.clientHeight) * width / Math.max(1, this.svg.clientWidth);
-    this.set(new DOMRect(origin.x + bounds.width / 2 - width / 2, origin.y + bounds.height / 2 - height / 2, width, height));
+    return new DOMPoint(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2).matrixTransform(node.transform.baseVal.consolidate()?.matrix);
+  }
+  private width(): number { return this.svg.clientWidth || 500; }
+  private height(): number { return this.svg.clientHeight || 300; }
+  private fitWidth(): number { return Math.max(this.initial.width, this.initial.height * this.width() / this.height()); }
+  private maximum(): number { return Math.max(this.fitWidth(), this.width() * 4); }
+  private center(point: DOMPoint, width: number): void {
+    const height = this.height() * width / this.width();
+    this.set(new DOMRect(point.x - width / 2, point.y - height / 2, width, height));
+  }
+  private resize(): void {
+    const v = this.svg.viewBox.baseVal;
+    this.center(new DOMPoint(v.x + v.width / 2, v.y + v.height / 2), Math.max(this.width() / 2, Math.min(this.maximum(), v.width)));
   }
 
   private point(event: MouseEvent): DOMPoint {
@@ -77,5 +109,9 @@ export class GraphController {
 
   private set(rect: DOMRect): void {
     this.svg.setAttribute("viewBox", [rect.x, rect.y, rect.width, rect.height].join(" "));
+    for (const action of ["zoom-in", "zoom-out"]) {
+      const button = document.querySelector(`[data-action="${action}"]`);
+      if (button instanceof HTMLButtonElement) { button.disabled = action === "zoom-in" ? rect.width <= this.width() / 2 + .01 : rect.width >= this.maximum() - .01; }
+    }
   }
 }

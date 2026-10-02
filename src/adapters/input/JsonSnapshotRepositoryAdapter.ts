@@ -1,3 +1,5 @@
+import type { LinearAccount } from "../../core/domain/LinearAccount.ts";
+import { LinearAccountCodec } from "./LinearAccountCodec.ts";
 import { Task } from "../../core/domain/Task.ts";
 import type { Priority, TaskFields, TaskStatus } from "../../core/domain/Task.ts";
 import type { TaskRepositoryPort } from "../../ports/TaskRepositoryPort.ts";
@@ -78,7 +80,7 @@ export function decodeTask(raw: unknown): Task {
     throw new Error("snapshot: task needs id and title");
   }
   const f: TaskFields = { id, title, blockedBy: strList(raw, "blockedBy"), children: strList(raw, "children"), labels: strList(raw, "labels"), resources: strList(raw, "resources") };
-  const optional: (keyof TaskFields)[] = ["key", "parent", "assignee", "milestone", "due", "url", "createdAt", "description"];
+  const optional: (keyof TaskFields)[] = ["key", "parent", "assignee", "assigneeId", "milestone", "due", "url", "createdAt", "description"];
   for (const k of optional) {
     const v = str(raw, k);
     if (v !== undefined) {
@@ -92,6 +94,7 @@ export function decodeTask(raw: unknown): Task {
 }
 
 export class JsonSnapshotRepositoryAdapter implements TaskRepositoryPort {
+  account: LinearAccount | undefined;
   capturedAt: string | null = null;
   warnings: string[] = [];
   constructor(
@@ -111,6 +114,7 @@ export class JsonSnapshotRepositoryAdapter implements TaskRepositoryPort {
     const capturedAt = str(parsed, "capturedAt");
     this.capturedAt = capturedAt !== undefined && Number.isFinite(Date.parse(capturedAt)) ? capturedAt : null;
     this.warnings = strList(parsed, "warnings");
+    this.account = new LinearAccountCodec().decode(parsed["account"]);
     const tasks = parsed["tasks"];
     if (!Array.isArray(tasks)) {
       return Promise.reject(new Error("snapshot: tasks must be a list"));

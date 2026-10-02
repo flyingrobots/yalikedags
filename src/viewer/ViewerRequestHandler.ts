@@ -1,3 +1,4 @@
+import { ViewerData } from "./ViewerData.ts";
 import type { Analysis } from "../core/services/Analysis.ts";
 import { JsonSnapshotAdapter } from "../adapters/output/JsonSnapshotAdapter.ts";
 import { SvgRendererAdapter } from "../adapters/output/SvgRendererAdapter.ts";
@@ -28,9 +29,11 @@ export class ViewerRequestHandler {
     switch (path) {
       case "/":
       case "/index.html":
-        return { status: 200, contentType: "text/html; charset=utf-8", body: viewerPage(a, { svg: this.svg.render(a), snapshotJson: this.json.render(a) }, this.options()) };
+        return { status: 200, contentType: "text/html; charset=utf-8", body: viewerPage() };
       case "/popout.html":
         return { status: 200, contentType: "text/html; charset=utf-8", body: '<!doctype html><html lang="en"><head><meta charset="utf-8"><title>yalikedags · View</title></head><body></body></html>' };
+      case "/viewer.json":
+        return { status: 200, contentType: "application/json", body: new ViewerData().render(a, this.options()) };
       case "/snapshot.json":
         return { status: 200, contentType: this.json.contentType, body: this.json.render(a) };
       case "/graph.svg":

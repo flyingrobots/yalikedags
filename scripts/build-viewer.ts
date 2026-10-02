@@ -11,8 +11,7 @@ if (!result.success) { throw new AggregateError(result.logs, "viewer build faile
 const js = result.outputs.find((output) => output.path.endsWith(".js"));
 const css = result.outputs.find((output) => output.path.endsWith(".css"));
 if (js === undefined || css === undefined) { throw new Error("viewer build missing JS or CSS"); }
-const licence = await Bun.file(resolve(root, "node_modules/dockview/LICENCE.md")).text();
-const script = `${await js.text()}\n/* ${licence.replace(/\*\//g, "* /")} */`;
+const script = await js.text();
 const styles = await css.text();
 await mkdir(resolve(root, "src/viewer/generated"), { recursive: true });
 await Bun.write(resolve(root, "src/viewer/generated/assets.ts"),

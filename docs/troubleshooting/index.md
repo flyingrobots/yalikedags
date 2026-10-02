@@ -16,7 +16,7 @@ The name lookup is exact and case-insensitive and needs exactly one hit. Copy th
 
 ## `linear_http_error: HTTP 400: {"errors":[{"message":"Query too complex" ...` (exit 5)
 
-Linear caps GraphQL complexity at 10000; this tool pages at 50 issues, which fit on 2026-09-23. If Linear lowers the cap or adds cost to a field, this returns. Evidence to include when reporting: the full message, which carries the computed complexity.
+Linear caps GraphQL complexity at 10000; this tool pages at 25 issues after a 50-issue query exceeded the cap on 2026-09-30. If Linear lowers the cap or adds cost to a field, this returns. Evidence to include when reporting: the full message, which carries the computed complexity.
 
 ## `linear_incomplete: ...`
 

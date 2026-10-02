@@ -55,7 +55,7 @@ loaded 12 tasks from task list examples/example-tasklist.txt
 viewer at http://127.0.0.1:<port>/  (127.0.0.1 only; Ctrl-C to stop)
 ```
 
-Open that address in a browser. You will see the graph laid out left to right, blockers before dependents, with the legend in the sidebar. Click `implement-core-dag-builder`: everything not upstream or downstream of it dims, and the sidebar shows its fields. Drag to pan, wheel to zoom, press <kbd>Esc</kbd> to clear. Press Ctrl-C in the terminal when you are done.
+Open that address in a browser. **Start here** shows the two ready tasks and their unblocking impact. Click **Immediately unblocked** on **Implement core DAG builder** to inspect the two tasks it makes ready. Choose **Dependencies** in the left navigation to see the graph laid out left to right, blockers before dependents, with a legend below it. Select the DAG builder: its details open on the right and unrelated connections dim. **Readable size** centers your selection. Drag to pan, wheel to zoom, and press <kbd>Esc</kbd> to clear the selection. Choose **Waves** to compare parallel work, or **Tasks** to filter and sort the full list. Press Ctrl-C in the terminal when you are done.
 
 ## 3. Try one variation
 

@@ -27,9 +27,9 @@ And when ya want someone else to see it who hasn't got the tool, or the key, or 
 
 JSON exports use snapshot schema 2 to preserve unknown statuses and exact estimates. Legacy schema 1 snapshots remain readable; see [the snapshot reference](docs/reference/snapshot.md).
 
-### Arrange your workspace
+### Find the next move
 
-The viewer now has dockable views: DAG, wave grid, task table, task details, ready work, and findings. The task table supports sorting, search, and state/assignee/milestone/label filters. Search for a task, drag tabs to arrange your workspace, and use the header Views button to open views or reset the layout. The Changes view compares snapshots and confirms when a source refresh finds no changes. The exported HTML still carries everything in one offline file.
+The viewer opens with the work that's ready, what it'll unblock, and the longest chain standing between ya and done. Dependencies gives the graph room to breathe; Waves shows what could run in parallel; Tasks gives ya the searchable, sortable list. Pick a task and its details open beside it. Findings calls out the dodgy cards, and Import/Export handles snapshots and comparisons. Six views, one job at a time. No arranging windows before ya can get to work. The browser does the drawing; the server hands it the analyzed data as JSON. Linear reads show the workspace and who captured it, and assigned cards say who owns the job. Still one offline file when ya export it. Filter the graph to your tasks, click a whole table row to inspect it, and drag the details drawer wider when ya need room. Theme and text size live at the bottom of the nav; [the viewer reference](docs/reference/viewer.md) covers the controls.
 
 ## Start here
 
@@ -52,6 +52,8 @@ Get a graph on screen in about two minutes, off the bundled example, no key need
 - [The viewer's screen and controls](docs/reference/viewer.md)
 
 ## Understand it
+
+- [One issue, one independently mergeable PR](docs/explanation/atomic-work.md): the planning and task-splitting contract
 
 - [How the frontier, the workstreams and the critical path are derived](docs/explanation/derived-views.md)
 - [What Linear owns and what this tool derives](docs/explanation/source-of-truth.md)

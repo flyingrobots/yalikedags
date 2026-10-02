@@ -29,7 +29,8 @@
   },
   "dependencies": {
     "@git-stunts/vault": "^1.0.1",
-    "dockview": "^8.3.1"
+    "dompurify": "^3.4.16",
+    "marked": "^18.0.14"
   },
   "devDependencies": {
     "@eslint/js": "^9",
