@@ -32,17 +32,31 @@ Written by `sync` and `render --format json`; read by `--snapshot` and served at
 | `status` | `open`, `in-progress`, `done`, `canceled`, `unknown` | yes | stored fact |
 | `blockedBy` | string[] | yes | stored fact; the only edge |
 | `children`, `labels`, `resources` | string[] | yes | may be empty |
-| `parent`, `assignee`, `milestone`, `due`, `url`, `createdAt`, `description` | string | no | absent when unknown |
+| `parent`, `assignee`, `assigneeId`, `milestone`, `due`, `url`, `createdAt`, `description` | string | no | absent when unknown |
 | `priority` | 1 to 4 | no | Linear's scale; 0 (none) is absent |
 | `effort` | finite nonnegative number | no | Exact source estimate, including fractions; no rounding or clamping |
 | `state` | `done`, `in-progress`, `blocked`, `ready`, `unresolved` | derived | not read back |
 | `workstream` | string or null | derived | not read back |
 | `critical` | boolean | derived | on either critical path |
 
-`grid` is waves by workstreams: `waves` is the number of columns, each row is one workstream (`workstream` is its id, or `null` for the shared gatekeepers row, which comes first when there are any), and `cells[i]` lists the row's tasks in wave `i`. Every open schedulable task appears in exactly one cell. Cycles, unknown statuses, and missing blockers can prevent tasks and their descendants from receiving a wave. The viewer draws its Grid view from this field.
+`grid` is waves by workstreams: `waves` is the number of columns, each row is one workstream (`workstream` is its id, or `null` for the shared gatekeepers row, which comes first when there are any), and `cells[i]` lists the row's tasks in wave `i`. Every open schedulable task appears in exactly one cell. Cycles, unknown statuses, and missing blockers can prevent tasks and their descendants from receiving a wave. The viewer draws its Waves view from this field.
 
 Only the stored task fields and provenance are read back by `--snapshot`; derived fields are recomputed. `daysUntilDue` is `9999` for undated tasks.
 
+
+## Linear account metadata
+
+Fresh Linear reads optionally include `account`, an additive schema-2 field. It contains `user`, `workspace`, and `project`, each with an `id` and `name`. `user` is the API identity that captured the snapshot; it does not describe whoever opens the file later. This metadata survives `--snapshot` reads and subsequent exports. Legacy snapshots and other sources can omit it. No key or email address is stored. Optional `assigneeId` preserves stable tracker identity for owner filters and assignment comparisons. Issue `assignee` remains the optional display-name string; the viewer labels an absent value Unassigned.
+
+```json
+{
+  "account": {
+    "user": { "id": "user-example", "name": "Sam Example" },
+    "workspace": { "id": "workspace-example", "name": "Example workspace" },
+    "project": { "id": "project-example", "name": "Example project" }
+  }
+}
+```
 
 ## Provenance and uncertainty
 

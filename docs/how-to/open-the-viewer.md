@@ -26,14 +26,16 @@ Open the address. To pick the port yourself, add `--port 8787`.
 
 ## Verify
 
-The page opens with a DAG and Ready work. Search for a task or click a node: Task details opens and unrelated work dims. Open the header’s **Views menu** and choose **Wave grid** to inspect the same selection in a table, or drag its tab beside the DAG to see both at once. Drag tabs and dividers to arrange the workspace; the Views menu’s **Reset layout** restores the default. The page loads without further network requests. **Refresh source** explicitly rereads the source through the local server; the key stays on the server.
+The page opens on **Start here**, with ready work, unblocking impact, and the critical path. Select a task to open its details. Choose **Dependencies**, **Waves**, or **Tasks** from the navigation rail to explore the same project. Search in Dependencies finds and centers a task in the graph. Close details or press Escape to reclaim the working area. The browser loads `/viewer.json` from the local server and renders the workspace; it makes no external asset requests. **Import/Export → Refresh source** explicitly rereads the source; the key stays on the server.
 
 ## Common variations
 
+- `/viewer.json` provides server-analyzed data for the client-rendered interface.
 - `/snapshot.json`, `/graph.svg`, `/graph.dot` on the same host return the raw artifacts.
-- **Task table** adds sorting, search, and state/assignee/milestone/label filters while keeping the wave grid.
-- **Refresh source** preserves layout, selection, filters, and sorting. It shows the exact capture time and retains the previous snapshot on failure.
-- **Changes** shows changes since the last successful refresh or compares a chosen snapshot JSON locally.
+- **Tasks** adds sorting, search, and state/assignee/milestone/label filters while keeping the wave grid.
+- **Refresh source** preserves the active view, selection, filters, and sorting. It shows the exact capture time and retains the previous snapshot on failure.
+- Linear sources show the workspace, project, capture identity, and issue assignees. Snapshot files preserve captured metadata; old files may not contain it.
+- **Import/Export** holds source details, refresh, JSON export, and local comparison with an earlier snapshot.
 - **Keep it, or send it to somebody**: `render --format html --out dag.html` writes the same page as one file. It opens by double-clicking, needs no process and no key, and fetches nothing. Use it for a graph somebody else should look at, or for a copy of today you can put beside a copy of last week.
 
   ```bash

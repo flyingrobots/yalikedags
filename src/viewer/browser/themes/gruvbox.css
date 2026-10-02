@@ -1,0 +1,41 @@
+/* Viewer adaptation. Palette source: https://github.com/morhetz/gruvbox
+   Original anchors are preserved; OKLCH lightness is bounded for UI text contrast.
+   Light Dracula/Monokai are viewer companions, not official upstream light variants. */
+:root[data-palette="gruvbox"][data-theme="dark"] {
+  --ref-theme-bg: #282828;
+  --ref-theme-fg: #ebdbb2;
+  --ref-theme-accent: #fabd2f;
+  --ref-theme-ready: #b8bb26;
+  --ref-theme-progress: #83a598;
+  --ref-theme-blocked: #fb4934;
+  --ref-theme-unresolved: #d3869b;
+  --canvas: var(--ref-theme-bg);
+  --surface: color-mix(in oklab, var(--ref-theme-bg) 96%, var(--ref-theme-fg));
+  --raised: color-mix(in oklab, var(--ref-theme-bg) 92%, var(--ref-theme-fg));
+  --ink: oklch(from var(--ref-theme-fg) max(l, .84) c h);
+  --muted: oklch(from var(--ref-theme-fg) max(.78, calc(l * .88)) c h);
+  --accent: oklch(from var(--ref-theme-accent) max(l, .76) c h);
+  --ready: oklch(from var(--ref-theme-ready) max(l, .76) c h);
+  --progress: oklch(from var(--ref-theme-progress) max(l, .76) c h);
+  --blocked: oklch(from var(--ref-theme-blocked) max(l, .80) min(c, .15) h);
+  --unresolved: oklch(from var(--ref-theme-unresolved) max(l, .76) c h);
+}
+:root[data-palette="gruvbox"][data-theme="light"] {
+  --ref-theme-bg: #fbf1c7;
+  --ref-theme-fg: #3c3836;
+  --ref-theme-accent: #b57614;
+  --ref-theme-ready: #79740e;
+  --ref-theme-progress: #076678;
+  --ref-theme-blocked: #9d0006;
+  --ref-theme-unresolved: #8f3f71;
+  --canvas: var(--ref-theme-bg);
+  --surface: color-mix(in oklab, var(--ref-theme-bg) 96%, var(--ref-theme-fg));
+  --raised: color-mix(in oklab, var(--ref-theme-bg) 92%, var(--ref-theme-fg));
+  --ink: oklch(from var(--ref-theme-fg) min(l, .42) c h);
+  --muted: oklch(from var(--ref-theme-fg) min(.44, calc(l * 1.1)) c h);
+  --accent: oklch(from var(--ref-theme-accent) min(l, .44) c h);
+  --ready: oklch(from var(--ref-theme-ready) min(l, .44) c h);
+  --progress: oklch(from var(--ref-theme-progress) min(l, .44) c h);
+  --blocked: oklch(from var(--ref-theme-blocked) min(l, .44) c h);
+  --unresolved: oklch(from var(--ref-theme-unresolved) min(l, .44) c h);
+}

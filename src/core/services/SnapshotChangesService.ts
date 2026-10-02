@@ -14,10 +14,17 @@ export class SnapshotChangesService {
       if (old.status !== task.status) {
         out.push({ kind: task.status === "done" ? "completed" : "status", task: task.id, key: task.key, detail: `${old.status} → ${task.status}` });
       }
+      out.push(...this.assignment(old, task));
       out.push(...this.blockers(old, task, { before, after }));
     }
     for (const task of before.tasks.filter((t) => !after.has(t.id))) { out.push({ kind: "removed", task: task.id, key: task.key, detail: task.title }); }
     return [...out, ...this.paths(before, after)];
+  }
+
+  private assignment(old: Task, task: Task): SnapshotChange[] {
+    const changed = old.assigneeId !== undefined && task.assigneeId !== undefined
+      ? old.assigneeId !== task.assigneeId : old.assignee !== task.assignee;
+    return changed ? [{ kind: "assignment", task: task.id, key: task.key, detail: `${old.assignee ?? "Unassigned"} → ${task.assignee ?? "Unassigned"}` }] : [];
   }
 
   private blockers(old: Task, task: Task, graphs: { before: Dag; after: Dag }): SnapshotChange[] {

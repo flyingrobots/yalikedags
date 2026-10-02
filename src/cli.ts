@@ -88,7 +88,7 @@ async function load(repo: TaskRepositoryPort, analyser: AnalysisService): Promis
     }
   }
   console.error(`loaded ${String(tasks.length)} tasks from ${repo.describe()}`);
-  return analyser.analyse(tasks, repo.describe(), { ...(repo.capturedAt !== undefined && { capturedAt: repo.capturedAt }), warnings: repo.warnings ?? [] });
+  return analyser.analyse(tasks, repo.describe(), { ...(repo.capturedAt !== undefined && { capturedAt: repo.capturedAt }), warnings: repo.warnings ?? [], account: repo.account });
 }
 
 async function keyCommand(args: Args, vault: VaultSecretsAdapter): Promise<ExitCodeValue> {
@@ -135,7 +135,7 @@ function auditCommand(a: Analysis, args: Args): ExitCodeValue {
 
 async function serveCommand(args: Args, read: () => Promise<Analysis>): Promise<ExitCodeValue> {
   const live = new RefreshingAnalysis(await read(), read);
-  const handler = new ViewerRequestHandler(() => live.current, () => ({ refresh: true, ...(live.changes !== undefined && { changes: live.changes }) }));
+  const handler = new ViewerRequestHandler(() => live.current, () => ({ refresh: true, ...(live.changes !== undefined && { changes: live.changes }), ...(live.previous !== undefined && { previous: live.previous }) }));
   const handle = new ViewerServerAdapter(handler, () => live.refresh()).start(Number(args.get("port") ?? "0"));
   console.error(`viewer at ${handle.url}  (127.0.0.1 only; Ctrl-C to stop)`);
   await new Promise<void>((resolve) => {

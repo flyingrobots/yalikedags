@@ -1,3 +1,5 @@
+import type { LinearAccount } from "../../core/domain/LinearAccount.ts";
+import { LinearAccountCodec } from "./LinearAccountCodec.ts";
 import { Task } from "../../core/domain/Task.ts";
 import type { Priority, TaskFields, TaskStatus } from "../../core/domain/Task.ts";
 import { LinearConnection } from "../linear/LinearConnection.ts";
@@ -8,15 +10,17 @@ import { LinearGraphqlClient } from "../linear/LinearGraphqlClient.ts";
 import type { Rec } from "../linear/GraphqlJson.ts";
 import { nodes, num, rec, str } from "../linear/GraphqlJson.ts";
 
-/** Linear caps query complexity at 10000; 100 issues with these nested connections scored 14091 on 2026-09-23, 50 fits. */
-const PAGE_SIZE = 50;
+/** Linear caps complexity at 10000; 50 issues with account/assignment fields scored 12663.6. */
+const PAGE_SIZE = 25;
 
 const ISSUES = `query($id: String!, $after: String) {
+  viewer { id name }
+  organization { id name }
   project(id: $id) { id name issues(first: ${String(PAGE_SIZE)}, after: $after, includeArchived: false) {
     pageInfo { hasNextPage endCursor }
     nodes {
       id identifier title description url createdAt priority estimate dueDate
-      state { name type } assignee { name } labels { pageInfo { hasNextPage } nodes { name } } projectMilestone { name }
+      state { name type } assignee { id name } labels { pageInfo { hasNextPage } nodes { name } } projectMilestone { name }
       parent { id } children { pageInfo { hasNextPage } nodes { id } }
       relations { pageInfo { hasNextPage } nodes { type relatedIssue { id } } }
       inverseRelations { pageInfo { hasNextPage } nodes { type issue { id } } }
@@ -27,6 +31,7 @@ const PRIORITIES: readonly Priority[] = [1, 2, 3, 4];
 
 /** Linear is the source of truth. This adapter reads a project's issues and their blocking relations, read-only. */
 export class LinearTaskRepositoryAdapter implements TaskRepositoryPort {
+  account: LinearAccount | undefined;
   /** Uncertainty observed during the most recent read. Never secrets. */
   readonly warnings: string[] = [];
   private readonly client: LinearGraphqlClient;
@@ -45,6 +50,7 @@ export class LinearTaskRepositoryAdapter implements TaskRepositoryPort {
 
   async load(): Promise<readonly Task[]> {
     this.warnings.length = 0;
+    this.account = undefined;
     const projectId = await this.client.resolveProjectId(this.project);
     const out: Task[] = [];
     const forward = new Map<string, string[]>();
@@ -53,6 +59,7 @@ export class LinearTaskRepositoryAdapter implements TaskRepositoryPort {
     do {
       const data = await this.client.query(ISSUES, { id: projectId, after });
       if (data["project"] === null || data["project"] === undefined) { throw new Error("linear_project_not_found: requested project is unavailable"); }
+      if (after === null) { this.readAccount(data); }
       const issues: LinearPage = new LinearPage(rec(data["project"])["issues"], after);
       for (const raw of issues.nodes) {
         this.checkConnections(raw);
@@ -67,6 +74,11 @@ export class LinearTaskRepositoryAdapter implements TaskRepositoryPort {
       const extra = forward.get(t.id) ?? [];
       return extra.length === 0 ? t : t.with({ blockedBy: [...t.blockedBy, ...extra] });
     });
+  }
+
+  private readAccount(data: Rec): void {
+    if (data["viewer"] === undefined || data["organization"] === undefined) { return; }
+    this.account = new LinearAccountCodec().decode({ user: data["viewer"], workspace: data["organization"], project: data["project"] });
   }
 
   private checkConnections(raw: Rec): void {
@@ -105,6 +117,7 @@ export class LinearTaskRepositoryAdapter implements TaskRepositoryPort {
       ["createdAt", str(raw["createdAt"])],
       ["due", str(raw["dueDate"])],
       ["assignee", str(rec(raw["assignee"])["name"])],
+      ["assigneeId", str(rec(raw["assignee"])["id"])],
       ["milestone", str(rec(raw["projectMilestone"])["name"])],
       ["parent", str(rec(raw["parent"])["id"])],
     ];

@@ -1,3 +1,4 @@
+import type { LinearAccount } from "../domain/LinearAccount.ts";
 import { Dag } from "../domain/Dag.ts";
 import type { Task } from "../domain/Task.ts";
 import { ResourcePolicy } from "../domain/ResourcePolicy.ts";
@@ -26,7 +27,7 @@ export class AnalysisService {
     this.frontier = new FrontierService(clock);
   }
 
-  analyse(tasks: readonly Task[], source: string, provenance: { capturedAt?: string | null; warnings?: readonly string[] } = {}): Analysis {
+  analyse(tasks: readonly Task[], source: string, provenance: { account?: LinearAccount | undefined; capturedAt?: string | null; warnings?: readonly string[] } = {}): Analysis {
     const dag = new Dag(tasks);
     const waves = this.waves.waves(dag);
     const gatekeepers = this.waves.gatekeepers(dag);
@@ -34,6 +35,7 @@ export class AnalysisService {
     return new Analysis({
       dag,
       source,
+      account: provenance.account,
       asOf: this.clock.today(),
       capturedAt: provenance.capturedAt === undefined ? (this.clock.now?.() ?? null) : provenance.capturedAt,
       warnings: provenance.warnings ?? [],

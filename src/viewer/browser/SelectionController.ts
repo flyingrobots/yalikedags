@@ -1,3 +1,4 @@
+import { MarkdownDescription } from "./MarkdownDescription.ts";
 import { element, isElement } from "./Dom.ts";
 import type { ViewerState } from "./ViewerState.ts";
 
@@ -9,7 +10,7 @@ export class SelectionController {
     state.subscribe(() => { this.render(); });
     for (const panel of panels) { this.bind(panel); }
     document.addEventListener("keydown", (event) => {
-      if (event.key === "Escape") { state.select(undefined); }
+      if (event.key === "Escape" && document.querySelector(":popover-open") === null) { state.select(undefined); }
     });
   }
 
@@ -22,9 +23,9 @@ export class SelectionController {
     });
     panel.addEventListener("keydown", (event) => {
       if (event.key === "Escape") { this.state.select(undefined); event.stopPropagation(); }
-      if (!isElement(event.target) || !event.target.matches(".node[data-id]") || !["Enter", " "].includes(event.key)) { return; }
+      if (!isElement(event.target) || !event.target.matches(".node[data-id],tr[data-task]") || !["Enter", " "].includes(event.key)) { return; }
       event.preventDefault();
-      this.state.select(event.target.getAttribute("data-id") ?? undefined);
+      this.state.select(event.target.getAttribute("data-task") ?? event.target.getAttribute("data-id") ?? undefined);
     });
   }
 
@@ -63,11 +64,13 @@ export class SelectionController {
     const template = this.templates.get(this.state.selected);
     if (template === undefined) {
       this.detail.textContent = "Select a task to see its details and dependencies.";
-      element("selection-status").textContent = "Select a task to trace its dependencies.";
+      element("selection-status").textContent = "";
       return;
     }
     this.detail.replaceChildren(template.content.cloneNode(true));
     const task = this.state.dag.get(this.state.selected ?? "");
+    const description = this.detail.querySelector<HTMLElement>(".task-description");
+    if (description !== null && task.description !== undefined) { new MarkdownDescription().render(task.description, description); }
     element("selection-status").textContent = `${task.key} · ${task.title}`;
   }
 }

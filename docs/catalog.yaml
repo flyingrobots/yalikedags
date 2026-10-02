@@ -21,3 +21,4 @@ pages:
   - { id: standard-documentation, title: Documentation Product Standard, type: standard, capability: cli, audiences: [contributor], status: current, path: standards/documentation.md, intents: [write-docs] }
   - { id: standard-typescript, title: TypeScript Code Standards, type: standard, capability: cli, audiences: [contributor, agent], status: current, path: standards/typescript.md, intents: [write-code] }
   - { id: standard-testing, title: Testing Standards, type: standard, capability: cli, audiences: [contributor, agent], status: current, path: standards/testing.md, intents: [write-tests] }
+  - { id: explain-atomic-work, title: One issue, one independently mergeable PR, type: explanation, capability: graph, audiences: [user, contributor, agent], status: current, path: explanation/atomic-work.md, intents: [plan-work, split-tasks, understand-dependencies], related: [explain-derived-views, explain-source-of-truth] }
