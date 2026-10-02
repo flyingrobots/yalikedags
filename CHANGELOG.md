@@ -4,6 +4,8 @@ All notable changes to this project are documented here. The format follows Keep
 
 ## [Unreleased]
 
+- Add host-specific offline executable packaging with embedded viewer/runtime, dependency and runtime notices, source archive, manifest, checksums, and disconnected artifact verification.
+
 - Bound snapshot file size, graph cardinality, strings, and JSON structure; compare imports in an embedded local worker with cancel, timeout, and stale-result protection.
 
 - Add hash-based script policies to served/offline HTML and security headers to viewer responses; offline files deny connections and served pages restrict them to the local origin.
