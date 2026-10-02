@@ -4,6 +4,8 @@ All notable changes to this project are documented here. The format follows Keep
 
 ## [Unreleased]
 
+- Keep rapid puppy posture requests on the animation frame queue so they preserve the visible pose until the next paint.
+
 - Give every viewer page a direct local URL with browser Back/Forward and offline hash routes.
 - Pack dependency components independently and place unconnected cards in a labeled grid. Open at readable card scale, with active/history filters and viewport recovery after layout changes.
 - Keep capture time, task/edge counts, and source refresh visible on every page. Report retained capture time after refresh failure and preserve valid controls and selection.

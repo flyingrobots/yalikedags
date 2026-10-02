@@ -33,7 +33,7 @@ export class PuppyRig {
         ...frame, nodes: Object.fromEntries(Object.entries(frame.nodes).filter(([id]) => ids.includes(id))),
       })) }, duration);
     }
-    this.flush();
+    this.queue();
   }
   pose(): ReadonlyMap<string, { x: number; y: number }> {
     return new Map(Array.from(this.layers.values()).flatMap(layer => Array.from(layer.offsets)));

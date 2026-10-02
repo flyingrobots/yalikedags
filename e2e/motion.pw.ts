@@ -203,6 +203,37 @@ test("rapid sit requests blend from the visible pose without a standing reset", 
   await expect(page.locator("#puppy-dag-node-hip")).toHaveAttribute("cy", "357");
 });
 
+test("posture interruptions preserve geometry between animation callbacks", async ({ page }) => {
+  await page.addInitScript(() => {
+    const requestFrame = window.requestAnimationFrame.bind(window);
+    window.requestAnimationFrame = (callback): number => requestFrame(time => {
+      callback(time);
+      document.dispatchEvent(new Event("test:animation-update"));
+    });
+  });
+  await page.goto(url);
+  // oracle: interrupting between an animation update and its queued paint cannot change the displayed pose synchronously.
+  const changed = await page.locator(".brand-puppy").evaluate(svg => new Promise<number>(complete => {
+    const geometry = (): string => Array.from(svg.querySelectorAll(".node,.edge,.pupil,.ear-fill"),
+      node => [node.getAttribute("cx"), node.getAttribute("cy"), node.getAttribute("d")].join("|")).join("\n");
+    const sit = (): void => {
+      document.documentElement.dataset["puppyAction"] = "sit-sequence";
+      document.dispatchEvent(new Event("yalikedags:puppy-action"));
+    };
+    let samples = 0; let differences = 0;
+    const interrupt = (): void => {
+      if (samples >= 8) { return; }
+      const before = geometry(); sit();
+      if (geometry() !== before) { differences++; }
+      samples++;
+      if (samples === 8) { document.removeEventListener("test:animation-update", interrupt); complete(differences); }
+    };
+    document.addEventListener("test:animation-update", interrupt);
+    sit();
+  }));
+  expect(changed).toBe(0);
+});
+
 test("rig debug exposes owned regions and attached bones, with independent seated wag and head motion", async ({ page }) => {
   await page.goto(pathToFileURL(resolve("dist/viewer-motion-dev.html")).href);
   await page.getByRole("button", { name: "Puppy rig tool", exact: true }).click();
