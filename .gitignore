@@ -13,8 +13,6 @@ coverage/
 .Trashes
 .obsidian/
 
-# Local clean-room terms: names that must never be committed here.
-.clean-room.local
 src/viewer/generated/
 test-results/
 playwright-report/

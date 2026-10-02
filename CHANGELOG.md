@@ -4,6 +4,8 @@ All notable changes to this project are documented here. The format follows Keep
 
 ## [Unreleased]
 
+- Remove the clean-room script and its CI, pre-commit, and check-command integrations.
+
 - Discard graph drag state when the pointer returns after releasing outside the SVG.
 
 - Resolve critical-path ties in stable task-id order so reordered snapshots do not report false chain changes.
