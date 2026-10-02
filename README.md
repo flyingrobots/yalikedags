@@ -64,6 +64,8 @@ Get a graph on screen in about two minutes, off the bundled example, no key need
 
 Snapshot comparisons stay local, run off the UI thread, and can be canceled. Oversized imports are refused; see [import budgets](docs/reference/snapshot.md#import-budgets).
 
+For disconnected use, add `--offline` with a file source. Remote sources are refused before the key is read; see [offline mode](docs/reference/cli.md#offline-mode).
+
 ## What ya need
 
 - [bun](https://bun.sh) 1.2 or newer. That's the runtime. There is no Python in here; the Python that used to be here is in the first commit if ya want to look at it, but ya don't.
