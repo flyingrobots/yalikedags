@@ -13,6 +13,7 @@ import { DotRendererAdapter } from "./adapters/output/DotRendererAdapter.ts";
 import { SvgRendererAdapter } from "./adapters/output/SvgRendererAdapter.ts";
 import { HtmlRendererAdapter } from "./adapters/output/HtmlRendererAdapter.ts";
 import { TextReportRendererAdapter } from "./adapters/output/TextReportRendererAdapter.ts";
+import { OfflineHttpAdapter } from "./adapters/http/OfflineHttpAdapter.ts";
 import { FetchHttpAdapter } from "./adapters/http/FetchHttpAdapter.ts";
 import { SystemClockAdapter } from "./adapters/clock/SystemClockAdapter.ts";
 import { EnvSecretsAdapter } from "./adapters/secrets/EnvSecretsAdapter.ts";
@@ -36,6 +37,8 @@ const USAGE = `yalikedags: ya like dags?
 usage: yalikedags <command> [--project <name|id> | --tasklist <file> | --snapshot <file> | --dag <file>] [options]
 
 commands
+  --offline disables remote sources and outbound HTTP; local file workflows remain available.
+
   sync      read the source and write a snapshot JSON      --out <file>
   audit     report findings (isolated, redundant, stale, split candidates)   --json  --strict
   frontier  the ready tasks, most urgent first
@@ -180,7 +183,8 @@ async function renderCommand(a: Analysis, args: Args): Promise<ExitCodeValue> {
 function buildResolver(args: Args, vault: VaultSecretsAdapter): SourceResolver {
   const keyTarget = args.get("key-target");
   return new SourceResolver({
-    http: new FetchHttpAdapter(),
+    http: args.has("offline") ? new OfflineHttpAdapter() : new FetchHttpAdapter(),
+    offline: args.has("offline"),
     secrets: new ChainSecretsAdapter([new EnvSecretsAdapter(process.env), vault]),
     readFile: (p: string): Promise<string> => Bun.file(p).text(),
     ...(keyTarget !== undefined && { keyTarget }),
