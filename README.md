@@ -11,40 +11,40 @@
 
 ## What's all this, then?
 
-Right. So you've got a Linear project, yeah? Two hundred-odd cards, all sat there like they're waiting for a fight what's never gonna happen. And nobody can tell ya which one comes first, which one's holding up the rest, or which ones are the same job wearing two hats. That's what this is for.
+Sure, you've a Linear project. Two hundred cards in it. Everyone's busy, nobody can start, and the fella who knows what's holding it up is away till Monday. Half the cards are the same job wearing different hats. Lovely. We'll have a look, so.
 
-### ***yalikedags reads your Linear project, builds the dependency DAG out of it, tells ya what's ready, what's blocked, where the long chain is, and which cards are talking rubbish. Then it draws the whole thing so ya can look at it proper. Two ways an' all: the graph, for how it all hangs together, and the grid, workstreams down the side and waves across the top, for who could be doing what this round.***
+### ***yalikedags reads your Linear project and draws the dependencies. Shows ya what can start, what's waiting on what, and the long chain between you and going home. A graph to see how it hangs together, a grid to see who could get on with what. Finds the cards that need a talking-to as well. All in the one place.***
 
 ## Put the plan back where the work is
 
-Now, if the dependencies live in a file on your machine and not in Linear, where everyone can see 'em, that's no good to anybody, is it? Well, this'ere'll work out the difference, and write ya a lovely plan. Ya read it first. Nothing in Linear moves till ya say `--confirm`. Then it does the job and goes back and checks the job got done. Till then, good dag. Stays put.
+No use having the plan on your machine if the rest of them are looking in Linear. It'll work out the difference and write it down for ya. Have a read. Happy with it? Say `--confirm` and it'll make the changes, then check they're done. Till then, good dag. Stays put.
 
 ## 🐾 Who's it for?
 
-Ah, don't ya know? It's for the whole team. Everyone's mints their own Linear key an puts in their own keychain, then everyone starts the server, an' everyone sees the same graph. Just like that, ya see? Linear keeps the truth, lad; this just has the good sense to draw it.
+The lot of ya. Each gets their own Linear key, puts it in their own keychain, and opens the same project. Same work, same graph. No passing keys round. Linear keeps the books; this draws the picture.
 
-###  🐶 Take it with ya
+### 🐶 Take it with ya
 
-And when ya want to show yer mam, er someone else has ta see it, who hasn't got the tool, or ya key, or the first idea what a terminal is, use `render --format html --out dag.html` and out pops one file. Whole viewer in it, graph and all. Self-contained. Simple. Opens by a quick double-click, asks the internet for nothing, works on a plane, shows ya just like that.
+Want to show your mam? She's not installing all this. Use `render --format html --out dag.html` and give her the file. One file, the whole viewer in it. Double-click and there's your graph. No key, no internet. Works on a plane, if you're going somewhere.
 
-*Mind who ya send it to, though:* the file's got the cards and people's names in it. Pick **Structure only** in Import/Export, or add `--redact`, to leave those out, if yer paranoid. But don't we didn't warn ya: the graph's shape can still give a project away; [here's what travels with the file](SECURITY.md#export-contents-and-retention).
+*Mind who gets a copy.* The cards and people's names go with it. Pick **Structure only** in Import/Export, or add `--redact`, to leave those out. Someone who knows the project might still recognise the shape. [Have a look at what's in the file](SECURITY.md#export-contents-and-retention) before ya send it round.
 
 ### ♟️ Find the next move
 
-What's ready? What'll it unblock? What's standing between ya and done? The viewer puts that bit up front. Have a look at the dependencies, line the work up in waves, or find a card in the task list. Pick one and its details open beside it. Findings calls out the dodgy cards. There's a little dag keeping ya company an' all. [Have a look round](docs/how-to/open-the-viewer.md).
+Start with what can be done now. It'll show ya what that frees up next. Follow the dependencies, line the work up in waves, or pick a card and see what's in it. Findings has the ones that need sorting out. There's a little dag to keep ya company, too. Doesn't do the work for ya. [Come and have a look](docs/how-to/open-the-viewer.md).
 
 ## 📍 Start here
 
-Well? What are ya waiting for? Get a graph on screen. It'll take ya about two minutes, off the bundled example, no key needed: [See your first DAG](docs/tutorials/first-dag.md). Even me mam figured it out on her own, this one.
+Go on, try the example. No key needed, about two minutes: [See your first DAG](docs/tutorials/first-dag.md). My mam's already got hers open. She's asking why you're still reading.
 
 ### 👀 What ya lookin' to do?
 
-- [Put ya Linear key somewhere safe](docs/how-to/store-the-linear-key.md) (once, then forget it)
-- [Get ya project out of Linear](docs/how-to/sync-a-project.md)
+- [Put your Linear key somewhere safe](docs/how-to/store-the-linear-key.md) (once, then forget it)
+- [Get your project out of Linear](docs/how-to/sync-a-project.md)
 - [Find the missing links and cards that need splitting](docs/how-to/audit-a-project.md)
 - [Have a look at the thing](docs/how-to/open-the-viewer.md), or save it as one file ya can send someone
-- [Put the dependencies back in Linear](docs/how-to/reconcile-into-linear.md), after ya've read the plan
-- [Take the whole tool offline](docs/how-to/install-offline.md), for where the internet doesn't come with ya
+- [Put the dependencies back in Linear](docs/how-to/reconcile-into-linear.md), once you've read the plan
+- [Take the whole tool offline](docs/how-to/install-offline.md), in case the internet doesn't come with ya
 
 ### 🕵️‍♂️ Need particulars?
 
@@ -55,7 +55,7 @@ Well? What are ya waiting for? Get a graph on screen. It'll take ya about two mi
 - [Where the buttons are and what they do](docs/reference/viewer.md)
 - [What stays local and what gets shared](SECURITY.md)
 
-###  🎓 How's it work, then?
+### 🎓 How's it work, then?
 
 - [One job, one PR, working when it lands](docs/explanation/atomic-work.md)
 - [How it works out what's ready and what's holding ya up](docs/explanation/derived-views.md)
@@ -68,17 +68,17 @@ Well? What are ya waiting for? Get a graph on screen. It'll take ya about two mi
 ### 🦮 Kit you'll need
 
 - [bun](https://bun.sh) 1.2 or newer to run it.
-- A Linear personal API key if ya want ya own project. [Stick it in the keychain](docs/how-to/store-the-linear-key.md) and be done with it. The bundled example needs no key.
+- A Linear personal API key for your own project. [Stick it in the keychain](docs/how-to/store-the-linear-key.md) and be done with it. The example needs no key.
 - GraphViz `dot` if ya want to draw the `.dot` files yourself. The viewer does its own drawing.
 
-##  🕹️ Give it a go
+## 🕹️ Give it a go
 
 ```bash
 bun install
 bun src/cli.ts render --tasklist examples/example-tasklist.txt
 ```
 
-Ya should get this sort of thing. Cut down a bit so we're not here all day:
+You'll get something like this. I've cut it short; we've things to be doing:
 
 ```text
 loaded 12 tasks from task list examples/example-tasklist.txt
@@ -91,9 +91,9 @@ frontier (2 ready tasks, most urgent first):
 critical path by depth: 6 tasks: implement-core-dag-builder then ... then deploy-to-production
 ```
 
-## Want to customize it? Here's how ya change it, and how to share it back, if ya want to.
+## Got a better way of doing it?
 
-Fancy getting under the bonnet? Read [the house rules](CONTRIBUTING.md) and [how it's put together](docs/contributing/architecture.md). Tests first. Keep real project stuff out of it. Run `bun run check` before ya push or the hooks'll have ya.
+Have a look at [the house rules](CONTRIBUTING.md) and [how it's put together](docs/contributing/architecture.md), then show us. Tests first, real project business kept out of it. Run `bun run check` before ya push. Bring it back working, now.
 
 ## Licence
 
