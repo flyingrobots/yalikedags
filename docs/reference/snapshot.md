@@ -22,6 +22,10 @@ Written by `sync` and `render --format json`; read by `--snapshot` and served at
 }
 ```
 
+## Import budgets
+
+The reader rejects snapshots above 8 MiB, 5,000 tasks, or 20,000 blocker references. Any string is limited to 65,536 UTF-16 code units. The JSON structure is limited to 100,000 values and 32 nesting levels, including ignored fields. These are simultaneous limits, not a guarantee that every graph below the task ceiling is inexpensive to analyze. Limit failures report `snapshot_limit`; split an oversized export at meaningful project boundaries.
+
 ## Task fields
 
 | Field | Type | Required | Notes |

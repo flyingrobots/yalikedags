@@ -3,6 +3,10 @@ import { resolve } from "node:path";
 
 /** Bundle once for both server and file export. No runtime asset requests or CDN. */
 const root = resolve(import.meta.dir, "..");
+await mkdir(resolve(root, "src/viewer/generated"), { recursive: true });
+const worker = await Bun.build({ entrypoints: [resolve(root, "src/viewer/browser/comparison.worker.ts")], target: "browser", format: "iife", minify: true });
+if (!worker.success || worker.outputs[0] === undefined) { throw new Error("comparison worker build failed"); }
+await Bun.write(resolve(root, "src/viewer/generated/comparison.ts"), `export const comparisonScript = ${JSON.stringify(await worker.outputs[0].text())};\n`);
 const result = await Bun.build({
   entrypoints: [resolve(root, "src/viewer/browser/main.ts")],
   target: "browser", format: "iife", minify: true, sourcemap: "none",
