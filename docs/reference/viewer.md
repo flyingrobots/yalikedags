@@ -99,6 +99,8 @@ The graphite surfaces use cyan for navigation and selection. Task states use min
 
 **Import/Export → Refresh source** explicitly rereads through the local server. There is no polling. Selection, filters, sorting, and active view survive a successful refresh; failed reads preserve the current snapshot and display a notice. Offline exports disable refresh. A refresh of a snapshot file rereads that file, not its original tracker.
 
+Snapshot comparison runs in an embedded local worker, including in offline HTML. Files above 8 MiB are refused before reading; [snapshot import budgets](snapshot.md#import-budgets) also bound graph and JSON structure. **Cancel comparison** terminates work, and a 15-second timeout stops expensive comparisons. A newer selection cancels the previous request. Failure or cancellation leaves the current project intact and clears incomplete comparison results.
+
 **Import/Export** reports added and removed tasks, completed tasks, status changes, assignment changes, blocker changes, and changes in critical-chain membership. After refresh it compares the previous successful read and confirms when no changes were found. **Compare snapshot JSON** compares a chosen earlier file locally. It uses stable task ids, so files from unrelated projects can give misleading results. It is not a complete field-by-field audit.
 
 Empty snapshots, unschedulable waves, no ready work, and no audit findings have explicit empty states. Invalid embedded data produces a visible startup error. Local storage holds the active view, column preferences, inspector width, and appearance preferences; a refresh handoff temporarily uses browser history state for selection and controls. Ordinary reload resets selection.

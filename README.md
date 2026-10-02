@@ -62,6 +62,8 @@ Get a graph on screen in about two minutes, off the bundled example, no key need
 
 - [Troubleshooting](docs/troubleshooting/index.md): the sync refused, the graph has a cycle, a relation points somewhere odd
 
+Snapshot comparisons stay local, run off the UI thread, and can be canceled. Oversized imports are refused; see [import budgets](docs/reference/snapshot.md#import-budgets).
+
 The viewer restricts browser scripts and connections with a Content Security Policy; see [Security](SECURITY.md).
 
 The local viewer accepts only its bound loopback host and port; use the address printed by `serve`.
