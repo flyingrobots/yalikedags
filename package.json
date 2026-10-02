@@ -22,7 +22,9 @@
     "test:live": "bun run fixture:provision && YALIKEDAGS_LIVE=1 bun test test/live/",
     "fixture:provision": "bun scripts/live-fixture.ts provision",
     "fixture:verify": "bun scripts/live-fixture.ts verify",
-    "fixture:plan": "bun scripts/live-fixture.ts provision --dry-run"
+    "fixture:plan": "bun scripts/live-fixture.ts provision --dry-run",
+    "package:offline": "bun run build:viewer && bun scripts/package-offline.ts",
+    "verify:offline": "bun scripts/verify-offline.ts"
   },
   "engines": {
     "bun": ">=1.2"

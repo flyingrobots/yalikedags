@@ -71,6 +71,8 @@ Live check against a real project (read-only, needs the key): `bun src/cli.ts sy
 
 Install the test browser with `bunx playwright install chromium`, then run `bun run test:browser`. CI installs Chromium and runs this separately from the offline Bun suite. The browser suite exercises both `file://` export and loopback serving, storage fallback, shared selection, view navigation and inspector lifecycle, graph navigation and filtering, Markdown sanitization, pagination, palette contrast, inspector resizing, escaping, and crowded/empty graphs.
 
+The build embeds a separate comparison worker before bundling the viewer. Keep snapshot parsing/comparison off the UI thread; the client creates a local Blob worker and terminates it on cancellation, supersession, error, or timeout.
+
 `bun run viewer:screenshots` regenerates the viewer documentation screenshots using only the bundled public example and a fixed date.
 
 ## Known gaps

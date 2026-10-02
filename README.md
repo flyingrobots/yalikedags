@@ -79,6 +79,14 @@ Get a graph on screen in about two minutes, off the bundled example, no key need
 
 - [Troubleshooting](docs/troubleshooting/index.md): the sync refused, the graph has a cycle, a relation points somewhere odd
 
+For disconnected machines, [build and verify a self-contained offline distribution](docs/how-to/install-offline.md) on a preparation machine, then transfer it with its checksums and notices.
+
+Snapshot comparisons stay local, run off the UI thread, and can be canceled. Oversized imports are refused; see [import budgets](docs/reference/snapshot.md#import-budgets).
+
+The viewer restricts browser scripts and connections with a Content Security Policy; see [Security](SECURITY.md).
+
+The local viewer accepts only its bound loopback host and port; use the address printed by `serve`.
+
 For disconnected use, add `--offline` with a file source. Remote sources are refused before the key is read; see [offline mode](docs/reference/cli.md#offline-mode).
 
 ## What ya need
