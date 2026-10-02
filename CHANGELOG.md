@@ -4,6 +4,8 @@ All notable changes to this project are documented here. The format follows Keep
 
 ## [Unreleased]
 
+- Add hash-based script policies to served/offline HTML and security headers to viewer responses; offline files deny connections and served pages restrict them to the local origin.
+
 - Validate viewer request host, bound port, and HTTP method before routing snapshot or refresh requests.
 
 - Add `--offline` to refuse remote sources and tracker writes before credential access and block outbound HTTP while retaining local file workflows.

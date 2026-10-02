@@ -6,6 +6,8 @@
 
 ![Start here: ready work, unblocking impact, and the critical path](../images/viewer-overview.png)
 
+The viewer embeds a hash-based script policy. Offline files permit no connections; served pages use same-origin JSON. Theme and SVG inline styles remain supported. The local server additionally denies embedding in frames.
+
 The local server validates its host and port before serving data. Use the printed `127.0.0.1` URL or `localhost` with the same port; custom hostnames and reverse proxies are not supported. Data routes accept GET/HEAD; refresh requires a same-origin POST.
 
 ## Rendering and data
