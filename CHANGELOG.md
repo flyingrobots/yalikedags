@@ -6,6 +6,10 @@ All notable changes to this project are documented here. The format follows Keep
 
 - Bound snapshot file size, graph cardinality, strings, and JSON structure; compare imports in an embedded local worker with cancel, timeout, and stale-result protection.
 
+- Add hash-based script policies to served/offline HTML and security headers to viewer responses; offline files deny connections and served pages restrict them to the local origin.
+
+- Validate viewer request host, bound port, and HTTP method before routing snapshot or refresh requests.
+
 - Add `--offline` to refuse remote sources and tracker writes before credential access and block outbound HTTP while retaining local file workflows.
 
 - Document the atomic work contract: one executable issue per independently mergeable PR, correctness prerequisites as edges, and explicit antichain/MECE scope. Add root agent guidance and distinguish planned dependency discovery from current analysis.

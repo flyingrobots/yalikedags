@@ -6,6 +6,10 @@
 
 ![Start here: ready work, unblocking impact, and the critical path](../images/viewer-overview.png)
 
+The viewer embeds a hash-based script policy. Offline files permit no connections; served pages use same-origin JSON. Theme and SVG inline styles remain supported. The local server additionally denies embedding in frames.
+
+The local server validates its host and port before serving data. Use the printed `127.0.0.1` URL or `localhost` with the same port; custom hostnames and reverse proxies are not supported. Data routes accept GET/HEAD; refresh requires a same-origin POST.
+
 ## Rendering and data
 
 The server computes task states, frontier order, unblocking counts, waves, workstreams, critical paths, audit findings, and resource conflicts. The browser decodes those results and builds the interface; it does not rerun scheduling to draw the views. Graph positioning is a client rendering step. Comparing a locally chosen JSON file remains entirely client-side. `/snapshot.json` is the portable snapshot export; `/viewer.json` wraps it in schema `yalikedags/viewer/1` with refresh capability and optional changes. Neither endpoint writes a JSON file to disk. Use `sync --out` or `render --format json --out` to save one.
