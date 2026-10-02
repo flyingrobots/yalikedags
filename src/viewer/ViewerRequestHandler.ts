@@ -1,3 +1,4 @@
+import { VIEW_ROUTES } from "./ViewRoutes.ts";
 import { SetupData } from "./SetupData.ts";
 import type { ViewerSetup } from "./SetupData.ts";
 import { ViewerData } from "./ViewerData.ts";
@@ -34,6 +35,7 @@ export class ViewerRequestHandler {
   }
 
   handle(path: string): ViewerResponse {
+    if ([...VIEW_ROUTES.values()].includes(path)) { path = "/"; }
     const a = this.current();
     if ("kind" in a) { return this.setupResponse(path, a); }
     switch (path) {

@@ -31,7 +31,7 @@ Only one wave per graph runs at a time, with at most 180 visible nodes animated 
 
 Selection is shared across views. Selecting a task centers it smoothly in Dependencies, without resetting a valid zoom level. Switching to Tasks, Start here, or Waves reveals its page and scrolls to the selected row/card. Existing filters stay active: excluded tasks are not silently added back. Keyboard focus stays where you put it; wheel, pointer, and keyboard input cancel automatic scrolling. Task details opens with a short fade.
 
-Hover the puppy, focus its brand link, or change themes to play a short tail wag. Click the puppy to play a five-keyframe sit: shift weight, lower onto rounded haunches with its head over its forelegs, adjust the front paws one at a time, hold, and stand again. Body poses and tail wags have independent GSAP tracks, so a wag can continue through a sit. Its duration uses --motion-sit-duration. Reusable node-offset keyframe packets run on a GSAP timeline with smooth interpolation; the tail’s arrows follow its nodes. Replacement clips start from the current layer positions. The click sequence returns to standing; reduced-motion/visibility cancellation resets the whole rig. Tail tracks take precedence over decorative node wiggles. Duration and swing use --motion-tail-duration and --motion-tail-angle.
+Hover the puppy, focus its brand link, or change themes to play a short tail wag. Use **Sit and stand** in the development Puppy rig tool to play a five-keyframe sit: shift weight, lower onto rounded haunches with its head over its forelegs, adjust the front paws one at a time, hold, and stand again. Body poses and tail wags have independent GSAP tracks, so a wag can continue through a sit. Its duration uses --motion-sit-duration. Reusable node-offset keyframe packets run on a GSAP timeline with smooth interpolation; the tail’s arrows follow its nodes. Replacement clips start from the current layer positions. The sit sequence returns to standing; reduced-motion/visibility cancellation resets the whole rig. Tail tracks compose with decorative node wiggles. Duration and swing use --motion-tail-duration and --motion-tail-angle.
 
 In development mode, open the floating **Developer tools → Puppy rig** tool and choose **Colored regions** or **Regions and bones**. The preference stays in this browser. Region colors fill the nodes and translucent triangle surfaces behind the DAG edges. Mesh vertices follow their rig nodes through every animation; switching debug off restores the original unfilled artwork. Fill opacity and triangle seams use --rig-mesh-* tokens. Region colors use theme tokens; labeled swatches and distinct bone dash patterns also identify the regions in monochrome themes. The overlay covers the frame, head, ears, tail, forelimbs, and hindlegs.
 
@@ -67,11 +67,13 @@ Ready cards, wave cards, critical-path steps, graph nodes, the task table, and t
 
 ## Start with the next move
 
-The first visit opens **Start here**. The summary counts ready, in-progress, blocked, unresolved, and finished tasks separately. Ready work is ranked by urgency. Click **Immediately unblocked** or **Downstream** on a card to expand the exact task list; each result opens its details. Immediate results become ready when that card finishes; downstream results include unfinished descendants that may still have other blockers. Resource warnings include in-progress holders and ready contenders.
+The first visit opens **Start here**. The summary counts tasks with no recorded open blockers, in-progress, blocked, unresolved, and finished tasks separately. The dependency frontier is ranked by urgency and excludes explicitly identified tracking containers. This does not establish implementation readiness. Click **Immediately unblocked** or **Downstream** on a card to expand the exact task list; each result opens its details. Immediate results have no recorded open blockers when that card finishes; downstream results include unfinished descendants that may still have other blockers. Resource warnings include in-progress holders and ready contenders.
 
 The critical path lists the longest chain of open tasks by depth, in dependency order. Select any step to inspect it. This is a dependency forecast, not a duration estimate or calendar schedule. The graph's bold borders include both depth-based and effort-based critical chains.
 
 ## Views
+
+Each workspace view displays its name as a visible H1 above its content. The heading follows navigation and uses the shared responsive gutter and theme typography tokens.
 
 The navigation brand includes an inline DAG puppy above the wordmark (beside it on mobile). Its colors follow the active theme; the same artwork is embedded in offline exports without a separate asset request.
 
@@ -79,7 +81,7 @@ The navigation rail switches the main working area between six views. On narrow 
 
 | View | Use it to |
 |---|---|
-| **Start here** | Find ready work, its impact, and the longest open chain. |
+| **Start here** | Inspect the recorded dependency frontier, its impact, and the longest open chain. |
 | **Dependencies** | Trace blockers and dependents. Arrows point from blocker to dependent. **Readable size** restores a readable scale; **Fit all** shows the complete graph. |
 | **Waves** | Compare workstreams across waves. Shared prerequisites appear first. Columns retain their width and scroll horizontally. |
 | **Tasks** | Search, sort, and filter by state, assignee, milestone, or label. Filters apply only to Tasks. Click anywhere on a row to open details; the column chooser remembers optional columns. |
@@ -212,3 +214,61 @@ Colors, type, spacing, borders, radii, shadows, opacity, component dimensions, a
 In **Import/Export**, choose **Export content** before clicking **Export snapshot JSON**. **Full snapshot** (default) includes descriptions, people, project/account details, and provenance present in the current snapshot. **Structure only** replaces identities and removes content while retaining statuses and relationships. Graph shape and counts remain identifying. See the [exact reduction](snapshot.md#structure-only-exports). Changing this choice affects only the downloaded copy, never the current workspace.
 
 Downloads are plaintext and stay on disk until deleted. Snapshots are not automatically saved to browser storage; preferences and refresh restoration have separate retention described in [Security](../../SECURITY.md#export-contents-and-retention).
+
+### Puppy attention and directional waves
+
+Click the puppy for a silent bark animation: the jaw opens and the head gives two small impulses without changing its held posture. In the development Puppy rig tool, **Sit and stand** plays the original five-keyframe sequence; the pose selector holds Standing, Sitting, or Play bow. The seated tail curls low around the haunches using four articulated sections.
+
+While visible, the puppy chooses fresh idle gestures with irregular 6–32 second pauses: variable tail wags, head turns, ear twitches, and occasional bows that return to standing. Consecutive gestures never repeat, and some wags include an ear twitch. Manually held poses suppress automatic bows. Pointer proximity, clicks, theme changes, and debug actions postpone the next idle gesture; interrupting an automatic bow blends back toward standing. A nearby mouse or pen aims its head toward the pointer with a 14-degree clamp; leaving the vicinity returns the gaze to neutral. These additive tracks preserve the body pose. Hidden pages and reduced motion suspend idle behavior, and reduced motion disables pointer tracking and barking.
+
+Click and theme waves displace nodes away from the wave origin in screen space, including mirrored artwork and zoomed graphs. A damped spring response settles each node after the impulse. Pose animation and ripple wrappers compose independently, so a held puppy pose still responds to theme waves. Motion timing, proximity, angle limits, and spring damping/frequency use semantic motion tokens.
+
+## Page URLs
+
+The local viewer renders each page in the browser and exposes a stable URL:
+
+| Page | Local route |
+| --- | --- |
+| Start here | `/start` |
+| Dependencies | `/dependencies` |
+| Waves | `/waves` |
+| Tasks | `/tasks` |
+| Findings | `/findings` |
+| Import/Export | `/import-export` |
+
+Direct links and page reloads return the viewer shell; the browser loads the current
+server snapshot. Navigation uses browser history, including Back and Forward.
+Opening `/` restores the saved view, falling back to Start here. Standalone HTML
+exports use matching hash routes, such as `viewer.html#/tasks`, so navigation
+continues to work without a server. Reloading a page does not fetch fresh Linear
+data: use **Refresh source** to read upstream.
+
+## Sparse graphs and planning evidence
+
+The browser lays out weakly connected components independently and packs them into
+shelves. Cards with no connections in the current view occupy a separate compact
+grid. This arrangement creates no dependency edges. Filters can make a card appear
+unconnected in that view even when it has a connection elsewhere in the snapshot.
+Use **Unconnected cards** to jump to that region.
+
+The opening graph uses readable card scale. **Fit all** is a deliberate overview;
+**Readable size** centers the selection, or opens from the first component when nothing is selected. Filtering,
+refresh, and returning from a neighborhood choose new readable bounds. Resize
+recovers a view that would otherwise be empty or microscopic. **Active work** is
+the default graph filter; completed/canceled history remains available separately
+or together with active cards.
+
+The capture summary shows the source capture time and whole-snapshot task/edge
+counts on every page. Graph filter counts describe the displayed subset. Failed
+source refresh retains the existing graph and reports its retained capture time.
+Successful refresh replaces the snapshot and restores still-valid selection and
+controls. Page reload only displays the server's current capture.
+
+The incomplete dependency-review notice is intentional: no recorded blockers is
+not evidence of independence or implementation readiness. Source labels and an
+explicit tracking-container declaration distinguish implementation, research,
+decisions, investigations, and containers; unclassified cards need disposition.
+Containers are excluded from the dependency frontier count. Wave membership still
+reflects the supplied graph and may include containers; it is not an executable-PR
+count. Proposed dependencies require evidence and review outside this viewer and
+are never manufactured from domains, shared files, or parent membership.

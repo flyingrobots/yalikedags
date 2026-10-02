@@ -26,7 +26,8 @@ export class RefreshController {
       if (!response.ok) { throw new Error("refresh failed"); }
       done();
     } catch {
-      this.notice("Refresh failed. The previous snapshot is still displayed; check the server and retry.");
+      const capture = document.getElementById("snapshot-capture")?.getAttribute("datetime") ?? "unknown";
+      this.notice(`Refresh failed. Retaining the previous snapshot captured ${capture}. Check the server and retry.`);
       control.disabled = false;
     }
   }

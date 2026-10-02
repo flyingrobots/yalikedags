@@ -1,3 +1,4 @@
+import { VIEW_ROUTES } from "../ViewRoutes.ts";
 import { revealDrawer, stopDrawer } from "./DrawerMotion.ts";
 import { element } from "./Dom.ts";
 import { rec, str } from "../../adapters/linear/GraphqlJson.ts";
@@ -24,10 +25,25 @@ export class Workspace {
     }
     let initial = str(rec(saved)["view"]);
     try { initial ??= localStorage.getItem("yalikedags.view.v2") ?? undefined; } catch { /* storage is optional */ }
-    this.show(initial !== undefined && VIEWS.has(initial) ? initial : "ready");
+    this.show(this.route() ?? (initial !== undefined && VIEWS.has(initial) ? initial : "ready"), false);
+    window.addEventListener("popstate", () => { this.show(this.route() ?? "ready", false); });
   }
 
-  show(id: string): void {
+  private route(): string | undefined {
+    const path = location.protocol === "file:" ? location.hash.slice(1) : location.pathname;
+    return [...VIEW_ROUTES].find(([, slug]) => slug === path)?.[0];
+  }
+
+  private navigate(id: string, push: boolean): void {
+    const slug = VIEW_ROUTES.get(id);
+    if (slug !== undefined) {
+      const target = location.protocol === "file:" ? `#${slug}` : slug;
+      const current = location.protocol === "file:" ? location.hash : location.pathname;
+      if (current !== target) { if (push) { history.pushState(null, "", target); } else { history.replaceState(history.state, "", target); } }
+    }
+  }
+
+  show(id: string, push = true): void {
     if (id === "details") {
       const panel = element("inspector"); const opening = panel.hidden;
       panel.hidden = false;
@@ -37,6 +53,7 @@ export class Workspace {
       return;
     }
     if (!VIEWS.has(id)) { return; }
+    this.navigate(id, push);
     this.active = id;
     for (const [key, panel] of this.panels) {
       if (key !== "details") { panel.hidden = key !== id; }

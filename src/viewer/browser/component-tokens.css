@@ -1150,3 +1150,20 @@
 }
 
 :root { --motion-spring-damping: 7; --motion-spring-frequency: 14; }
+
+:root {
+  --ui-view-title-padding: var(--space-20) var(--ui-data-view-gutter);
+  --ui-view-title-font-size: var(--text-24);
+  --ui-view-title-line-height: 1.2;
+  --ui-view-title-color: var(--ink);
+  --ui-view-title-flex: 0 0 auto;
+}
+
+:root {
+  --snapshot-summary-gap: var(--space-12);
+  --snapshot-summary-padding: var(--space-12) var(--ui-data-view-gutter);
+  --snapshot-summary-font: var(--text-12);
+  --snapshot-summary-background: var(--surface);
+  --snapshot-summary-border: var(--size-1) solid var(--line);
+  --graph-region-font: var(--text-16);
+}

@@ -4,9 +4,16 @@ All notable changes to this project are documented here. The format follows Keep
 
 ## [Unreleased]
 
+- Give every viewer page a direct local URL with browser Back/Forward and offline hash routes.
+- Pack dependency components independently and place unconnected cards in a labeled grid. Open at readable card scale, with active/history filters and viewport recovery after layout changes.
+- Keep capture time, task/edge counts, and source refresh visible on every page. Report retained capture time after refresh failure and preserve valid controls and selection.
+- Distinguish source-labeled work kinds and tracking containers. Describe dependency-only readiness as no recorded open blockers, with an explicit incomplete-review notice.
+
+- Show the active page name as a visible H1 above every workspace view, with themeable typography and responsive gutters.
+
 - Give the puppy an irregular idle repertoire with varied tail wags, head and ear gestures, occasional bows, no consecutive repeats, and interaction-aware pauses that preserve manually held poses.
 
-- Curl the seated puppy tail around its haunches; add bounded pointer gaze and click-to-bark without losing the held pose. Restore theme ripples during pose animation and use directional damped spring impulses for shock waves. Preserve exact rest geometry after playback.
+- Curl the seated puppy tail around its haunches; add idle gestures, bounded pointer gaze, and click-to-bark without losing the held pose. Restore theme ripples during pose animation and use directional damped spring impulses for shock waves.
 
 - Give the far foreleg a distinct wrist and paw; keep pose and secondary animation controls available when rig visualization is off.
 

@@ -1,3 +1,4 @@
+import { PlanningEvidence } from "../core/services/PlanningEvidence.ts";
 import { viewerMetadata } from "./ViewerMetadata.ts";
 import { ImpactMarkup } from "./ImpactMarkup.ts";
 import { ChangesMarkup } from "./ChangesMarkup.ts";
@@ -16,17 +17,17 @@ export class ViewerPanels {
 
   render(svg: string): string {
     return `<div id="panel-staging" hidden>
-      <section id="graph-panel" class="panel graph-panel"><div class="graph-filters"><div class="search"><label class="sr-only" for="search">Find a task</label><input id="search" type="search" placeholder="Find a task…" autocomplete="off"><div id="search-results" hidden></div></div><label>Owner<select id="graph-owner" aria-label="Graph owner"></select></label><label>State<select id="graph-status" aria-label="Graph state"><option value="all">All tasks</option><option value="open">Open (unfinished)</option><option value="ready">Ready</option><option value="in-progress">In progress</option><option value="blocked">Blocked</option><option value="unresolved">Unresolved</option><option value="done">Finished</option></select></label><button id="graph-clear-filters">Clear graph filters</button><span id="graph-filter-status" role="status"></span></div><div class="panel-toolbar">
-      <button data-action="readable">Readable size</button><button data-action="fit">Fit all</button><button data-action="focus">Focus selection</button>
+      <section id="graph-panel" class="panel graph-panel"><div class="graph-filters"><div class="search"><label class="sr-only" for="search">Find a task</label><input id="search" type="search" placeholder="Find a task…" autocomplete="off"><div id="search-results" hidden></div></div><label>Owner<select id="graph-owner" aria-label="Graph owner"></select></label><label>State<select id="graph-status" aria-label="Graph state"><option value="open">Active work</option><option value="all">All tasks + history</option><option value="ready">Ready</option><option value="in-progress">In progress</option><option value="blocked">Blocked</option><option value="unresolved">Unresolved</option><option value="done">Completed / canceled history</option></select></label><button id="graph-clear-filters">Clear graph filters</button><span id="graph-filter-status" role="status"></span></div><div class="panel-toolbar">
+      <button data-action="isolated">Unconnected cards</button><button data-action="readable">Readable size</button><button data-action="fit">Fit all</button><button data-action="focus">Focus selection</button>
       <button data-action="zoom-in" aria-label="Zoom in">+</button><button data-action="zoom-out" aria-label="Zoom out">−</button>
       </div><div class="graph-scope"><button id="graph-neighborhood" disabled>Focus neighborhood</button><button id="graph-expand" hidden>Expand one hop</button><button id="graph-all" hidden>Whole project</button><span id="graph-scope-status" role="status">Whole project · select a task to focus its neighborhood</span></div><div id="graph">${svg}</div>
       ${this.analysis.dag.size === 0 ? '<p class="empty">No tasks in this snapshot.</p>' : ""}
       <div class="graph-legend" aria-label="Task states and dependency notation"><span class="legend-state ready">Ready</span><span class="legend-state in-progress">In progress</span><span class="legend-state blocked">Blocked</span><span class="legend-state unresolved">Unresolved</span><span class="legend-state done">Done</span><span class="legend-guide">→ blocker to dependent · Bold: critical path · Dashed: shared prerequisite</span></div></section>
       ${taskTableMarkup()}
       ${this.changePanel()}
-      <section id="grid-panel" class="panel scroll-panel"><div class="view-filter">${this.ownerControls("grid")}</div><p class="panel-intro">Workstreams × waves. A forecast of parallel work, not a schedule. Wave counts refer to the whole project.</p><div id="grid">${this.grid()}${this.unscheduled()}</div></section>
+      <section id="grid-panel" class="panel scroll-panel"><div class="view-filter">${this.ownerControls("grid")}</div><p class="panel-intro">Workstreams × waves. A forecast of parallel work, not a schedule. Wave counts refer to the recorded graph, including containers; these are not executable PR counts or proof of independence.</p><div id="grid">${this.grid()}${this.unscheduled()}</div></section>
       <section id="details-panel" class="panel scroll-panel"><div id="detail"><p class="empty">Select a task to see its details and dependencies.</p></div></section>
-      <section id="ready-panel" class="panel scroll-panel">${new OverviewMarkup(this.analysis).header()}<div class="overview-columns"><div class="ready-section"><div class="section-heading"><div><h3>Ready work</h3></div></div><div class="view-filter">${this.ownerControls("ready")}</div><ol id="frontier" class="task-list">${this.frontier()}</ol></div>${new OverviewMarkup(this.analysis).path()}</div></section>
+      <section id="ready-panel" class="panel scroll-panel">${new OverviewMarkup(this.analysis).header()}<div class="overview-columns"><div class="ready-section"><div class="section-heading"><div><h3>No recorded open blockers</h3></div></div><div class="view-filter">${this.ownerControls("ready")}</div><ol id="frontier" class="task-list">${this.frontier()}</ol></div>${new OverviewMarkup(this.analysis).path()}</div></section>
       <section id="findings-panel" class="panel scroll-panel"><p class="panel-intro">${String(this.analysis.findings.length)} findings in this snapshot.</p><div id="findings">${new FindingsMarkup().render(this.analysis)}</div></section>
       </div>${this.analysis.dag.tasks.map((task) => this.detail(task)).join("")}`;
   }
@@ -67,10 +68,10 @@ export class ViewerPanels {
   }
 
   private frontier(): string {
-    return this.analysis.frontier.map((entry) => {
+    return this.analysis.frontier.filter(entry => new PlanningEvidence().kind(entry.task) !== "Tracking container").map((entry) => {
       const conflicts = this.analysis.conflicts.get(entry.task.id) ?? [];
       return `<li>${this.card(entry.task.id)}${new ImpactMarkup().render(this.analysis, entry.task.id)}${conflicts.length ? `<p class="resource-warning">${esc(conflicts.join("; "))}</p>` : ""}</li>`;
-    }).join("") || '<li class="empty">No tasks ready to start.</li>';
+    }).join("") || '<li class="empty">No non-container cards without recorded open blockers.</li>';
   }
 
   private links(ids: readonly string[]): string {
@@ -81,7 +82,7 @@ export class ViewerPanels {
 
   private detail(t: Task): string {
     const a = this.analysis;
-    const fields = [["State", a.stateOf(t.id)], ["Status", t.status], ["Priority", t.priority], ["Effort", t.effort],
+    const fields = [["Work kind (source evidence)", new PlanningEvidence().kind(t)], ["Dependency readiness", "Recorded blockers only; implementation readiness not verified"], ["State", a.stateOf(t.id)], ["Status", t.status], ["Priority", t.priority], ["Effort", t.effort],
       ["Assignee", t.assignee ?? "Unassigned"], ["Milestone", t.milestone], ["Due", t.due], ["Labels", t.labels.join(", ")],
       ["Workstream", a.workstreamOf(t.id)]];
     const rows = fields.filter(([, value]) => value !== undefined && value !== "")

@@ -11,6 +11,13 @@
 
 Full snapshot exports contain project text and people in plaintext. For a reduced copy, select **Import/Export → Export content → Structure only**, or use `render --redact` / `sync --redact`. Graph shape and task counts remain identifying; see [export contents and retention](SECURITY.md#export-contents-and-retention).
 
+The viewer has direct page URLs such as `/dependencies` and `/tasks` (offline
+exports use `#/dependencies` and `#/tasks`). Sparse graphs open at readable scale,
+with independently packed components and a separate unconnected-card grid. Capture
+time, source refresh, and task/edge counts stay visible. No recorded blockers is
+not proof of independence: the viewer flags incomplete dependency review and
+separates explicit tracking containers from its dependency frontier.
+
 ## What this is for
 
 Right. So you've got a Linear project, yeah? Two hundred-odd cards, all sat there like they're waiting for a fight what's never gonna happen. And nobody can tell ya which one comes first, which one's holding up the rest, or which ones are the same job wearing two hats. That's what this is for. yalikedags reads your Linear project, builds the dependency DAG out of it, tells ya what's ready, what's blocked, where the long chain is, and which cards are talking rubbish. Then it draws the whole thing so ya can look at it proper. Two ways an' all: the graph, for how it all hangs together, and the grid, workstreams down the side and waves across the top, for who could be doing what this round.
@@ -25,7 +32,7 @@ It's for the whole team. Everyone's got their own Linear key in their own keycha
 
 Missing a Linear key? `serve --project example-project` opens a setup screen with environment/keychain instructions and a local-file alternative. Restart from the same terminal after exporting a key.
 
-The DAG and puppy use locally bundled GSAP for hover motion, expanding click/theme pulses, and smooth selection navigation. Reduced-motion preferences disable decorative effects. Task details opens at its maximum width unless you have saved a smaller size.
+The DAG and puppy use locally bundled GSAP for hover motion, expanding click/theme pulses, and smooth selection navigation. The puppy curls its tail when seated, occasionally moves its ears and head, follows nearby pointers within a safe angle, and barks silently on click. Reduced-motion preferences disable decorative effects. Task details opens at its maximum width unless you have saved a smaller size.
 
 **Theme → Text size** adjusts a relative-scale slider; the wider desktop navigation grows with the text.
 

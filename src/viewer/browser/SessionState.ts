@@ -7,6 +7,7 @@ export class SessionState {
   private readonly saved = rec(history.state);
 
   restore(state: ViewerState): void {
+    state.select(str(this.saved["selected"]));
     const controls = rec(this.saved["controls"]);
     document.querySelectorAll<HTMLInputElement | HTMLSelectElement>("input[id],select[id]").forEach((control) => {
       const value = str(controls[control.id]);
@@ -14,7 +15,6 @@ export class SessionState {
         control.value = value; control.dispatchEvent(new Event(control instanceof HTMLSelectElement ? "change" : "input"));
       }
     });
-    state.select(str(this.saved["selected"]));
     // The refresh handoff is consumed; subsequent reloads use the latest saved layout.
     history.replaceState(null, "");
   }

@@ -428,3 +428,9 @@ footer:has(#selection-status:empty):has(#viewer-notice[hidden]) {display:var(--u
 :root[data-puppy-debug="bones"] .puppy-dag .ear-fill {visibility:hidden}
 :root[data-puppy-debug="regions"] .puppy-dag .pupil,
 :root[data-puppy-debug="bones"] .puppy-dag .pupil {fill:var(--rig-pupil-fill)}
+
+#view-title {padding:var(--ui-view-title-padding);font-size:var(--ui-view-title-font-size);line-height:var(--ui-view-title-line-height);color:var(--ui-view-title-color);flex:var(--ui-view-title-flex)}
+.snapshot-summary {display:flex;flex-wrap:wrap;align-items:center;gap:var(--snapshot-summary-gap);padding:var(--snapshot-summary-padding);font-size:var(--snapshot-summary-font);background:var(--snapshot-summary-background);border-bottom:var(--snapshot-summary-border)}
+.snapshot-summary>div {display:flex;flex-direction:column;flex:1}
+.graph-region-label {fill:var(--muted);font-size:var(--graph-region-font)}
+.planning-warning {padding:var(--snapshot-summary-padding);background:var(--snapshot-summary-background);border-bottom:var(--snapshot-summary-border);font-size:var(--snapshot-summary-font)}
