@@ -17,3 +17,5 @@ Defined in `src/cli/ExitCode.ts`; a refusal's leading `name:` token selects the 
 | 10 | `PLAN_WOULD_CYCLE` | performing the plan would leave a graph that does not schedule | nothing was written; `plan` emits no plan, and `apply` refuses the unsafe effective plan | review the desired edges and any skipped removals; re-plan, or allow reviewed removals if intended |
 
 A write to `--out` happens only on the success path, so a nonzero exit never leaves a partial file. Exit 8 is the exception in spirit rather than in fact: the file is written, and it is written precisely because the run was incomplete.
+
+`serve --project` handles initial `NO_KEY` and `LINEAR_UNAUTHORIZED` by keeping the loopback server running and displaying credential setup in the browser. Other commands retain codes 7 and 3. An authentication failure during refresh preserves the last successful snapshot.

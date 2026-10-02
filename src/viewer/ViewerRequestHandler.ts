@@ -1,3 +1,6 @@
+import { VIEW_ROUTES } from "./ViewRoutes.ts";
+import { SetupData } from "./SetupData.ts";
+import type { ViewerSetup } from "./SetupData.ts";
 import { ViewerData } from "./ViewerData.ts";
 import type { Analysis } from "../core/services/Analysis.ts";
 import { JsonSnapshotAdapter } from "../adapters/output/JsonSnapshotAdapter.ts";
@@ -22,14 +25,23 @@ export class ViewerRequestHandler {
   private readonly svg = new SvgRendererAdapter();
   private readonly dot = new DotRendererAdapter();
 
-  constructor(private readonly current: () => Analysis, private readonly options: () => ViewerOptions = () => ({})) {}
+  constructor(private readonly current: () => Analysis | ViewerSetup, private readonly options: () => ViewerOptions = () => ({}), private readonly development = false) {}
+
+  private setupResponse(path: string, setup: ViewerSetup): ViewerResponse {
+    if (path === "/" || path === "/index.html") { return { status: 200, contentType: "text/html; charset=utf-8", body: viewerPage(undefined, this.development) }; }
+    if (path === "/viewer.json") { return { status: 200, contentType: "application/json", body: new SetupData().render(setup) }; }
+    const known = ["/snapshot.json", "/graph.svg", "/graph.dot"].includes(path);
+    return { status: known ? 503 : 404, contentType: "text/plain", body: known ? "Credential setup required\n" : "not found\n" };
+  }
 
   handle(path: string): ViewerResponse {
+    if ([...VIEW_ROUTES.values()].includes(path)) { path = "/"; }
     const a = this.current();
+    if ("kind" in a) { return this.setupResponse(path, a); }
     switch (path) {
       case "/":
       case "/index.html":
-        return { status: 200, contentType: "text/html; charset=utf-8", body: viewerPage() };
+        return { status: 200, contentType: "text/html; charset=utf-8", body: viewerPage(undefined, this.development) };
       case "/popout.html":
         return { status: 200, contentType: "text/html; charset=utf-8", body: '<!doctype html><html lang="en"><head><meta charset="utf-8"><title>yalikedags · View</title></head><body></body></html>' };
       case "/viewer.json":

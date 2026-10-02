@@ -46,11 +46,19 @@ export class SvgRendererAdapter implements RendererPort {
       `<svg xmlns="http://www.w3.org/2000/svg" width="${String(width)}" height="${String(height)}" viewBox="0 0 ${String(width)} ${String(height)}">`,
       `<style>${STYLE}</style>`,
       '<defs><marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#555"/></marker></defs>',
+      this.isolatedLabel(a, layout),
       ...this.edges(a, layout),
       ...this.nodes(a, layout),
       "</svg>",
     ];
     return `${parts.join("\n")}\n`;
+  }
+
+  private isolatedLabel(a: Analysis, layout: Layout): string {
+    const isolated = a.dag.tasks.filter(task => a.dag.blockers(task.id).length + a.dag.dependents(task.id).length === 0);
+    if (isolated.length === 0) { return ""; }
+    const y = Math.min(...isolated.map(task => coords(layout, task.id).y)) - 20;
+    return `<text class="graph-region-label" x="24" y="${String(y)}">No connections in this view · ${String(isolated.length)} cards · dependency review needed</text>`;
   }
 
   private edges(a: Analysis, layout: Layout): string[] {
@@ -77,7 +85,7 @@ export class SvgRendererAdapter implements RendererPort {
       const classes = ["node", a.stateOf(t.id), a.isCritical(t.id) ? "critical" : "", a.gatekeepers.includes(t.id) ? "gatekeeper" : ""].filter((c) => c.length > 0).join(" ");
       const lines = new SvgTaskTitle().lines(t.title);
       return [
-        `<g class="${classes}" data-id="${escapeXml(t.id)}" transform="translate(${String(x)},${String(y)})">`,
+        `<g class="${classes}" data-id="${escapeXml(t.id)}" data-isolated="${String(a.dag.blockers(t.id).length + a.dag.dependents(t.id).length === 0)}" transform="translate(${String(x)},${String(y)})">`,
         `<title>${escapeXml(t.key)} · ${escapeXml(t.title)} · ${escapeXml(a.stateOf(t.id))} · ${escapeXml(t.assignee ?? "Unassigned")}</title>`,
         `<rect width="${String(NODE_W)}" height="${String(NODE_H)}"/>`,
         `<text x="8" y="18" font-weight="bold">${escapeXml(t.key.length > 36 ? `${t.key.slice(0, 35)}…` : t.key)}</text>`,

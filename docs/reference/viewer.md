@@ -10,6 +10,55 @@ The viewer embeds a hash-based script policy. Offline files permit no connection
 
 The local server validates its host and port before serving data. Use the printed `127.0.0.1` URL or `localhost` with the same port; custom hostnames and reverse proxies are not supported. Data routes accept GET/HEAD; refresh requires a same-origin POST.
 
+## Connect Linear
+
+When `serve --project` cannot find a credential in either the environment or OS keychain, or Linear rejects it, the viewer shows a full-height setup screen with the DAG puppy and a command for the configured key target. The command is shown as escaped code; no key is entered, stored, or sent through the browser. Keychain targets that are not valid shell variable names get a keychain command instead of an invalid `export`.
+
+Replace the placeholder with your personal Linear key, stop the server with Ctrl-C, and rerun the original command from that shell. For example:
+
+```bash
+export LINEAR_API_KEY='your-linear-api-key'
+bun src/cli.ts serve --project example-project
+```
+
+Expand **Prefer the keychain or a local file?** for a command that reads the key from stdin without adding it to shell history, or to explore the bundled example without authentication. Source-checkout commands use `bun src/cli.ts`; packaged installations can substitute `yalikedags`. A valid stored key still opens the workspace even if no environment variable is set. Theme and text-size controls also work on the setup screen.
+
+Project export endpoints return 503 until a snapshot is loaded. Unrelated source failures retain their normal CLI errors; a failed refresh of a previously loaded project preserves that snapshot.
+
+![Credential setup with the DAG puppy and a shell command](../images/viewer-setup.png)
+
+## Motion and selection
+
+The viewer bundles GSAP with its own client assets, including offline HTML; animation makes no CDN or service requests. Hover or keyboard-focus a graph node to give it a short wiggle. Click the DAG or puppy to release an expanding circle from the pointer. Nodes react when the ring reaches their visible bounds. Theme changes smoothly interpolate semantic colors and emit a wave from each visible graph’s center. The raw standalone SVG remains static.
+
+Only one wave per graph runs at a time, with at most 180 visible nodes animated per wave. A new pulse replaces the old one. Panning never fires a click pulse; dragging, wheel zoom, graph replacement, and hiding the browser tab cancel decorative motion. Task graph layout transforms and dependency edges stay fixed. Theme transitions release their temporary overrides when done, so CSS theme tokens remain authoritative.
+
+Selection is shared across views. Selecting a task centers it smoothly in Dependencies, without resetting a valid zoom level. Switching to Tasks, Start here, or Waves reveals its page and scrolls to the selected row/card. Existing filters stay active: excluded tasks are not silently added back. Keyboard focus stays where you put it; wheel, pointer, and keyboard input cancel automatic scrolling. Task details opens with a short fade.
+
+Hover the puppy, focus its brand link, or change themes to play a short tail wag. Use **Sit and stand** in the development Puppy rig tool to play a five-keyframe sit: shift weight, lower onto rounded haunches with its head over its forelegs, adjust the front paws one at a time, hold, and stand again. Body poses and tail wags have independent GSAP tracks, so a wag can continue through a sit. Its duration uses --motion-sit-duration. Reusable node-offset keyframe packets run on a GSAP timeline with smooth interpolation; the tail’s arrows follow its nodes. Replacement clips start from the current layer positions. The sit sequence returns to standing; reduced-motion/visibility cancellation resets the whole rig. Tail tracks compose with decorative node wiggles. Duration and swing use --motion-tail-duration and --motion-tail-angle.
+
+In development mode, open the floating **Developer tools → Puppy rig** tool and choose **Colored regions** or **Regions and bones**. The preference stays in this browser. Region colors fill the nodes and translucent triangle surfaces behind the DAG edges. Mesh vertices follow their rig nodes through every animation; switching debug off restores the original unfilled artwork. Fill opacity and triangle seams use --rig-mesh-* tokens. Region colors use theme tokens; labeled swatches and distinct bone dash patterns also identify the regions in monochrome themes. The overlay covers the frame, head, ears, tail, forelimbs, and hindlegs.
+
+With the rig overlay enabled, **Puppy pose** holds Standing, Sitting, or Play bow. Moving from a sit to a bow raises the hips before lowering the chest. **Wag tail**, **Tilt head**, and **Shake ears** run independently over any pose. Head rotation carries the ears, and tail rotation follows its moving root. Each near/far leg has its own base track; paw positions belong to the posture and are not moved by head or tail actions. The legs use two-bone inverse kinematics with fixed bind lengths and bend direction. Far forelimb surfaces connect fully to the shoulder; far hindlimbs have distinct ankle, hock, and paw contours. Bound outline vertices rotate with their bones without scaling across the limb; the outer haunch blends pelvis and leg influences to preserve its round silhouette. Feet and the torso remain authored pose controls, not a physics simulation. The DAG's connectivity does not change. No debug setting changes project data.
+
+The operating system’s **Reduce motion** setting is honored live: waves, wiggles, and tail clips stop, theme colors switch immediately, and selection scrolling/panning becomes immediate. Motion duration, wave speed, amplitude, opacity, and color use CSS tokens in component-tokens.css (--motion-*). Browser evidence lives in e2e/motion.pw.ts.
+
+## Developer overlay
+
+Start the local viewer with an explicit development flag:
+
+```bash
+YALIKEDAGS_DEV=1 bun src/cli.ts serve --tasklist examples/example-tasklist.txt --port 4178
+```
+
+The floating **DEV** toolbar appears on both the project and credential setup screens. It is absent from normal servers and HTML exports. URL parameters, imported project data, and saved rig preferences do not enable it. Restart the server without the environment flag to disable development mode.
+
+Drag the **DEV** grip with a mouse, pen, or touch. GSAP Draggable keeps it within the viewport. Focus the grip and use arrow keys to move it; hold Shift for larger steps. Position is saved locally when storage is available and clamped when the viewport or panel size changes. Collapse leaves the toolbar accessible; expand restores its widgets and output.
+
+The icon row selects **Diagnostics** or **Puppy rig**. Tool widgets appear below it, followed by a selectable, read-only diagnostics text area. **Clear diagnostics** empties the log. The log holds at most 100 local UI events; it does not intercept console arguments or collect project text, credentials, raw errors, or network responses. Browser failures are noted with a prompt to inspect the browser console. Diagnostics widgets show viewport dimensions, pixel ratio, motion preference, and puppy node count. Rig controls are available only here, rather than in ordinary Appearance. The pose selector and Wag tail, Tilt head, and Shake ears buttons remain available when rig visualization is Off; only the region legend and geometry overlays are hidden.
+
+The development flag controls presentation, not authentication. All tools run locally in the browser; GSAP and its Draggable plugin are bundled without CDN requests.
+
 ## Rendering and data
 
 The server computes task states, frontier order, unblocking counts, waves, workstreams, critical paths, audit findings, and resource conflicts. The browser decodes those results and builds the interface; it does not rerun scheduling to draw the views. Graph positioning is a client rendering step. Comparing a locally chosen JSON file remains entirely client-side. `/snapshot.json` is the portable snapshot export; `/viewer.json` wraps it in schema `yalikedags/viewer/1` with refresh capability and optional changes. Neither endpoint writes a JSON file to disk. Use `sync --out` or `render --format json --out` to save one.
@@ -22,17 +71,21 @@ Ready cards, wave cards, critical-path steps, graph nodes, the task table, and t
 
 ## Start with the next move
 
-The first visit opens **Start here**. The summary counts ready, in-progress, blocked, unresolved, and finished tasks separately. Ready work is ranked by urgency. Click **Immediately unblocked** or **Downstream** on a card to expand the exact task list; each result opens its details. Immediate results become ready when that card finishes; downstream results include unfinished descendants that may still have other blockers. Resource warnings include in-progress holders and ready contenders.
+The first visit opens **Start here**. The summary counts tasks with no recorded open blockers, in-progress, blocked, unresolved, and finished tasks separately. The dependency frontier is ranked by urgency and excludes explicitly identified tracking containers. This does not establish implementation readiness. Click **Immediately unblocked** or **Downstream** on a card to expand the exact task list; each result opens its details. Immediate results have no recorded open blockers when that card finishes; downstream results include unfinished descendants that may still have other blockers. Resource warnings include in-progress holders and ready contenders.
 
 The critical path lists the longest chain of open tasks by depth, in dependency order. Select any step to inspect it. This is a dependency forecast, not a duration estimate or calendar schedule. The graph's bold borders include both depth-based and effort-based critical chains.
 
 ## Views
 
+Each workspace view displays its name as a visible H1 above its content. The heading follows navigation and uses the shared responsive gutter and theme typography tokens.
+
+The navigation brand includes an inline DAG puppy above the wordmark (beside it on mobile). Its colors follow the active theme; the same artwork is embedded in offline exports without a separate asset request.
+
 The navigation rail switches the main working area between six views. On narrow screens it becomes a horizontally scrollable navigation bar.
 
 | View | Use it to |
 |---|---|
-| **Start here** | Find ready work, its impact, and the longest open chain. |
+| **Start here** | Inspect the recorded dependency frontier, its impact, and the longest open chain. |
 | **Dependencies** | Trace blockers and dependents. Arrows point from blocker to dependent. **Readable size** restores a readable scale; **Fit all** shows the complete graph. |
 | **Waves** | Compare workstreams across waves. Shared prerequisites appear first. Columns retain their width and scroll horizontally. |
 | **Tasks** | Search, sort, and filter by state, assignee, milestone, or label. Filters apply only to Tasks. Click anywhere on a row to open details; the column chooser remembers optional columns. |
@@ -59,7 +112,7 @@ Task filters and sorting operate across the full dataset before paging. Owner fi
 4. Follow clickable blockers and dependents, or switch views to inspect the same selection.
 5. Use **Close task details** or Escape to clear selection and reclaim the space.
 
-The left navigation stays visible. The **Task details** edge button hides or restores the drawer while retaining selection. Its single **Close task details** button clears selection. Drag the drawer's left edge to resize it, or focus that edge and use arrow keys; its width survives reloads. On smaller screens the inspector overlays the working area. Content scrollbars are hidden while scrolling remains available.
+The left navigation stays visible. The **Task details** edge button hides or restores the drawer while retaining selection. Its single **Close task details** button clears selection. Drag the drawer's left edge to resize it, or focus that edge and use arrow keys; its width survives reloads. Without a saved width it opens at its maximum (900 px, bounded by the viewport), and you can still drag it smaller. On smaller screens the inspector overlays the working area. Content scrollbars are hidden while scrolling remains available.
 
 Search displays up to 30 results and tells you when to narrow the query. Task descriptions render sanitized GitHub-flavored Markdown, including lists, tables, code, and disabled checkboxes. Description images become links rather than fetching external assets. Valid links open in a new tab.
 
@@ -121,7 +174,7 @@ The interface is custom HTML, CSS, and TypeScript, without a component framework
 - `src/viewer/browser/component-tokens.css`: named component defaults for every visual declaration, including responsive variants and graph styles.
 - `src/viewer/browser/viewer.css`: selectors consume tokens; locally inherited task colors resolve at the component.
 
-The default base text size is 16 px. **Theme → Base text size** offers 14, 16, 18, and 20 px, scales shared typography tokens, and saves the choice locally. Introductory slogans, navigation numbering, repeated view subtitles, and idle footer instructions have been removed. Task data, uncertainty explanations, and operational controls remain.
+The default text scale is 100% of your browser’s default font size. **Theme → Text size** is a slider from 87.5% to 150%, updating immediately; arrow keys adjust it and Home/End select the limits. **Reset text size** returns to 100%. Typography and desktop navigation width use relative units, so both grow together. The desktop rail starts at 16 rem (14.5 rem on narrower desktop windows); mobile navigation stays full-width and scrolls horizontally. The choice is saved locally, and previous 14/16/18/20 px preferences migrate to the equivalent relative scale. Introductory slogans, navigation numbering, repeated view subtitles, and idle footer instructions have been removed. Task data, uncertainty explanations, and operational controls remain.
 
 Use the **Theme** button at the bottom of the left navigation to choose a palette independently of **Light**, **Dark**, or **System** display mode. System is the default and follows operating-system changes immediately. Preferences stay in browser storage; selections still work for the current session when storage is unavailable. The same controls work in offline HTML and on mobile. Escape closes the appearance panel and returns focus to its button.
 
@@ -167,3 +220,61 @@ Colors, type, spacing, borders, radii, shadows, opacity, component dimensions, a
 In **Import/Export**, choose **Export content** before clicking **Export snapshot JSON**. **Full snapshot** (default) includes descriptions, people, project/account details, and provenance present in the current snapshot. **Structure only** replaces identities and removes content while retaining statuses and relationships. Graph shape and counts remain identifying. See the [exact reduction](snapshot.md#structure-only-exports). Changing this choice affects only the downloaded copy, never the current workspace.
 
 Downloads are plaintext and stay on disk until deleted. Snapshots are not automatically saved to browser storage; preferences and refresh restoration have separate retention described in [Security](../../SECURITY.md#export-contents-and-retention).
+
+### Puppy attention and directional waves
+
+Click the puppy for a silent bark animation: the jaw opens and the head gives two small impulses without changing its held posture. In the development Puppy rig tool, **Sit and stand** plays the original five-keyframe sequence; the pose selector holds Standing, Sitting, or Play bow. The seated tail curls low around the haunches using four articulated sections.
+
+While visible, the puppy chooses fresh idle gestures with irregular 6–32 second pauses: variable tail wags, head turns, ear twitches, and occasional bows that return to standing. Consecutive gestures never repeat, and some wags include an ear twitch. Manually held poses suppress automatic bows. Pointer proximity, clicks, theme changes, and debug actions postpone the next idle gesture; interrupting an automatic bow blends back toward standing. A nearby mouse or pen aims its head toward the pointer with a 14-degree clamp; leaving the vicinity returns the gaze to neutral. These additive tracks preserve the body pose. Hidden pages and reduced motion suspend idle behavior, and reduced motion disables pointer tracking and barking.
+
+Click and theme waves displace nodes away from the wave origin in screen space, including mirrored artwork and zoomed graphs. A damped spring response settles each node after the impulse. Pose animation and ripple wrappers compose independently, so a held puppy pose still responds to theme waves. Motion timing, proximity, angle limits, and spring damping/frequency use semantic motion tokens.
+
+## Page URLs
+
+The local viewer renders each page in the browser and exposes a stable URL:
+
+| Page | Local route |
+| --- | --- |
+| Start here | `/start` |
+| Dependencies | `/dependencies` |
+| Waves | `/waves` |
+| Tasks | `/tasks` |
+| Findings | `/findings` |
+| Import/Export | `/import-export` |
+
+Direct links and page reloads return the viewer shell; the browser loads the current
+server snapshot. Navigation uses browser history, including Back and Forward.
+Opening `/` restores the saved view, falling back to Start here. Standalone HTML
+exports use matching hash routes, such as `viewer.html#/tasks`, so navigation
+continues to work without a server. Reloading a page does not fetch fresh Linear
+data: use **Refresh source** to read upstream.
+
+## Sparse graphs and planning evidence
+
+The browser lays out weakly connected components independently and packs them into
+shelves. Cards with no connections in the current view occupy a separate compact
+grid. This arrangement creates no dependency edges. Filters can make a card appear
+unconnected in that view even when it has a connection elsewhere in the snapshot.
+Use **Unconnected cards** to jump to that region.
+
+The opening graph uses readable card scale. **Fit all** is a deliberate overview;
+**Readable size** centers the selection, or opens from the first component when nothing is selected. Filtering,
+refresh, and returning from a neighborhood choose new readable bounds. Resize
+recovers a view that would otherwise be empty or microscopic. **Active work** is
+the default graph filter; completed/canceled history remains available separately
+or together with active cards.
+
+The capture summary shows the source capture time and whole-snapshot task/edge
+counts on every page. Graph filter counts describe the displayed subset. Failed
+source refresh retains the existing graph and reports its retained capture time.
+Successful refresh replaces the snapshot and restores still-valid selection and
+controls. Page reload only displays the server's current capture.
+
+The incomplete dependency-review notice is intentional: no recorded blockers is
+not evidence of independence or implementation readiness. Source labels and an
+explicit tracking-container declaration distinguish implementation, research,
+decisions, investigations, and containers; unclassified cards need disposition.
+Containers are excluded from the dependency frontier count. Wave membership still
+reflects the supplied graph and may include containers; it is not an executable-PR
+count. Proposed dependencies require evidence and review outside this viewer and
+are never manufactured from domains, shared files, or parent membership.

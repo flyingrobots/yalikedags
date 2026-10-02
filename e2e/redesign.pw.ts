@@ -24,7 +24,7 @@ test("the workspace opens on actionable work and gives the graph the full canvas
 
 test("ready work and critical path use the snapshot's real analysis", async ({ page }) => {
   await page.goto("http://127.0.0.1:4178");
-  await expect(page.locator(".project-stats")).toContainText("2Ready to start");
+  await expect(page.locator(".project-stats")).toContainText("2No recorded open blockers");
   await expect(page.locator(".critical-steps li")).toHaveCount(6);
   await expect(page.locator("#frontier .impact").first()).toContainText("7 Downstream");
   await page.locator(".critical-steps button").last().click();

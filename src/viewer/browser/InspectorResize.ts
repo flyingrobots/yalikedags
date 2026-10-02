@@ -1,3 +1,5 @@
+import { stopDrawer } from "./DrawerMotion.ts";
+import { motionNumber } from "./MotionPolicy.ts";
 import { element } from "./Dom.ts";
 
 /** Pointer capture supports mouse/touch; arrow keys offer the same bounded adjustment. */
@@ -9,6 +11,7 @@ export class InspectorResize {
     try { const width = Number(localStorage.getItem("yalikedags.inspector-width")); if (width >= 280) { this.set(width); } } catch { /* Optional storage. */ }
     this.handle.addEventListener("pointerdown", (event) => {
       if (event.button !== 0) { return; }
+      stopDrawer(this.panel);
       event.preventDefault(); this.drag = { x: event.clientX, width: this.panel.getBoundingClientRect().width };
       this.handle.setPointerCapture(event.pointerId);
     });
@@ -21,7 +24,7 @@ export class InspectorResize {
     });
     new ResizeObserver(() => { this.updateAria(); }).observe(this.panel);
   }
-  private maximum(): number { return Math.max(280, Math.min(900, innerWidth - 32)); }
+  private maximum(): number { return Math.max(280, Math.min(motionNumber("--inspector-max-width"), innerWidth - 32)); }
   private keyWidth(key: string): number {
     if (key === "Home") { return 280; }
     if (key === "End") { return this.maximum(); }

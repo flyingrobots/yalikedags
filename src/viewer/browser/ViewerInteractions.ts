@@ -5,6 +5,7 @@ import type { GraphController } from "./GraphController.ts";
 export class ViewerInteractions {
   constructor(workspace: Workspace, graph: GraphController) {
     const actions = new Map<string, () => void>([
+      ["isolated", (): void => { graph.jumpIsolated(); }],
       ["readable", (): void => { graph.readable(); }], ["fit", (): void => { graph.fit(); }], ["focus", (): void => { graph.focus(); }],
       ["zoom-in", (): void => { graph.zoom(1 / 1.25); }], ["zoom-out", (): void => { graph.zoom(1.25); }],
     ]);

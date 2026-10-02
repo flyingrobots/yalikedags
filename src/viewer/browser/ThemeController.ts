@@ -1,3 +1,4 @@
+import { ThemeMotion } from "./ThemeMotion.ts";
 import { themeById } from "../ThemeCatalog.ts";
 import { element } from "./Dom.ts";
 
@@ -5,6 +6,7 @@ type Mode = "light" | "dark" | "system";
 
 /** Preferences stay client-side; System follows OS changes without reloading data. */
 export class ThemeController {
+  private readonly motion = new ThemeMotion();
   private mode: Mode = "system";
   private palette = "graphite";
   private readonly media = matchMedia("(prefers-color-scheme: dark)");
@@ -40,8 +42,12 @@ export class ThemeController {
 
   private apply(): void {
     const resolved = this.mode === "system" ? (this.media.matches ? "dark" : "light") : this.mode;
-    document.documentElement.dataset["theme"] = resolved;
-    document.documentElement.dataset["palette"] = this.palette;
+    if (document.documentElement.dataset["theme"] !== resolved || document.documentElement.dataset["palette"] !== this.palette) {
+      this.motion.change(() => {
+        document.documentElement.dataset["theme"] = resolved;
+        document.documentElement.dataset["palette"] = this.palette;
+      });
+    }
     document.documentElement.dataset["mode"] = this.mode;
     const label = document.getElementById("appearance-label");
     if (label !== null) { label.textContent = this.mode === "system" ? `System (${resolved})` : this.mode; }

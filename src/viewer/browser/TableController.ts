@@ -1,3 +1,4 @@
+import { PlanningEvidence } from "../../core/services/PlanningEvidence.ts";
 import { Pagination } from "./Pagination.ts";
 import { TableColumns } from "./TableColumns.ts";
 import type { Task } from "../../core/domain/Task.ts";
@@ -37,6 +38,7 @@ export class TableController {
       });
     });
     state.subscribe(() => { this.highlight(); });
+    this.panel.addEventListener("yalikedags:reveal", () => { this.pagination.reveal(task => task.id === this.panel.dataset["revealTask"]); });
     this.render();
   }
 
@@ -80,7 +82,7 @@ export class TableController {
 
   private value(task: Task, column: string): string | number | undefined {
     const values = new Map<string, string | number | undefined>([
-      ["Key", task.key], ["Title", task.title], ["State", (this.state.states.get(task.id) ?? "unresolved")],
+      ["Work kind", new PlanningEvidence().kind(task)], ["Key", task.key], ["Title", task.title], ["State", (this.state.states.get(task.id) ?? "unresolved")],
       ["Assignee", task.assignee ?? "Unassigned"], ["Priority", task.priority], ["Estimate", task.effort],
       ["Milestone", task.milestone], ["Due", task.due], ["Labels", task.labels.join(", ")],
     ]);

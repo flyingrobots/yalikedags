@@ -1,4 +1,4 @@
-export const TABLE_COLUMNS = ["Title", "Key", "State", "Assignee", "Priority", "Estimate", "Milestone", "Due", "Labels"];
+export const TABLE_COLUMNS = ["Title", "Key", "State", "Work kind", "Assignee", "Priority", "Estimate", "Milestone", "Due", "Labels"];
 
 export function taskTableMarkup(): string {
   return `<section id="table-panel" class="panel scroll-panel"><div class="table-filters">

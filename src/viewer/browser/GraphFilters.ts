@@ -17,6 +17,7 @@ export class GraphFilters {
     owner.add(new Option("Everyone", "all")); owner.add(mine); owner.add(new Option("Unassigned", "unassigned"));
     owner.addEventListener("change", () => { this.apply(); }); status.addEventListener("change", () => { this.apply(); });
     element("graph-clear-filters").addEventListener("click", () => { this.clear(); });
+    this.apply();
     state.subscribe(() => { if (state.selected !== undefined && !this.ids.has(state.selected)) { this.clear(); } });
   }
   private clear(): void { this.owner.value = "all"; this.status.value = "all"; this.apply(); }

@@ -5,13 +5,12 @@ import { element } from "./Dom.ts";
 import type { ViewerState } from "./ViewerState.ts";
 import type { GraphController } from "./GraphController.ts";
 
-/** Re-layout a bounded subgraph entirely in the client; the full-project viewport is retained. */
+/** Re-layout a bounded subgraph entirely in the client; returning to the full project chooses readable bounds. */
 export class GraphNeighborhood {
   private visible: Set<string>;
   private active = false;
   private hops = 1;
   private root: string | undefined;
-  private saved = "";
   constructor(private readonly analysis: Analysis, private readonly state: ViewerState, private readonly graph: GraphController) {
     this.visible = new Set(analysis.dag.tasks.map((t) => t.id));
     element("graph-neighborhood").addEventListener("click", () => { this.focus(); });
@@ -33,7 +32,6 @@ export class GraphNeighborhood {
 
   focus(): void {
     if (this.state.selected === undefined) { return; }
-    if (!this.active) { this.saved = this.graph.viewport(); }
     this.active = true; this.hops = 1; this.render(); this.state.select(this.state.selected);
   }
 
@@ -73,7 +71,7 @@ export class GraphNeighborhood {
   private all(): void {
     this.active = false; this.root = undefined;
     this.scene(this.visible);
-    this.graph.restoreViewport(this.saved);
+    this.graph.readable();
     element("graph-expand").hidden = true; element("graph-all").hidden = true;
     element("graph-scope-status").textContent = `${String(this.visible.size)} tasks · current graph filters`;
   }
