@@ -6,6 +6,10 @@
 
 ![Start here: ready work, unblocking impact, and the critical path](../images/viewer-overview.png)
 
+The viewer embeds a hash-based script policy. Offline files permit no connections; served pages use same-origin JSON. Theme and SVG inline styles remain supported. The local server additionally denies embedding in frames.
+
+The local server validates its host and port before serving data. Use the printed `127.0.0.1` URL or `localhost` with the same port; custom hostnames and reverse proxies are not supported. Data routes accept GET/HEAD; refresh requires a same-origin POST.
+
 ## Rendering and data
 
 The server computes task states, frontier order, unblocking counts, waves, workstreams, critical paths, audit findings, and resource conflicts. The browser decodes those results and builds the interface; it does not rerun scheduling to draw the views. Graph positioning is a client rendering step. Comparing a locally chosen JSON file remains entirely client-side. `/snapshot.json` is the portable snapshot export; `/viewer.json` wraps it in schema `yalikedags/viewer/1` with refresh capability and optional changes. Neither endpoint writes a JSON file to disk. Use `sync --out` or `render --format json --out` to save one.
@@ -94,6 +98,8 @@ The graphite surfaces use cyan for navigation and selection. Task states use min
 **Import/Export → Snapshot details** shows the exact capture timestamp, or **Capture time unknown** for legacy snapshots. Partial-analysis details identify missing blocker references, unknown statuses, cycles, and source warnings. Reading a snapshot file preserves its original capture time.
 
 **Import/Export → Refresh source** explicitly rereads through the local server. There is no polling. Selection, filters, sorting, and active view survive a successful refresh; failed reads preserve the current snapshot and display a notice. Offline exports disable refresh. A refresh of a snapshot file rereads that file, not its original tracker.
+
+Snapshot comparison runs in an embedded local worker, including in offline HTML. Files above 8 MiB are refused before reading; [snapshot import budgets](snapshot.md#import-budgets) also bound graph and JSON structure. **Cancel comparison** terminates work, and a 15-second timeout stops expensive comparisons. A newer selection cancels the previous request. Failure or cancellation leaves the current project intact and clears incomplete comparison results.
 
 **Import/Export** reports added and removed tasks, completed tasks, status changes, assignment changes, blocker changes, and changes in critical-chain membership. After refresh it compares the previous successful read and confirms when no changes were found. **Compare snapshot JSON** compares a chosen earlier file locally. It uses stable task ids, so files from unrelated projects can give misleading results. It is not a complete field-by-field audit.
 

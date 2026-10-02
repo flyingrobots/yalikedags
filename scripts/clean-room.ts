@@ -1,36 +1,4 @@
 #!/usr/bin/env bun
-/**
- * clean-room: refuse any tracked file that carries somebody else's context.
- *
- * This repository is public-shaped. It is written while working inside a
- * private tracker, so the material that leaks is not secrets, which everyone
- * is careful about, but the ordinary furniture of a real project: a card
- * identifier copied into a sample, a client's name in a comment explaining
- * why a default is what it is, a task count pasted from a real audit.
- *
- * Each one is individually harmless and permanent, which is the problem: they
- * are added at the moment somebody is writing docs from what is in front of
- * them, and removed only if somebody later reads the whole repository with
- * this question in mind. So it is a gate rather than a habit.
- *
- * What it refuses, and both were actually found in this repository on
- * 2026-09-23:
- *
- *   - a four-digit-or-longer issue key, which no example needs and no
- *     synthetic fixture produces. Short keys (PRO-1, PRO-123) stay allowed:
- *     they are obviously illustrative and the documentation standard already
- *     names them as the placeholder form.
- *   - a tracker URL carrying a real workspace slug.
- *
- * **Names are deliberately not in this file.** A denylist publishes what it
- * filters: a rule spelling an organisation's name tells every reader of this
- * repository that the author works for them, which is the thing the rule
- * exists to prevent. This one shipped with exactly that defect and is the
- * reason the paragraph is here. So names live in `.clean-room.local`, one
- * term per line, untracked and gitignored. Write yours there once; the check
- * picks it up with no argument. CI runs the structural rules only, which is
- * correct, because CI cannot hold the term either.
- */
 import { readFileSync, existsSync } from "node:fs";
 
 interface Rule {
