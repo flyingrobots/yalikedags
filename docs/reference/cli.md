@@ -31,6 +31,10 @@ An unrecognised flag is a usage error, exit 2, and the parser suggests the flag 
 | `--snapshot <file>` | a snapshot written by `sync` (schema `yalikedags/snapshot/2`, or legacy `/1`) |
 | `--dag <file>` | the task-dag JSON schema: `{ "nodes": [ { "id", "title", "done", "blocked_by", "pri", "resources" } ], "resources": [...] }`. Its `resources` block also supplies the frontier's conflict policy. |
 
+## Offline mode
+
+`--offline` permits local `--snapshot`, `--tasklist`, and `--dag` sources and disables outbound HTTP. Linear sources and writers (including plan/apply targets) are refused before credentials are read, with usage exit 2. Without this flag, connected operation remains available. File-backed viewer refresh rereads only the local file. This is an application policy; use OS-level network isolation for a strict air gap.
+
 ## Choosing a credential
 
 | Flag | Meaning |
