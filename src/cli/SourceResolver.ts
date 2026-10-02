@@ -22,6 +22,7 @@ export interface SourceDeps {
    * rather than being given the production key by default.
    */
   keyTarget?: string;
+  offline?: boolean;
 }
 
 /** Exactly one of --project, --tasklist, --snapshot, --dag names where tasks come from. */
@@ -81,6 +82,7 @@ export class SourceResolver {
   }
 
   private async key(): Promise<string> {
+    if (this.deps.offline === true) { throw new Error("usage: offline mode refuses remote sources and writers before credential access"); }
     const target = this.deps.keyTarget ?? KEY_TARGET;
     const key = await this.deps.secrets.get(target);
     if (key === undefined) {
