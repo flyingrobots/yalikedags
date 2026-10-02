@@ -64,6 +64,8 @@ Get a graph on screen in about two minutes, off the bundled example, no key need
 
 The viewer restricts browser scripts and connections with a Content Security Policy; see [Security](SECURITY.md).
 
+The local viewer accepts only its bound loopback host and port; use the address printed by `serve`.
+
 For disconnected use, add `--offline` with a file source. Remote sources are refused before the key is read; see [offline mode](docs/reference/cli.md#offline-mode).
 
 ## What ya need
