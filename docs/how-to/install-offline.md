@@ -16,6 +16,8 @@ Replace the license path with the file accompanying your installed Bun distribut
 
 The packager refuses missing notices, dependency versions absent from the lockfile, and an existing output directory. Stage intended source files before packaging so the source archive includes them. `manifest.json` records version, platform, architecture, Bun version, source revision, dirty-tree status, lock fingerprint, and production package versions. `source.tar.gz` contains the tracked working-tree source used for the build, including staged additions. Release from a clean committed checkout for traceable builds.
 
+Dependency notices preserve shipped license files and the package manifest's license declaration. When an upstream package supplies a declaration without a standalone license file, the notices also include its shipped README files. URL-only declarations remain URLs; packaging does not fetch or invent additional license terms. A dependency with neither a license file nor a nonempty declaration is refused.
+
 The verification command checks payload hashes, runs JSON and HTML exports with no runtime commands in PATH, and exercises the HTML viewer with browser networking disabled. It requires the development Chromium installation on the preparation machine. This is an artifact smoke test, not proof of OS-level isolation or byte-identical compiler output.
 
 ## Transfer and verify

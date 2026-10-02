@@ -4,6 +4,8 @@ All notable changes to this project are documented here. The format follows Keep
 
 ## [Unreleased]
 
+- Preserve package license declarations and shipped README notices when an offline dependency has no standalone license file, including GSAP.
+
 - Keep rapid puppy posture requests on the animation frame queue so they preserve the visible pose until the next paint.
 
 - Give every viewer page a direct local URL with browser Back/Forward and offline hash routes.
