@@ -1,4 +1,6 @@
+import { PuppyIdle } from "./PuppyIdle.ts";
 import { PuppySitClip } from "./PuppySitClip.ts";
+import { PuppyAttention } from "./PuppyAttention.ts";
 import { PuppyPostureClip } from "./PuppyPostureClip.ts";
 import { PuppyRig } from "./PuppyRig.ts";
 import { PuppyRigDebug } from "./PuppyRigDebug.ts";
@@ -8,19 +10,19 @@ import { motionDuration, motionNumber, motionPreference } from "./MotionPolicy.t
 export class PuppyMotion {
   private readonly rig: PuppyRig;
   constructor(private readonly svg: SVGSVGElement) {
-    this.rig = new PuppyRig(svg); new PuppyRigDebug(svg);
+    this.rig = new PuppyRig(svg); new PuppyRigDebug(svg); new PuppyAttention(svg, this.rig); new PuppyIdle(svg, this.rig);
     svg.addEventListener("pointerenter", () => { this.wag(); });
-    svg.addEventListener("click", () => { this.sit(); });
+    svg.addEventListener("click", () => { this.bark(); });
     svg.closest("a")?.addEventListener("focus", () => { this.wag(); });
     document.addEventListener("yalikedags:themechange", () => { this.wag(); });
     document.addEventListener("yalikedags:puppy-action", () => { this.action(); });
     motionPreference.addEventListener("change", () => { this.rig.reset(); });
     document.addEventListener("visibilitychange", () => { if (document.hidden) { this.rig.reset(); } });
   }
-  private sit(): void {
+  private bark(): void {
     if (document.hidden) { return; }
-    this.svg.dispatchEvent(new Event("yalikedags:clip-start"));
-    this.rig.play(new PuppySitClip(this.rig.geometry).packet(), motionDuration("--motion-sit-duration"));
+    const amount = motionNumber("--motion-bark-distance");
+    this.rig.bark.play([amount * .2, amount, amount * .15, amount * .8, 0], motionDuration("--motion-bark-duration"));
   }
   private wag(): void {
     if (document.hidden || this.svg.getBoundingClientRect().width === 0) { return; }
@@ -30,6 +32,8 @@ export class PuppyMotion {
   private action(): void {
     const action = document.documentElement.dataset["puppyAction"];
     if (document.hidden) { return; }
+    if (action === "sit-sequence") { this.rig.play(new PuppySitClip(this.rig.geometry).packet(), motionDuration("--motion-sit-duration")); return; }
+    if (action === "bark") { this.bark(); return; }
     if (action === "wag") { this.wag(); return; }
     if (action === "tilt") {
       const angle = motionNumber("--motion-head-angle");

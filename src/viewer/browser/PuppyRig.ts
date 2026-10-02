@@ -12,6 +12,8 @@ export class PuppyRig {
   readonly geometry: AnimatedDagGeometry;
   readonly tail = new RigAngleTrack(() => { this.queue(); });
   readonly head = new RigAngleTrack(() => { this.queue(); });
+  readonly gaze = new RigAngleTrack(() => { this.queue(); });
+  readonly bark = new RigAngleTrack(() => { this.queue(); });
   readonly ears = new RigAngleTrack(() => { this.queue(); });
   private readonly layers = new Map<string, PuppyRigLayer>();
   private readonly players = new Map<string, NodeClipPlayer>();
@@ -48,9 +50,10 @@ export class PuppyRig {
       }
     }
     this.limbs.apply(points);
-    this.rotate(points, ["head", "ears"], { pivot: "neck", angle: this.head.pose.angle });
+    this.rotate(points, ["head", "ears"], { pivot: "neck", angle: this.head.pose.angle + this.gaze.pose.angle + this.bark.pose.angle * .25 });
     this.rotate(points, ["ears"], { pivot: "earRoot", angle: this.ears.pose.angle });
     this.rotate(points, ["tail"], { pivot: "tailRoot", angle: this.tail.pose.angle });
+    for (const id of ["jaw", "muzzle"]) { const point = points.get(id); if (point !== undefined) { point.y += this.bark.pose.angle; } }
     const offsets = new Map(Array.from(points, ([id, point]) => {
       const rest = this.geometry.nodes.get(id);
       return [id, { x: point.x - (rest?.x ?? 0), y: point.y - (rest?.y ?? 0) }];
@@ -74,7 +77,7 @@ export class PuppyRig {
   }
   reset(): void {
     this.players.forEach(player => { player.stop(); });
-    this.tail.stop(); this.head.stop(); this.ears.stop();
+    this.tail.stop(); this.head.stop(); this.ears.stop(); this.gaze.stop(); this.bark.stop();
     cancelAnimationFrame(this.frame); this.frame = 0; this.geometry.restore();
     this.svg.dispatchEvent(new Event("yalikedags:rig-pose"));
   }

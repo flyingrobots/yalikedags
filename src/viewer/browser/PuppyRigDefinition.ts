@@ -3,7 +3,7 @@ export const PUPPY_PARTS: Readonly<Record<string, readonly string[]>> = {
     frame: ["neck", "withers", "back", "hip", "rump", "shoulder", "rib", "waist", "haunch", "chest", "belly", "flank"],
     head: ["nose", "bridge", "brow", "forehead", "crown", "eye", "muzzle", "jaw", "cheek"],
     ears: ["earRoot", "earOuter", "earBend", "earTip", "earInner", "earFold"],
-    tail: ["tailRoot", "tailBend", "tailTip", "tailOuter", "tailArc", "tailJoin"],
+    tail: ["tailRoot", "tailBend", "tailTip", "tailOuter", "tailArc", "tailJoin", "tailBase", "tailBaseOuter", "tailEnd", "tailEndOuter"],
     forelimbs: ["frontKnee", "frontAnkle", "frontToe", "frontPaw", "frontHeel", "frontBack", "frontTop"],
     farForelimb: ["farFrontKnee", "farFrontHeel", "farFrontToe", "farFrontBack", "farFrontAnkle", "farFrontWrist", "farFrontPaw"],
     hindlegs: ["rearKnee", "rearAnkle", "rearToe", "rearPaw", "rearHeel", "rearHock", "rearTop"],
@@ -12,7 +12,7 @@ export const PUPPY_PARTS: Readonly<Record<string, readonly string[]>> = {
 export const PUPPY_BONES = [
     ["frame", "hip", "withers"], ["frame", "withers", "neck"], ["frame", "shoulder", "chest"],
     ["head", "neck", "eye"], ["head", "eye", "nose"], ["ears", "earRoot", "earTip"],
-    ["tail", "hip", "tailRoot"], ["tail", "tailRoot", "tailBend"], ["tail", "tailBend", "tailTip"],
+    ["tail", "hip", "tailRoot"], ["tail", "tailRoot", "tailBase"], ["tail", "tailBase", "tailBend"], ["tail", "tailBend", "tailEnd"], ["tail", "tailEnd", "tailTip"],
     ["forelimbs", "chest", "frontKnee"], ["forelimbs", "frontKnee", "frontAnkle"], ["forelimbs", "frontAnkle", "frontPaw"],
     ["forelimbs", "shoulder", "farFrontKnee"], ["forelimbs", "farFrontKnee", "farFrontHeel"], ["forelimbs", "farFrontHeel", "farFrontPaw"],
     ["hindlegs", "hip", "rearKnee"], ["hindlegs", "rearKnee", "rearAnkle"], ["hindlegs", "rearAnkle", "rearPaw"],

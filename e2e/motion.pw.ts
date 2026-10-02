@@ -8,6 +8,10 @@ import { Task } from "../src/core/domain/Task.ts";
 import { AnalysisService } from "../src/core/services/AnalysisService.ts";
 import { HtmlRendererAdapter } from "../src/adapters/output/HtmlRendererAdapter.ts";
 const url = pathToFileURL(resolve("dist/viewer-motion.html")).href;
+test.beforeEach(async ({ page }) => {
+  await page.mouse.move(1400, 950);
+  await page.addInitScript(() => { document.addEventListener("DOMContentLoaded", () => { document.documentElement.style.setProperty("--motion-idle-delay", "3600"); document.documentElement.style.setProperty("--motion-gaze-angle", "0"); document.dispatchEvent(new Event("visibilitychange")); }); });
+});
 test.beforeAll(() => {
   mkdirSync("dist", { recursive: true });
   const tasks = Array.from({ length: 60 }, (_, i) => new Task({ id: `task-${String(i)}`, title: `Task ${String(i).padStart(2, "0")}` }));
@@ -85,6 +89,7 @@ test("graph pulses grow from the pointer, survive scene replacement, and never f
 test("the wave reaches nearby graph nodes before distant ones", async ({ page }) => {
   await page.goto(url);
   await page.getByRole("button", { name: "Dependencies", exact: true }).click();
+  await page.getByRole("button", { name: "Fit all", exact: true }).click();
   await page.locator("#graph > svg").evaluate(svg => {
     const observer = new MutationObserver(records => {
       for (const record of records) {
@@ -123,7 +128,7 @@ test("selection pans the visible DAG and scrolls the selected task into another 
 test("puppy tail keyframes move connected geometry and restore the resting pose", async ({ page }) => {
   await page.goto(url);
   const tip = page.locator("#puppy-dag-node-tailTip");
-  const edge = page.locator('.brand-puppy [data-from="tailBend"][data-to="tailTip"]');
+  const edge = page.locator('.brand-puppy [data-from="tailEnd"][data-to="tailTip"]');
   const rest = await tip.getAttribute("cx"); const path = await edge.getAttribute("d");
   await page.locator(".brand-puppy").dispatchEvent("pointerenter");
   await expect.poll(() => tip.getAttribute("cx")).not.toBe(rest);
@@ -140,13 +145,13 @@ test("puppy tail keyframes move connected geometry and restore the resting pose"
   await expect(tip).toHaveAttribute("cx", rest ?? "");
 });
 
-test("clicking the puppy sits its haunches, holds the pose, and stands back up", async ({ page }) => {
+test("the sit sequence sits its haunches, holds the pose, and stands back up", async ({ page }) => {
   await page.goto(url);
   const hip = page.locator("#puppy-dag-node-hip");
   const paw = page.locator("#puppy-dag-node-frontPaw");
   const edge = page.locator('.brand-puppy [data-from="back"][data-to="hip"]');
   const rest = await edge.getAttribute("d");
-  await page.locator(".brand-puppy").dispatchEvent("click");
+  await page.evaluate(() => { document.documentElement.dataset["puppyAction"] = "sit-sequence"; document.dispatchEvent(new Event("yalikedags:puppy-action")); });
   // oracle: haunches lower and the front paw lifts before the seated hold; all geometry returns to the authored pose.
   await expect.poll(async () => Number(await paw.getAttribute("cy"))).toBeLessThan(650);
   await expect.poll(async () => Number(await hip.getAttribute("cy"))).toBeGreaterThan(450);
@@ -154,7 +159,7 @@ test("clicking the puppy sits its haunches, holds the pose, and stands back up",
   await expect(edge).not.toHaveAttribute("d", rest ?? "");
   await expect(hip).toHaveAttribute("cy", "357", { timeout: 7000 });
   await expect(edge).toHaveAttribute("d", rest ?? "");
-  await page.locator(".brand-puppy").dispatchEvent("click");
+  await page.evaluate(() => { document.documentElement.dataset["puppyAction"] = "sit-sequence"; document.dispatchEvent(new Event("yalikedags:puppy-action")); });
   await expect.poll(async () => Number(await hip.getAttribute("cy"))).toBeGreaterThan(400);
   await page.emulateMedia({ reducedMotion: "reduce" });
   await expect(hip).toHaveAttribute("cy", "357");
@@ -163,7 +168,7 @@ test("clicking the puppy sits its haunches, holds the pose, and stands back up",
 
 test("seated puppy brings its head over its forearms and retains rounded haunch volume", async ({ page }) => {
   await page.goto(url);
-  await page.locator(".brand-puppy").dispatchEvent("click");
+  await page.evaluate(() => { document.documentElement.dataset["puppyAction"] = "sit-sequence"; document.dispatchEvent(new Event("yalikedags:puppy-action")); });
   // oracle: head moves backward over the forelegs, with a substantial vertical hip-to-ground span.
   await expect.poll(() => page.locator("#puppy-dag-node-eye").getAttribute("cx")).toBe("509");
   const pose = await page.locator(".brand-puppy").evaluate(svg => {
@@ -181,16 +186,16 @@ test("seated puppy brings its head over its forearms and retains rounded haunch 
   expect(Math.abs(pose.pupilX - pose.eyeX)).toBeLessThan(8);
 });
 
-test("rapid puppy clicks blend from the visible pose without a standing reset", async ({ page }) => {
+test("rapid sit requests blend from the visible pose without a standing reset", async ({ page }) => {
   await page.goto(url);
-  await page.locator(".brand-puppy").dispatchEvent("click");
+  await page.evaluate(() => { document.documentElement.dataset["puppyAction"] = "sit-sequence"; document.dispatchEvent(new Event("yalikedags:puppy-action")); });
   await expect.poll(() => page.locator("#puppy-dag-node-eye").getAttribute("cx")).toBe("509");
   // oracle: a new click must preserve every visible vertex, edge, pupil and ear in the same frame.
   const samples = await page.locator(".brand-puppy").evaluate(svg => {
     const geometry = (): string[] => Array.from(svg.querySelectorAll(".node,.edge,.pupil,.ear-fill"),
       node => [node.getAttribute("cx"), node.getAttribute("cy"), node.getAttribute("d")].join("|"));
     const before = geometry();
-    for (let i = 0; i < 4; i++) { svg.dispatchEvent(new MouseEvent("click")); }
+    for (let i = 0; i < 4; i++) { document.documentElement.dataset["puppyAction"] = "sit-sequence"; document.dispatchEvent(new Event("yalikedags:puppy-action")); }
     return { before, after: geometry() };
   });
   expect(samples.after).toEqual(samples.before);
@@ -236,4 +241,25 @@ test("rig debug exposes owned regions and attached bones, with independent seate
   await expect(page.getByLabel("Puppy rig debug", { exact: true })).toHaveValue("bones");
   await page.getByLabel("Puppy rig debug", { exact: true }).selectOption("off");
   await expect(page.locator(".puppy-rig-bones")).toBeHidden();
+});
+
+test("shock waves push graph nodes away from either impact direction", async ({ page }) => {
+  await page.goto(url);
+  await page.getByRole("button", { name: "Dependencies", exact: true }).click();
+  const node = page.locator('#graph [data-id="task-0"] .dag-motion-node');
+  await node.evaluate(visual => {
+    new MutationObserver(() => {
+      const transform = visual.getAttribute("transform") ?? "";
+      const value = Number(/translate\(([-\d.e]+)/.exec(transform)?.[1]);
+      if (Math.abs(value) > .01 && visual.getAttribute("data-first-x") === null) { visual.setAttribute("data-first-x", String(value)); }
+    }).observe(visual, { attributes: true, attributeFilter: ["transform"] });
+  });
+  for (const side of [-1, 1]) {
+    await node.evaluate(visual => { visual.removeAttribute("data-first-x"); });
+    const box = await node.boundingBox(); if (box === null) { throw new Error("Missing node"); }
+    await page.locator("#graph > svg").dispatchEvent("click", { clientX: box.x + box.width / 2 + side * 100, clientY: box.y + box.height / 2 });
+    await expect(node).toHaveAttribute("data-first-x", /\d/);
+    expect(Number(await node.getAttribute("data-first-x")) * side).toBeLessThan(0);
+    await expect(page.locator("#graph .dag-motion-node[transform]")).toHaveCount(0);
+  }
 });

@@ -54,8 +54,8 @@ export class DagMotion {
     this.wave.to(pose, { radius: radius / Math.max(.01, Math.hypot(matrix.a, matrix.b)), opacity: 0, duration: radius / speed, ease: "none", onUpdate: () => {
       ring.setAttribute("r", String(pose.radius)); ring.style.opacity = String(pose.opacity);
     } }, 0);
-    this.arrivals(box, x, y).forEach(({ node, distance }, index) => {
-      this.wave?.call(() => { node.wiggle(index % 2 === 0 ? 1 : -1); }, [], distance / speed);
+    this.arrivals(box, x, y).forEach(({ node, distance }) => {
+      this.wave?.call(() => { const rect = node.node.getBoundingClientRect(); node.wiggle({ x: rect.x + rect.width / 2 - x, y: rect.y + rect.height / 2 - y }); }, [], distance / speed);
     });
   }
   private arrivals(box: DOMRect, x: number, y: number): { node: MotionNode; distance: number }[] {

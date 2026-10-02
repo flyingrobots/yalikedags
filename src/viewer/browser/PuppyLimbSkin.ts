@@ -11,19 +11,26 @@ const CHAINS = [
 export class PuppyLimbSkin {
   constructor(private readonly geometry: AnimatedDagGeometry) {}
   apply(points: Map<string, Point>): void {
-    for (const chain of CHAINS) {
+    for (const chain of CHAINS) { this.chain(points, chain); }
+    this.paw(points, "farRear");
+    this.paw(points, "farFront");
+  }
+  private chain(points: Map<string, Point>, chain: typeof CHAINS[number]): void {
       const root = points.get(chain.root); const knee = points.get(chain.knee); const end = points.get(chain.end);
       const a = this.geometry.nodes.get(chain.root); const b = this.geometry.nodes.get(chain.knee); const c = this.geometry.nodes.get(chain.end);
-      if (root === undefined || knee === undefined || end === undefined || a === undefined || b === undefined || c === undefined) { continue; }
+      if (root === undefined || knee === undefined || end === undefined || a === undefined || b === undefined || c === undefined) { return; }
+      if ([chain.root, chain.knee, chain.end].every(id => this.resting(points, id))) { return; }
       const side = Math.sign((b.x - a.x) * -(c.y - a.y) + (b.y - a.y) * (c.x - a.x));
       this.solve([root, knee, end], [Math.hypot(b.x - a.x, b.y - a.y), Math.hypot(c.x - b.x, c.y - b.y)], side);
       for (const id of chain.upper) { this.skin(points, id, [chain.root, chain.knee]); }
       for (const id of chain.lower) { this.skin(points, id, [chain.knee, chain.end]); }
-    }
-    this.paw(points, "farRear");
-    this.paw(points, "farFront");
+  }
+  private resting(points: Map<string, Point>, id: string): boolean {
+    const point = points.get(id); const rest = this.geometry.nodes.get(id);
+    return point !== undefined && rest !== undefined && Math.hypot(point.x - rest.x, point.y - rest.y) < 1e-8;
   }
   private paw(points: Map<string, Point>, prefix: string): void {
+    if (this.resting(points, `${prefix}Toe`) && this.resting(points, `${prefix}Heel`)) { return; }
     const toe = points.get(`${prefix}Toe`); const heel = points.get(`${prefix}Heel`);
     if (toe === undefined || heel === undefined) { return; }
     points.set(`${prefix}Paw`, { x: toe.x - 4, y: Math.max(heel.y, toe.y + 20) });

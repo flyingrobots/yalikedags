@@ -18,21 +18,26 @@ export class MotionNode {
       }
     }
   }
-  wiggle(sign = 1): void {
+  wiggle(direction = { x: 1, y: -1 }): void {
     const duration = motionDuration("--motion-node-duration");
-    if (duration === 0 || !this.visual.isConnected || this.node.hasAttribute("data-clip-track")) { return; }
+    if (duration === 0 || !this.visual.isConnected) { return; }
     this.stop();
     const box = this.visual.getBBox(); const matrix = this.visual.getScreenCTM();
     if (matrix === null) { return; }
-    const distance = motionNumber("--motion-node-distance") / Math.max(.01, Math.hypot(matrix.a, matrix.b));
-    const angle = motionNumber("--motion-node-angle") * sign;
-    const pose = { x: 0, y: 0, rotation: 0 };
+    const length = Math.hypot(direction.x, direction.y) || 1;
+    const amplitude = motionNumber("--motion-node-distance");
+    const inverse = matrix.inverse();
+    const origin = new DOMPoint(0, 0).matrixTransform(inverse);
+    const offset = new DOMPoint(direction.x / length * amplitude, direction.y / length * amplitude).matrixTransform(inverse);
+    const dx = offset.x - origin.x; const dy = offset.y - origin.y;
+    const angle = motionNumber("--motion-node-angle") * direction.x / length;
+    const damping = motionNumber("--motion-spring-damping"); const frequency = motionNumber("--motion-spring-frequency");
+    const pose = { time: 0 };
     this.timeline = gsap.timeline({ onUpdate: () => {
-      this.visual.setAttribute("transform", `translate(${String(pose.x)} ${String(pose.y)}) rotate(${String(pose.rotation)} ${String(box.x + box.width / 2)} ${String(box.y + box.height / 2)})`);
+      const spring = Math.exp(-damping * pose.time) * Math.sin(frequency * pose.time) * 2;
+      this.visual.setAttribute("transform", `translate(${String(dx * spring)} ${String(dy * spring)}) rotate(${String(angle * spring)} ${String(box.x + box.width / 2)} ${String(box.y + box.height / 2)})`);
     }, onComplete: () => { this.visual.removeAttribute("transform"); this.timeline = undefined; } });
-    this.timeline.to(pose, { x: distance * sign, y: -distance, rotation: angle, duration: duration * .2, ease: "power2.out" })
-      .to(pose, { x: -distance * sign * .5, y: distance * .3, rotation: -angle * .5, duration: duration * .25, ease: "sine.inOut" })
-      .to(pose, { x: 0, y: 0, rotation: 0, duration: duration * .55, ease: "elastic.out(1, 0.5)" });
+    this.timeline.to(pose, { time: 1, duration, ease: "none" });
   }
   stop(): void { this.timeline?.kill(); this.timeline = undefined; this.visual.removeAttribute("transform"); }
 }

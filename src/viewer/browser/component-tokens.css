@@ -1138,3 +1138,15 @@
   --rig-mesh-edge-width: .8;
   --rig-pupil-fill: var(--surface);
 }
+
+:root {
+  --motion-idle-delay: 6;
+  --motion-idle-variance: 26;
+  --motion-gaze-radius: 130;
+  --motion-gaze-angle: 14;
+  --motion-gaze-duration: .28;
+  --motion-bark-distance: 18;
+  --motion-bark-duration: .65;
+}
+
+:root { --motion-spring-damping: 7; --motion-spring-frequency: 14; }

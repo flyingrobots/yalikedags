@@ -186,3 +186,95 @@ test("animation controls remain available with rig visualization off", async ({ 
   await expect(page.getByLabel("Puppy pose", { exact: true })).toHaveValue("sit");
   await expect(page.getByRole("button", { name: "Shake ears", exact: true })).toBeVisible();
 });
+
+test("seated tail wraps low and barking preserves the held posture", async ({ page }) => {
+  await page.goto(dev);
+  await page.getByRole("button", { name: "Puppy rig tool", exact: true }).click();
+  await page.getByLabel("Puppy pose", { exact: true }).selectOption("sit");
+  const tip = page.locator("#puppy-dag-node-tailTip");
+  await expect(tip).toHaveAttribute("cy", "610");
+  expect(Number(await tip.getAttribute("cx"))).toBeLessThan(Number(await page.locator("#puppy-dag-node-tailRoot").getAttribute("cx")));
+  const hip = await page.locator("#puppy-dag-node-hip").getAttribute("cy");
+  const jaw = page.locator("#puppy-dag-node-jaw"); const rest = await jaw.getAttribute("cy");
+  await page.locator(".brand-puppy").dispatchEvent("click");
+  await expect(jaw).not.toHaveAttribute("cy", rest ?? "");
+  await page.locator(".brand-puppy").dispatchEvent("click");
+  await expect(jaw).toHaveAttribute("cy", rest ?? "");
+  await expect(page.locator("#puppy-dag-node-hip")).toHaveAttribute("cy", hip ?? "");
+  await expect(page.getByLabel("Puppy pose", { exact: true })).toHaveValue("sit");
+});
+
+test("nearby pointer aims the head within limits and leaving releases it", async ({ page }) => {
+  await page.goto(dev);
+  const eye = page.locator("#puppy-dag-node-eye");
+  const box = await page.locator(".brand-puppy").boundingBox();
+  if (box === null) { throw new Error("Missing puppy"); }
+  await page.mouse.move(box.x + box.width, box.y - 30);
+  await expect(eye).not.toHaveAttribute("cx", "279");
+  await page.waitForTimeout(400);
+  const angle = await page.locator(".brand-puppy").evaluate(svg => {
+    const point = (id: string): {x:number;y:number} => {
+      const n = svg.querySelector<SVGCircleElement>(`#puppy-dag-node-${id}`);
+      return { x:n?.cx.baseVal.value ?? 0, y:n?.cy.baseVal.value ?? 0 };
+    };
+    const e = point("eye"); const n = point("neck");
+    return Math.atan2(e.y - n.y, e.x - n.x) * 180 / Math.PI;
+  });
+  expect(Math.abs(angle - Math.atan2(285 - 350, 279 - 478) * 180 / Math.PI)).toBeLessThanOrEqual(15);
+  await page.mouse.move(0, 900);
+  await expect(eye).toHaveAttribute("cx", "279");
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.mouse.move(box.x + box.width, box.y - 30);
+  await expect(eye).toHaveAttribute("cx", "279");
+});
+
+test("idle gestures run occasionally and reduced motion cancels them", async ({ page }) => {
+  await page.addInitScript(() => {
+    document.addEventListener("DOMContentLoaded", () => {
+      document.documentElement.style.setProperty("--motion-idle-delay", ".3");
+      document.documentElement.style.setProperty("--motion-idle-variance", "0");
+    });
+  });
+  await page.goto(dev);
+  await page.evaluate(() => { document.dispatchEvent(new Event("visibilitychange")); });
+  const ear = page.locator("#puppy-dag-node-earTip"); const rest = await ear.getAttribute("cx");
+  await expect(page.locator(".brand-puppy")).toHaveAttribute("data-puppy-idle", /tail|head|ears|bow/);
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await expect(ear).toHaveAttribute("cx", rest ?? "");
+  await page.waitForTimeout(700);
+  await expect(ear).toHaveAttribute("cx", rest ?? "");
+});
+
+test("theme waves still displace nodes while a puppy pose is held", async ({ page }) => {
+  await page.goto(dev);
+  await page.getByRole("button", { name: "Puppy rig tool", exact: true }).click();
+  await page.getByLabel("Puppy pose", { exact: true }).selectOption("sit");
+  await expect(page.locator("#puppy-dag-node-eye")).toHaveAttribute("cx", "509");
+  await page.getByRole("button", { name: "Theme and display mode" }).click();
+  await page.getByLabel("Display mode", { exact: true }).selectOption("dark");
+  await expect(page.locator(".brand-puppy .dag-motion-node[transform]").first()).toBeAttached();
+  await expect(page.locator("#puppy-dag-node-hip")).toHaveAttribute("cy", "475");
+});
+
+
+test("idle bows return to standing, avoid repetition, and preserve manual poses", async ({ page }) => {
+  await page.goto(dev);
+  await page.evaluate(() => {
+    Math.random = (): number => .99;
+    document.documentElement.style.setProperty("--motion-idle-delay", ".2");
+    document.documentElement.style.setProperty("--motion-idle-variance", "0");
+    document.dispatchEvent(new Event("visibilitychange"));
+  });
+  const puppy = page.locator(".brand-puppy");
+  await expect(puppy).toHaveAttribute("data-puppy-idle", "bow");
+  await expect(page.locator("#puppy-dag-node-chest")).toHaveAttribute("cy", "550");
+  await expect(puppy).toHaveAttribute("data-puppy-idle", "ears", { timeout: 8000 });
+  await expect(page.locator("#puppy-dag-node-hip")).toHaveAttribute("cy", "357");
+  await page.getByRole("button", { name: "Puppy rig tool", exact: true }).click();
+  await page.getByLabel("Puppy pose", { exact: true }).selectOption("sit");
+  await expect(page.locator("#puppy-dag-node-hip")).toHaveAttribute("cy", "475");
+  await page.waitForTimeout(3000);
+  await expect(page.locator("#puppy-dag-node-hip")).toHaveAttribute("cy", "475");
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await expect(puppy).not.toHaveAttribute("data-puppy-idle");
+});

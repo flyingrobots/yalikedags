@@ -8,7 +8,6 @@ export class PuppyDebugControls {
     this.apply(select.value);
     motionPreference.addEventListener("change", () => { this.resetPose(); });
     document.addEventListener("visibilitychange", () => { if (document.hidden) { this.resetPose(); } });
-    document.querySelectorAll(".puppy-dag").forEach(svg => { svg.addEventListener("click", () => { this.resetPose(); }); });
     select.addEventListener("change", () => {
       this.apply(select.value);
       try { localStorage.setItem("yalikedags.puppy-debug.v1", select.value); } catch { /* Optional storage. */ }

@@ -1,6 +1,6 @@
 <svg class="puppy-dag" xmlns="http://www.w3.org/2000/svg" width="1200" height="840" viewBox="0 0 1200 840" role="img" aria-labelledby="puppy-dag-title puppy-dag-description">
 <title id="puppy-dag-title">Ya like dogs? A puppy made of a DAG.</title>
-<desc id="puppy-dag-description">A side-profile puppy faces right, with a round nose, floppy ear, big paws and an upturned tail. Its body is built from 61 vertices and 112 arrows. Every arrow points toward a vertex farther left, so the directed graph is acyclic.</desc>
+<desc id="puppy-dag-description">A side-profile puppy faces right, with a round nose, floppy ear, big paws and an upturned tail. Its body is built from 65 vertices and 117 arrows. Every arrow points toward a vertex farther left, so the directed graph is acyclic.</desc>
 <style>
 /* Inline this SVG to inherit the viewer theme. External img documents do not inherit host CSS.
    Component tokens can be overridden on this SVG; semantic defaults come from theme.css. */
@@ -33,7 +33,17 @@
 </defs>
 <g transform="translate(1175 -8) scale(-1 1)">
 <path class="ear-fill" d="M345 202 391 240 437 279 456 343 420 405 375 382 356 311Z"/>
-<g id="puppy-dag-edges"><path class="edge distant" data-from="farFrontHeel" data-to="farFrontWrist" d="M 569.13 629.01 L 574.03 619.55" marker-end="url(#puppy-dag-arrow-distant)"/>
+<g id="puppy-dag-edges"><path class="edge contour" data-from="tailEnd" data-to="tailEndOuter" d="M 930.07 267.07 L 944.10 281.10" marker-end="url(#puppy-dag-arrow-contour)"/>
+<path class="edge contour" data-from="tailBase" data-to="tailBaseOuter" d="M 884.27 340.50 L 902.62 370.10" marker-end="url(#puppy-dag-arrow-contour)"/>
+<path class="edge contour" data-from="tailEndOuter" data-to="tailOuter" d="M 956.94 281.44 L 965.59 253.34" marker-end="url(#puppy-dag-arrow-contour)"/>
+<path class="edge contour" data-from="tailEnd" data-to="tailTip" d="M 926.83 250.76 L 933.49 234.70" marker-end="url(#puppy-dag-arrow-contour)"/>
+<path class="edge contour" data-from="tailArc" data-to="tailEndOuter" d="M 940.36 333.53 L 949.72 304.33" marker-end="url(#puppy-dag-arrow-contour)"/>
+<path class="edge contour" data-from="tailBend" data-to="tailEnd" d="M 909.51 289.97 L 917.25 272.77" marker-end="url(#puppy-dag-arrow-contour)"/>
+<path class="edge contour" data-from="tailBaseOuter" data-to="tailArc" d="M 915.79 373.85 L 928.31 356.23" marker-end="url(#puppy-dag-arrow-contour)"/>
+<path class="edge contour" data-from="tailBase" data-to="tailBend" d="M 885.31 324.24 L 895.54 311.64" marker-end="url(#puppy-dag-arrow-contour)"/>
+<path class="edge contour" data-from="tailJoin" data-to="tailBaseOuter" d="M 888.53 411.14 L 901.70 393.27" marker-end="url(#puppy-dag-arrow-contour)"/>
+<path class="edge contour" data-from="tailRoot" data-to="tailBase" d="M 859.81 356.36 L 870.34 343.00" marker-end="url(#puppy-dag-arrow-contour)"/>
+<path class="edge distant" data-from="farFrontHeel" data-to="farFrontWrist" d="M 569.13 629.01 L 574.03 619.55" marker-end="url(#puppy-dag-arrow-distant)"/>
 <path class="edge distant" data-from="farFrontAnkle" data-to="farFrontHeel" d="M 541.16 611.57 L 556.11 627.52" marker-end="url(#puppy-dag-arrow-distant)"/>
 <path class="edge distant" data-from="farFrontPaw" data-to="farFrontHeel" d="M 501.00 637.00 L 552.00 637.00" marker-end="url(#puppy-dag-arrow-distant)"/>
 <path class="edge distant" data-from="farFrontPaw" data-to="farFrontToe" d="M 493.77 628.17 L 493.45 629.75" marker-end="url(#puppy-dag-arrow-distant)"/>
@@ -62,11 +72,11 @@
 <path class="edge contour" data-from="withers" data-to="back" d="M 533.97 356.18 L 638.04 349.03" marker-end="url(#puppy-dag-arrow-contour)"/>
 <path class="edge contour" data-from="back" data-to="hip" d="M 663.97 348.78 L 764.04 355.87" marker-end="url(#puppy-dag-arrow-contour)"/>
 <path class="edge contour" data-from="hip" data-to="tailRoot" d="M 791.93 358.31 L 838.09 363.37" marker-end="url(#puppy-dag-arrow-contour)"/>
-<path class="edge contour" data-from="tailRoot" data-to="tailBend" d="M 859.87 356.41 L 895.63 311.71" marker-end="url(#puppy-dag-arrow-contour)"/>
-<path class="edge contour" data-from="tailBend" data-to="tailTip" d="M 909.36 289.90 L 933.26 234.61" marker-end="url(#puppy-dag-arrow-contour)"/>
+
+
 <path class="edge contour" data-from="tailTip" data-to="tailOuter" d="M 950.82 226.21 L 957.52 230.68" marker-end="url(#puppy-dag-arrow-contour)"/>
-<path class="edge contour" data-from="tailArc" data-to="tailOuter" d="M 940.30 333.51 L 965.50 253.31" marker-end="url(#puppy-dag-arrow-contour)"/>
-<path class="edge contour" data-from="tailJoin" data-to="tailArc" d="M 888.45 411.09 L 928.21 356.15" marker-end="url(#puppy-dag-arrow-contour)"/>
+
+
 <path class="edge contour" data-from="rump" data-to="tailJoin" d="M 848.95 417.06 L 867.06 418.67" marker-end="url(#puppy-dag-arrow-contour)"/>
 <path class="edge contour" data-from="rump" data-to="rearTop" d="M 839.01 427.83 L 851.49 501.21" marker-end="url(#puppy-dag-arrow-contour)"/>
 <path class="edge contour" data-from="rearHock" data-to="rearTop" d="M 849.67 581.02 L 853.00 530.97" marker-end="url(#puppy-dag-arrow-contour)"/>
@@ -132,7 +142,7 @@
 <path class="edge mesh" data-from="hip" data-to="haunch" d="M 780.81 368.97 L 785.92 444.04" marker-end="url(#puppy-dag-arrow-mesh)"/>
 <path class="edge mesh" data-from="haunch" data-to="rump" d="M 796.01 452.07 L 824.99 426.57" marker-end="url(#puppy-dag-arrow-mesh)"/>
 <path class="edge mesh" data-from="tailRoot" data-to="tailJoin" d="M 858.13 374.73 L 875.00 406.73" marker-end="url(#puppy-dag-arrow-mesh)"/>
-<path class="edge mesh" data-from="tailBend" data-to="tailArc" d="M 911.47 308.90 L 928.18 331.87" marker-end="url(#puppy-dag-arrow-mesh)"/>
+
 <path class="edge mesh" data-from="haunch" data-to="rearTop" d="M 796.21 467.70 L 842.49 506.38" marker-end="url(#puppy-dag-arrow-mesh)"/>
 <path class="edge mesh" data-from="haunch" data-to="rearKnee" d="M 787.55 471.99 L 790.31 532.02" marker-end="url(#puppy-dag-arrow-mesh)"/>
 <path class="edge mesh" data-from="rearKnee" data-to="rearTop" d="M 800.87 542.14 L 840.54 522.62" marker-end="url(#puppy-dag-arrow-mesh)"/>
@@ -169,6 +179,10 @@
 <circle id="puppy-dag-node-back" class="node " cx="653" cy="348" r="8"/>
 <circle id="puppy-dag-node-hip" class="node " cx="780" cy="357" r="9"/>
 <circle id="puppy-dag-node-rump" class="node " cx="837" cy="416" r="9"/>
+<circle id="puppy-dag-node-tailBase" class="node" cx="879" cy="332" r="7"/>
+<circle id="puppy-dag-node-tailBaseOuter" class="node" cx="910" cy="382" r="7"/>
+<circle id="puppy-dag-node-tailEnd" class="node" cx="923" cy="260" r="7"/>
+<circle id="puppy-dag-node-tailEndOuter" class="node" cx="954" cy="291" r="7"/>
 <circle id="puppy-dag-node-tailRoot" class="node " cx="853" cy="365" r="8"/>
 <circle id="puppy-dag-node-tailBend" class="node " cx="905" cy="300" r="8"/>
 <circle id="puppy-dag-node-tailTip" class="node " cx="940" cy="219" r="10"/>

@@ -5,7 +5,7 @@ export class DebugDiagnostics {
     document.addEventListener("yalikedags:themechange", () => { this.write("Theme changed"); });
     document.addEventListener("yalikedags:puppy-action", () => {
       const action = document.documentElement.dataset["puppyAction"];
-      if (["stand", "sit", "bow", "wag", "tilt", "ears"].includes(action ?? "")) { this.write(`Puppy action: ${action ?? ""}`); }
+      if (["stand", "sit", "bow", "wag", "tilt", "ears", "bark", "sit-sequence"].includes(action ?? "")) { this.write(`Puppy action: ${action ?? ""}`); }
     });
     window.addEventListener("error", () => { this.write("Browser error; see browser console for details"); });
     window.addEventListener("unhandledrejection", () => { this.write("Unhandled rejection; see browser console for details"); });

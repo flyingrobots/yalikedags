@@ -4,6 +4,10 @@ All notable changes to this project are documented here. The format follows Keep
 
 ## [Unreleased]
 
+- Give the puppy an irregular idle repertoire with varied tail wags, head and ear gestures, occasional bows, no consecutive repeats, and interaction-aware pauses that preserve manually held poses.
+
+- Curl the seated puppy tail around its haunches; add bounded pointer gaze and click-to-bark without losing the held pose. Restore theme ripples during pose animation and use directional damped spring impulses for shock waves. Preserve exact rest geometry after playback.
+
 - Give the far foreleg a distinct wrist and paw; keep pose and secondary animation controls available when rig visualization is off.
 
 - Close the far foreleg shoulder mesh and give the far hind leg a tapered shin, hock, and distinct paw instead of a rectangular silhouette.
