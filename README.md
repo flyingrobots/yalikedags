@@ -9,100 +9,76 @@
 >
 > Mickey O'Neil, *Snatch* (2000). This tool is about the other kind.
 
-Full snapshot exports contain project text and people in plaintext. For a reduced copy, select **Import/Export → Export content → Structure only**, or use `render --redact` / `sync --redact`. Graph shape and task counts remain identifying; see [export contents and retention](SECURITY.md#export-contents-and-retention).
+## What's all this, then?
 
-The viewer has direct page URLs such as `/dependencies` and `/tasks` (offline
-exports use `#/dependencies` and `#/tasks`). Sparse graphs open at readable scale,
-with independently packed components and a separate unconnected-card grid. Capture
-time, source refresh, and task/edge counts stay visible. No recorded blockers is
-not proof of independence: the viewer flags incomplete dependency review and
-separates explicit tracking containers from its dependency frontier.
+Sure, you've a Linear project. Two hundred cards in it. Everyone's busy, nobody can start, and the fella who knows what's holding it up is away till Monday. Half the cards are the same job wearing different hats. Lovely. We'll have a look, so.
 
-## What this is for
+### ***yalikedags reads your Linear project and draws the dependencies. Shows ya what can start, what's waiting on what, and the long chain between you and going home. A graph to see how it hangs together, a grid to see who could get on with what. Finds the cards that need a talking-to as well. All in the one place.***
 
-Right. So you've got a Linear project, yeah? Two hundred-odd cards, all sat there like they're waiting for a fight what's never gonna happen. And nobody can tell ya which one comes first, which one's holding up the rest, or which ones are the same job wearing two hats. That's what this is for. yalikedags reads your Linear project, builds the dependency DAG out of it, tells ya what's ready, what's blocked, where the long chain is, and which cards are talking rubbish. Then it draws the whole thing so ya can look at it proper. Two ways an' all: the graph, for how it all hangs together, and the grid, workstreams down the side and waves across the top, for who could be doing what this round.
+## Put the plan back where the work is
 
-### Put dependencies back in Linear
+No use having the plan on your machine if the rest of them are looking in Linear. It'll work out the difference and write it down for ya. Have a read. Happy with it? Say `--confirm` and it'll make the changes, then check they're done. Till then, good dag. Stays put.
 
-Now, if the dependencies live in a file on your machine and not in Linear where everyone can see 'em, that's no good to anybody, is it. So there's a write path an' all: it works out the difference, writes ya a plan, and ya read the plan. Nothing moves till ya say `--confirm`. Then it does the job and goes back and checks the job got done. Every other command in here touches nothing. Read only, like a good dag on a lead.
+## 🐾 Who's it for?
 
-### One project, the whole team
+The lot of ya. Each gets their own Linear key, puts it in their own keychain, and opens the same project. Same work, same graph. No passing keys round. Linear keeps the books; this draws the picture.
 
-It's for the whole team. Everyone's got their own Linear key in their own keychain, everyone points it at the same project, everyone sees the same graph. Linear is the source of truth; this just has the good sense to draw it.
+### 🐶 Take it with ya
 
-Missing a Linear key? `serve --project example-project` opens a setup screen with environment/keychain instructions and a local-file alternative. Restart from the same terminal after exporting a key.
+Want to show your mam? She's not installing all this. Use `render --format html --out dag.html` and give her the file. One file, the whole viewer in it. Double-click and there's your graph. No key, no internet. Works on a plane, if you're going somewhere.
 
-The DAG and puppy use locally bundled GSAP for hover motion, expanding click/theme pulses, and smooth selection navigation. The puppy curls its tail when seated, occasionally moves its ears and head, follows nearby pointers within a safe angle, and barks silently on click. Reduced-motion preferences disable decorative effects. Task details opens at its maximum width unless you have saved a smaller size.
+*Mind who gets a copy.* The cards and people's names go with it. Pick **Structure only** in Import/Export, or add `--redact`, to leave those out. Someone who knows the project might still recognise the shape. [Have a look at what's in the file](SECURITY.md#export-contents-and-retention) before ya send it round.
 
-**Theme → Text size** adjusts a relative-scale slider; the wider desktop navigation grows with the text.
+### ♟️ Find the next move
 
-The navigation's [DAG puppy](assets/puppy-dag.svg) is inline SVG: it follows the selected theme and travels with offline exports.
+Start with what can be done now. It'll show ya what that frees up next. Follow the dependencies, line the work up in waves, or pick a card and see what's in it. Findings has the ones that need sorting out. There's a little dag to keep ya company, too. Doesn't do the work for ya. [Come and have a look](docs/how-to/open-the-viewer.md).
 
-### Share it as an offline file
+## 📍 Start here
 
-And when ya want someone else to see it who hasn't got the tool, or the key, or the first idea what a terminal is: `render --format html --out dag.html`. One file. Whole viewer in it, graph and all. Opens by double-clicking, asks the internet for nothing, works on a plane. Send it to whoever ya like.
+Go on, try the example. No key needed, about two minutes: [See your first DAG](docs/tutorials/first-dag.md). My mam's already got hers open. She's asking why you're still reading.
 
-JSON exports use snapshot schema 2 to preserve unknown statuses and exact estimates. Legacy schema 1 snapshots remain readable; see [the snapshot reference](docs/reference/snapshot.md).
+### 👀 What ya lookin' to do?
 
-### Find the next move
+- [Put your Linear key somewhere safe](docs/how-to/store-the-linear-key.md) (once, then forget it)
+- [Get your project out of Linear](docs/how-to/sync-a-project.md)
+- [Find the missing links and cards that need splitting](docs/how-to/audit-a-project.md)
+- [Have a look at the thing](docs/how-to/open-the-viewer.md), or save it as one file ya can send someone
+- [Put the dependencies back in Linear](docs/how-to/reconcile-into-linear.md), once you've read the plan
+- [Take the whole tool offline](docs/how-to/install-offline.md), in case the internet doesn't come with ya
 
-The viewer opens with the work that's ready, what it'll unblock, and the longest chain standing between ya and done. Dependencies gives the graph room to breathe; Waves shows what could run in parallel; Tasks gives ya the searchable, sortable list. Pick a task and its details open beside it. Findings calls out the dodgy cards, and Import/Export handles snapshots and comparisons. Six views, one job at a time. No arranging windows before ya can get to work. The browser does the drawing; the server hands it the analyzed data as JSON. Linear reads show the workspace and who captured it, and assigned cards say who owns the job. Still one offline file when ya export it. Filter the graph to your tasks, click a whole table row to inspect it, and drag the details drawer wider when ya need room. Theme and text size live at the bottom of the nav; [the viewer reference](docs/reference/viewer.md) covers the controls.
+### 🕵️‍♂️ Need particulars?
 
-## Start here
+- [What to type and what the switches do](docs/reference/cli.md)
+- [What those exit numbers mean](docs/reference/exit-codes.md)
+- [What's in a saved project](docs/reference/snapshot.md)
+- [What's in the plan, and the receipt when it's done](docs/reference/plan.md)
+- [Where the buttons are and what they do](docs/reference/viewer.md)
+- [What stays local and what gets shared](SECURITY.md)
 
-Get a graph on screen in about two minutes, off the bundled example, no key needed: [See your first DAG](docs/tutorials/first-dag.md).
+### 🎓 How's it work, then?
 
-## Common jobs
+- [One job, one PR, working when it lands](docs/explanation/atomic-work.md)
+- [How it works out what's ready and what's holding ya up](docs/explanation/derived-views.md)
+- [What Linear tells us and what we work out ourselves](docs/explanation/source-of-truth.md)
 
-- [Store your Linear key in the keychain](docs/how-to/store-the-linear-key.md) (once, then forget it)
-- [Sync a Linear project to a snapshot](docs/how-to/sync-a-project.md)
-- [Audit a project for missing dependencies and cards that want splitting](docs/how-to/audit-a-project.md)
-- [Open the local viewer](docs/how-to/open-the-viewer.md), or write it out as one file ya can send someone
-- [Reconcile a graph into Linear](docs/how-to/reconcile-into-linear.md), which is the one thing here that writes
+### 🫣 When luck runs out
 
-## Look things up
+[Something won't play ball?](docs/troubleshooting/index.md) Won't sync, dependencies going round in circles, a card pointing off somewhere it shouldn't. Start there.
 
-- [CLI commands and options](docs/reference/cli.md)
-- [Exit codes](docs/reference/exit-codes.md)
-- [The snapshot JSON](docs/reference/snapshot.md)
-- [The plan and receipt JSON](docs/reference/plan.md)
-- [The viewer's screen and controls](docs/reference/viewer.md)
+### 🦮 Kit you'll need
 
-## Understand it
+- [bun](https://bun.sh) 1.2 or newer to run it.
+- A Linear personal API key for your own project. [Stick it in the keychain](docs/how-to/store-the-linear-key.md) and be done with it. The example needs no key.
+- GraphViz `dot` if ya want to draw the `.dot` files yourself. The viewer does its own drawing.
 
-- [One issue, one independently mergeable PR](docs/explanation/atomic-work.md): the planning and task-splitting contract
-
-- [How the frontier, the workstreams and the critical path are derived](docs/explanation/derived-views.md)
-- [What Linear owns and what this tool derives](docs/explanation/source-of-truth.md)
-
-## When it goes wrong
-
-- [Troubleshooting](docs/troubleshooting/index.md): the sync refused, the graph has a cycle, a relation points somewhere odd
-
-For disconnected machines, [build and verify a self-contained offline distribution](docs/how-to/install-offline.md) on a preparation machine, then transfer it with its checksums and notices.
-
-Snapshot comparisons stay local, run off the UI thread, and can be canceled. Oversized imports are refused; see [import budgets](docs/reference/snapshot.md#import-budgets).
-
-The viewer restricts browser scripts and connections with a Content Security Policy; see [Security](SECURITY.md).
-
-The local viewer accepts only its bound loopback host and port; use the address printed by `serve`.
-
-For disconnected use, add `--offline` with a file source. Remote sources are refused before the key is read; see [offline mode](docs/reference/cli.md#offline-mode).
-
-## What ya need
-
-- [bun](https://bun.sh) 1.2 or newer. That's the runtime. There is no Python in here; the Python that used to be here is in the first commit if ya want to look at it, but ya don't.
-- A Linear personal API key, stored once in your OS keychain through [`@git-stunts/vault`](https://github.com/git-stunts/vault). Or `LINEAR_API_KEY` in the environment if ya must.
-- GraphViz `dot` only if ya want to render the `.dot` output yourself. The built-in SVG and the viewer need nothing.
-
-### Try the bundled example
+## 🕹️ Give it a go
 
 ```bash
 bun install
 bun src/cli.ts render --tasklist examples/example-tasklist.txt
 ```
 
-Expected output, abridged:
+You'll get something like this. I've cut it short; we've things to be doing:
 
 ```text
 loaded 12 tasks from task list examples/example-tasklist.txt
@@ -115,9 +91,9 @@ frontier (2 ready tasks, most urgent first):
 critical path by depth: 6 tasks: implement-core-dag-builder then ... then deploy-to-production
 ```
 
-## For them what want to change it
+## Got a better way of doing it?
 
-Ports and adapters, TypeScript on bun, tests first, standards before code. There's a live test tier an' all, with its own fixture and its own token, fenced off so it can't wander into anything real: [live testing](docs/contributing/live-testing.md). Read these in order and don't skip: [docs/standards/typescript.md](docs/standards/typescript.md), [docs/standards/testing.md](docs/standards/testing.md), [docs/standards/documentation.md](docs/standards/documentation.md). Then [the contributor guide](docs/contributing/architecture.md) and [CONTRIBUTING.md](CONTRIBUTING.md). Run `bun run check` before ya push or the hooks'll have ya.
+Have a look at [the house rules](CONTRIBUTING.md) and [how it's put together](docs/contributing/architecture.md), then show us. Tests first, real project business kept out of it. Run `bun run check` before ya push. Bring it back working, now.
 
 ## Licence
 
