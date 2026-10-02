@@ -4,6 +4,8 @@ All notable changes to this project are documented here. The format follows Keep
 
 ## [Unreleased]
 
+- Add explicit full/structure-only snapshot export choices and `sync`/`render --redact`. Structure-only exports replace identifiers, remove content and provenance, and recompute analysis without changing the current workspace. Document plaintext export contents and local retention.
+
 - Add host-specific offline executable packaging with embedded viewer/runtime, dependency and runtime notices, source archive, manifest, checksums, and disconnected artifact verification.
 
 - Bound snapshot file size, graph cardinality, strings, and JSON structure; compare imports in an embedded local worker with cancel, timeout, and stale-result protection.

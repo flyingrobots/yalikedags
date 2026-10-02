@@ -7,6 +7,7 @@
 import { AnalysisService } from "./core/services/AnalysisService.ts";
 import type { Analysis } from "./core/services/Analysis.ts";
 import type { RendererPort } from "./ports/RendererPort.ts";
+import { StructureOnlyAnalysisAdapter } from "./adapters/output/StructureOnlyAnalysisAdapter.ts";
 import { JsonSnapshotAdapter } from "./adapters/output/JsonSnapshotAdapter.ts";
 import { DotRendererAdapter } from "./adapters/output/DotRendererAdapter.ts";
 import { SvgRendererAdapter } from "./adapters/output/SvgRendererAdapter.ts";
@@ -43,6 +44,7 @@ commands
   frontier  the ready tasks, most urgent first
   render    --format json|dot|svg|html|text (default text)   --out <file>
             html is the viewer as one self-contained offline file
+            --redact exports structure only (sync/render): replaces IDs, removes content and provenance
   serve     local viewer on 127.0.0.1                       --port <n> (default 0 = pick one)
   key       --set | --check [--target NAME]   store or check a key in the OS keychain
             (default target LINEAR_API_KEY; --set reads stdin, never argv)
@@ -151,9 +153,10 @@ async function serveCommand(args: Args, read: () => Promise<Analysis>): Promise<
 }
 
 async function dispatch(args: Args, a: Analysis): Promise<ExitCodeValue> {
+  const output = args.has("redact") ? new StructureOnlyAnalysisAdapter().transform(a) : a;
   switch (args.command ?? "") {
     case "sync":
-      await emit(new JsonSnapshotAdapter().render(a), args.get("out"));
+      await emit(new JsonSnapshotAdapter().render(output), args.get("out"));
       return ExitCode.OK;
     case "audit":
       return auditCommand(a, args);
@@ -161,7 +164,7 @@ async function dispatch(args: Args, a: Analysis): Promise<ExitCodeValue> {
       process.stdout.write(`${new TextReportRendererAdapter().render(a).split("\n\n")[1] ?? ""}\n`);
       return ExitCode.OK;
     case "render":
-      return renderCommand(a, args);
+      return renderCommand(output, args);
     default:
       throw new Error(`usage: unknown command ${args.command ?? ""}`);
   }
@@ -187,6 +190,12 @@ function buildResolver(args: Args, vault: VaultSecretsAdapter): SourceResolver {
   });
 }
 
+function validateRedaction(args: Args): void {
+  if (args.has("redact") && !["sync", "render"].includes(args.command ?? "")) {
+    throw new Error("usage: --redact is supported only by sync and render");
+  }
+}
+
 async function main(argv: readonly string[]): Promise<ExitCodeValue> {
   const args = new Args(argv);
   const vault = new VaultSecretsAdapter();
@@ -194,6 +203,7 @@ async function main(argv: readonly string[]): Promise<ExitCodeValue> {
     process.stdout.write(USAGE);
     return args.command === undefined ? ExitCode.USAGE : ExitCode.OK;
   }
+  validateRedaction(args);
   if (args.command === "key") {
     return keyCommand(args, vault);
   }

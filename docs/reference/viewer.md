@@ -161,3 +161,9 @@ Colors, type, spacing, borders, radii, shadows, opacity, component dimensions, a
 
 - [Open the local viewer](../how-to/open-the-viewer.md)
 - [Audit a project](../how-to/audit-a-project.md)
+
+## Export contents and local retention
+
+In **Import/Export**, choose **Export content** before clicking **Export snapshot JSON**. **Full snapshot** (default) includes descriptions, people, project/account details, and provenance present in the current snapshot. **Structure only** replaces identities and removes content while retaining statuses and relationships. Graph shape and counts remain identifying. See the [exact reduction](snapshot.md#structure-only-exports). Changing this choice affects only the downloaded copy, never the current workspace.
+
+Downloads are plaintext and stay on disk until deleted. Snapshots are not automatically saved to browser storage; preferences and refresh restoration have separate retention described in [Security](../../SECURITY.md#export-contents-and-retention).

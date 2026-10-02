@@ -11,3 +11,13 @@ yalikedags reads your Linear workspace with **your** personal API key. The key n
 - The write port has no method for status, assignee, priority or title, so no plan can change them.
 
 To report a vulnerability, open a private security advisory on this repository or email the maintainer. Do not open a public issue with exploit details.
+
+## Export contents and retention
+
+Full JSON and HTML exports are plaintext project data: issue titles, descriptions, original IDs, links, assignments, labels, dates, estimates, and optional account/project/capture metadata. Secrets are not deliberately exported, but any secret pasted into an issue description is ordinary issue content and will be included. Store and share exported files accordingly.
+
+The viewer offers **Export content → Structure only** before download. CLI `sync --redact` and `render --redact` offer the same reduction, including offline HTML. They replace identifiers and remove content, people, account metadata, and dates; [the exact retained fields](docs/reference/snapshot.md#structure-only-exports) remain visible. This is neither encryption nor guaranteed anonymization: topology, order, statuses, and task counts can still identify a project. Redaction covers the artifact, not CLI stderr diagnostics or source files.
+
+The app does not automatically persist snapshots in browser storage. Browser local storage holds appearance (`yalikedags.appearance.v1`), text size (`yalikedags.text-size`), visible columns (`yalikedags.columns.v1`), last view (`yalikedags.view.v2`), and inspector width (`yalikedags.inspector-width`). Refresh restoration temporarily puts selection IDs, filter/search values, and layout in the current browser history entry; restoration clears that entry, but browser session/crash recovery may retain it. Clear this origin's site data and history to remove browser-managed state.
+
+Downloaded snapshots, rendered HTML, CLI output, logs, and source files remain on disk until you remove them. Clearing browser site data does not delete these files. The app has no expiry or secure-erasure guarantee; backups and browser download history have their own retention.

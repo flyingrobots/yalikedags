@@ -9,6 +9,8 @@
 >
 > Mickey O'Neil, *Snatch* (2000). This tool is about the other kind.
 
+Full snapshot exports contain project text and people in plaintext. For a reduced copy, select **Import/Export → Export content → Structure only**, or use `render --redact` / `sync --redact`. Graph shape and task counts remain identifying; see [export contents and retention](SECURITY.md#export-contents-and-retention).
+
 ## What this is for
 
 Right. So you've got a Linear project, yeah? Two hundred-odd cards, all sat there like they're waiting for a fight what's never gonna happen. And nobody can tell ya which one comes first, which one's holding up the rest, or which ones are the same job wearing two hats. That's what this is for. yalikedags reads your Linear project, builds the dependency DAG out of it, tells ya what's ready, what's blocked, where the long chain is, and which cards are talking rubbish. Then it draws the whole thing so ya can look at it proper. Two ways an' all: the graph, for how it all hangs together, and the grid, workstreams down the side and waves across the top, for who could be doing what this round.
