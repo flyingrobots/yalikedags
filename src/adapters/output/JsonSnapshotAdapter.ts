@@ -1,3 +1,4 @@
+import { DependencyDiscoveryService } from "../../core/services/DependencyDiscoveryService.ts";
 import type { Analysis } from "../../core/services/Analysis.ts";
 import { DependencyReviewCodec } from "../review/DependencyReviewCodec.ts";
 import type { DependencyReview } from "../../core/domain/DependencyReview.ts";
@@ -22,6 +23,7 @@ export class JsonSnapshotAdapter implements RendererPort {
   toObject(a: Analysis, review: DependencyReview | undefined = a.review): Record<string, unknown> {
     return {
       schema: SNAPSHOT_SCHEMA,
+      dependencyProposals: { method: "local-key-references/1", candidates: new DependencyDiscoveryService().discover(a.dag).map(c => ({ blocker: c.blocker, dependent: c.dependent, evidence: c.evidence, confidence: c.confidence })) },
       planning: new PlanningCoverageAdapter().toObject(a.planning),
       ...(review !== undefined && { dependencyReview: new DependencyReviewCodec().encode(review) }),
       source: a.source,

@@ -7,6 +7,8 @@
  * `--allow-destructive` for anything that deletes), performs it. Nothing this
  * tool changes was ever decided in the same breath as being performed.
  */
+import { ReviewIdentityAdapter } from "../adapters/review/ReviewIdentityAdapter.ts";
+import { AnalysisService } from "../core/services/AnalysisService.ts";
 import { Dag } from "../core/domain/Dag.ts";
 import type { Plan } from "../core/domain/Plan.ts";
 import { ReconcileService } from "../core/services/ReconcileService.ts";
@@ -66,6 +68,7 @@ export class ReconcileCommands {
     const spec = this.targetSpec(args, plan);
     const repository = await this.deps.resolver.resolveSpec(spec);
     const before = await this.dagOf(repository);
+    await this.checkEvidence(plan, repository, before);
     const confirmed = args.has("confirm");
     const writer = confirmed
       ? await this.deps.resolver.resolveWriter(spec)
@@ -79,6 +82,14 @@ export class ReconcileCommands {
       at: this.deps.clock.today(),
     });
     return this.emitReceipt({ receipt, plan, args, confirmed });
+  }
+
+  private async checkEvidence(plan: Plan, repository: TaskRepositoryPort, before: Dag): Promise<void> {
+    if (plan.prerequisiteVersion === undefined) { return; }
+    const current = new AnalysisService(this.deps.clock).analyse(before.tasks, repository.describe(), { account: repository.account, warnings: repository.warnings ?? [] });
+    if (await new ReviewIdentityAdapter().identify(current) !== plan.prerequisiteVersion) {
+      throw new Error("stale_proposal: prerequisite evidence changed since review; capture and review again before applying");
+    }
   }
 
   /** The plan records its own target; a different `--current` is a refusal, not an override. */

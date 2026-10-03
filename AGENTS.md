@@ -10,7 +10,7 @@ An executable Linear issue represents one atomic unit of work: one coherent PR w
 - A tracking parent may group several executable issues, but must be labeled as a container rather than counted as an additional executable PR. Account explicitly for shared prerequisites and unresolved work.
 - Preserve traceability from issue to PR to the resulting mainline commit. The intended history supports first-parent bisection to an introducing PR; do not promise that green CI proves absence of regressions.
 - Dependency discovery produces an evidence-backed proposed graph before antichain/workstream analysis. Distinguish recorded, proposed, and accepted edges. No recorded blocker does not prove real-world independence.
-- Current implementation analyzes supplied edges; automatic discovery, split proposals, and split application are planned capabilities. Do not describe them as implemented.
+- Current implementation analyzes supplied edges and offers bounded local issue-reference dependency candidates with human review, separate previews, and explicit relation-plan export. General semantic discovery, split proposals, and split application remain planned capabilities. Do not describe those extensions as implemented.
 
 ## Repository guidance
 

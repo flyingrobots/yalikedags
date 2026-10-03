@@ -92,6 +92,7 @@ export class PlanJsonCodec {
     const mutations = Array.isArray(parsed["mutations"]) ? parsed["mutations"].map((m: unknown) => decodeMutation(m)) : [];
     const unmatched = Array.isArray(parsed["unmatched"]) ? parsed["unmatched"].filter(isRec) : [];
     return new Plan({
+      prerequisiteVersion: parsed["prerequisiteVersion"] === undefined ? undefined : requireString(parsed, "prerequisiteVersion"),
       mutations,
       unmatched: unmatched.map((u) => new Unmatched(requireString(u, "desiredId"), requireString(u, "desiredKey"), requireString(u, "reason"))),
       desiredSource: requireString(parsed, "desiredSource"),

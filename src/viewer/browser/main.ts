@@ -1,4 +1,5 @@
 import { DebugOverlay } from "./DebugOverlay.ts";
+import { DependencyProposalController } from "./DependencyProposalController.ts";
 import { DependencyReviewController } from "./DependencyReviewController.ts";
 import { ViewerMotion } from "./ViewerMotion.ts";
 import { SelectionNavigation } from "./SelectionNavigation.ts";
@@ -36,6 +37,7 @@ async function start(): Promise<void> {
   if (analysis === undefined) { document.body.dataset["ready"] = "true"; return; }
   const review = new DependencyReviewController(analysis);
   await review.initialize();
+  new DependencyProposalController(analysis, review);
   new ExportController(analysis, () => review.current());
   const state = new ViewerState(analysis.dag.tasks, analysis.states);
   const session = new SessionState();

@@ -58,7 +58,7 @@ export class DependencyReviewController {
       ...this.analysis.dag.tasks.filter(task => this.analysis.stateOf(task.id) === "unresolved").map(task => `Unresolved task: ${task.key}`)];
     const exceptions = [...new Set([...this.field("review-exceptions").value.split("\n").map(value => value.trim()).filter(Boolean), ...known])];
     const review = new DependencyReview({ sourceVersion: this.sourceVersion, taskIds: this.analysis.dag.tasks.map(task => task.id),
-      basis: this.field("review-basis").value.trim(), exceptions, reviewedAt: new Date().toISOString(), reviewer: this.field("reviewer-name").value.trim(), decisions: this.decisions() });
+      basis: this.field("review-basis").value.trim(), exceptions, reviewedAt: new Date().toISOString(), reviewer: this.field("reviewer-name").value.trim(), decisions: this.draftDecisions() });
     const text = JSON.stringify(this.codec.encode(review));
     new SnapshotBudget().parse(text);
     this.review = review; this.origin = "Local review record (self-reported)";
@@ -87,20 +87,26 @@ export class DependencyReviewController {
     this.paragraph(`${this.origin}. ${this.review.reviewer} · ${this.review.reviewedAt}.`, details);
     this.paragraph(`Basis: ${this.review.basis}`, details);
     for (const exception of this.review.exceptions) { this.paragraph(`Unresolved exception: ${exception}`, details); }
-    if (status === "exceptions") { this.paragraph("Resolve listed exceptions and review every recorded relationship before claiming complete coverage.", details); }
+    if (status === "exceptions") { this.paragraph("Resolve listed exceptions and review every recorded relationship and discovered candidate before claiming complete coverage.", details); }
     for (const decision of this.review.decisions) {
       const row = document.createElement("p"); row.textContent = `${decision.blocker} → ${decision.dependent}: ${decision.outcome}${status === "stale" ? " (historical)" : ""}. ${decision.note}`; details.append(row);
     }
     target.append(details);
   }
 
-  private decisions(): ReviewDecision[] {
+  draftDecisions(): ReviewDecision[] {
+    if (element("dependency-review-form").hidden) { return this.review?.sourceVersion === this.sourceVersion ? [...this.review.decisions] : []; }
     return [...document.querySelectorAll<HTMLSelectElement>("[data-review-edge]")].map(control => {
       const outcome = control.value;
       if (outcome !== "accepted" && outcome !== "rejected" && outcome !== "unreviewed") { throw new Error("Invalid relationship decision"); }
       const note = control.closest("li")?.querySelector<HTMLInputElement>("[data-review-note]")?.value ?? "";
+      this.requireCandidateNote(control, note);
       return new ReviewDecision({ blocker: control.dataset["blocker"] ?? "", dependent: control.dataset["dependent"] ?? "", outcome, note });
     });
+  }
+
+  private requireCandidateNote(control: HTMLSelectElement, note: string): void {
+    if (control.hasAttribute("data-candidate") && control.value !== "unreviewed" && !note.trim()) { throw new Error("Candidate decisions require an evidence and direction rationale."); }
   }
 
   private restoreDecisions(): void {

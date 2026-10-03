@@ -447,3 +447,7 @@ footer:has(#selection-status:empty):has(#viewer-notice[hidden]) {display:var(--u
 #dependency-review-status details { max-height: 18rem; overflow: auto; overflow-wrap: anywhere; }
 .dependency-review { padding: 1rem; margin-block-end: 1rem; }
 .dependency-review p { margin-block: 0.4rem; }
+
+#dependency-candidates, #proposal-preview-content { max-height: 28rem; overflow: auto; overflow-wrap: anywhere; }
+.dependency-proposals { margin-block: 1rem; }
+.proposal-svg { max-height: 24rem; overflow: auto; }

@@ -37,6 +37,8 @@ Canceled the card that was meant to unblock it? That doesn't mean the work got d
 
 Had a proper look at the dependencies? **Review dependencies** lets ya record what ya checked, which relationships ya accept, and what still needs sorting. Change the underlying cards and it'll tell ya the review is stale. A review isn't a promise that nothing's missing. [Here's how it works](docs/reference/viewer.md#record-a-dependency-review).
 
+Missing a blocker? **Discover candidate dependencies** looks for issue references in the cards and shows ya what it found. Check the evidence, accept or reject it, and preview what changes. Nothing goes back to Linear until ya review the plan and explicitly apply it. [Show me how](docs/reference/viewer.md#discover-and-review-candidate-dependencies).
+
 ## 📍 Start here
 
 Go on, try the example. No key needed, about two minutes: [See your first DAG](docs/tutorials/first-dag.md). My mam's already got hers open. She's asking why you're still reading.

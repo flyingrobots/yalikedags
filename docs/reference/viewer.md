@@ -292,3 +292,24 @@ are never manufactured from domains, shared files, or parent membership.
 ### Planning coverage disclosure
 
 The Waves page exposes active scope, terminal exclusions, tracking-container counts, shared prerequisite assignees, unresolved exceptions, and cross-group edges in a bounded disclosure. These counts describe captured cards rather than executable PRs. Workstreams are temporary connected components, not team assignments; IDs and membership may change after refresh. Export the snapshot to retain the exact topology and state behind the displayed partition.
+
+### Discover and review candidate dependencies
+
+Choose **Discover candidate dependencies** to inspect local evidence extraction from titles and descriptions. The first implementation recognizes captured issue keys (such as `DEMO-1`). `requires`, `depends on`, `blocked by`, or `needs` immediately before a reference yields explicit prerequisite wording. Other references, including negation and reverse-direction wording, remain uncertain. Matching a theme, parent, or person never creates a candidate. Duplicate keys are ambiguous and are skipped. Unreferenced requirements remain a manual review responsibility; this is not general semantic discovery.
+
+Interactive discovery runs in the browser without a model or remote provider. The same pure routine supplies derived candidate evidence in CLI/server snapshot exports. It is bounded at 2,000 candidates, with quoted evidence bounded to 1,024 characters around the reference. Reaching the candidate ceiling prevents a complete review claim. Excerpts identify the proposed blocker and dependent; they do not certify direction or completeness. Read the full source task before accepting.
+
+Accept or reject each candidate and record the evidence/direction rationale. **Record review** persists these dispositions with the existing scope and evidence lifecycle. Unreviewed candidates and rejected recorded edges remain unresolved; rejecting a proposed edge is a completed disposition, not a tracker deletion. Changes to source evidence make the record stale and prevent reuse of its accepted decisions.
+
+Under **Preview and export proposals**, choose Recorded, Proposed, or Recorded + accepted candidates. The separate preview recalculates readiness, waves, both critical paths, shared prerequisites, groups, and exceptions. The main viewer continues to show recorded source relations. Proposed includes unreviewed candidates and can contain cycles; its hypothetical label and coverage exceptions remain visible. Accepting does not write to Linear.
+
+**Download proposal evidence** retains the source snapshot, candidate provenance, current dispositions, and accepted graph analysis in an audit bundle (`yalikedags/proposal-evidence/1`). It is an evidence document, not a tracker receipt or a snapshot import. A full ordinary snapshot retains candidate evidence and the saved review; structure-only exports omit identifying text and review claims. Unsaved form choices belong only to the evidence bundle until the review is recorded.
+
+**Download accepted relation plan** requires a recorded current review and a captured Linear project. It exports only saved accepted additions and refuses newly cyclic plans. Inspect that exact plan, then use the existing CLI:
+
+```sh
+bun src/cli.ts apply --plan yalikedags-accepted-relations.json
+bun src/cli.ts apply --plan yalikedags-accepted-relations.json --confirm --receipt receipt.json
+```
+
+Use `--key-target <configured-target>` if this project uses a named keychain entry. The first command is a dry run. The second performs only the reviewed plan after checking fresh source evidence. Read the receipt: failed, stale, skipped, or unconfirmed mutations are not success. Refresh the viewer to see the actual tracker graph; accepted local proposals never silently become recorded edges. See [plan and receipt semantics](plan.md#plans-exported-from-dependency-review).

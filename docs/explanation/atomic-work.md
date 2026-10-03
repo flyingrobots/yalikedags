@@ -56,10 +56,10 @@ Keep a durable link from each executable issue to its PR and resulting mainline 
 
 Given a known-good revision, a known-bad revision, and a reproducible regression check, first-parent bisection can identify the PR that introduced the regression. It identifies an integration boundary, not necessarily the faulty commit within the PR. Green CI only establishes what its checks cover; historical environments, migrations, and external services can also limit reproducibility.
 
-## Planned implementation
+## Implementation and planned extensions
 
-- [Dependency discovery](https://github.com/flyingrobots/yalikedags/issues/20) supplies the missing proposed graph.
-- [Antichain and MECE contracts](https://github.com/flyingrobots/yalikedags/issues/21) define and validate the resulting plan.
+- [Dependency discovery](https://github.com/flyingrobots/yalikedags/issues/20) supplies local issue-reference candidates, reviewed graph previews, and explicit relation-plan export. General semantic discovery remains outside this implementation.
+- [Antichain and MECE contracts](https://github.com/flyingrobots/yalikedags/issues/21) validate coverage and qualify temporary grouping for the resulting plan.
 - [Split proposals](https://github.com/flyingrobots/yalikedags/issues/24) apply this merge-boundary criterion to decomposition.
 - [Reviewed split application](https://github.com/flyingrobots/yalikedags/issues/25) turns approved plans into tracker tasks; generating a proposal alone never writes to Linear.
 

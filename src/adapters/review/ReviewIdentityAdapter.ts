@@ -4,7 +4,7 @@ import type { Analysis } from "../../core/services/Analysis.ts";
 export class ReviewIdentityAdapter {
   async identify(a: Analysis): Promise<string> {
     const tasks = a.dag.tasks.map(task => ({
-      id: task.id, title: task.title, description: task.description ?? "", status: task.status,
+      id: task.id, key: task.key, title: task.title, description: task.description ?? "", status: task.status,
       blockedBy: [...task.blockedBy].sort(), parent: task.parent ?? null,
       children: [...task.children].sort(), labels: [...task.labels].sort(),
     })).sort((left, right) => left.id < right.id ? -1 : left.id > right.id ? 1 : 0);

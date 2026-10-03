@@ -110,3 +110,9 @@ Written by `apply --confirm --receipt <file>`.
 `stale` is not `skipped`: nobody chose it, and it means the plan no longer describes the source. Plan again rather than passing another flag.
 
 `apply --confirm` exits `0` when `complete` is true and `8` otherwise.
+
+## Plans exported from dependency review
+
+The viewer downloads accepted candidate additions in the same plan format. These plans contain only `add-blocking-relation` mutations, the captured Linear project ID, and an additive `prerequisiteVersion` SHA-256 field. Before obtaining a writer, `apply` compares this identity against a fresh capture of prerequisite evidence. Changed task keys, titles, descriptions, statuses, scope, hierarchy, labels, relations, warnings, or project/workspace identity refuse the plan with `stale_proposal`. Capture time, assignment, priority, and estimates do not change prerequisite evidence.
+
+This check is not a tracker transaction: concurrent edits after the read remain possible. The existing cycle checks and final verification still apply. An incomplete receipt is never success. Since a successful or partially successful apply changes the evidence, capture and review again before retrying a guarded proposal plan. Legacy plans without `prerequisiteVersion` retain their existing mutation preconditions.

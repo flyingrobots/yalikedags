@@ -39,20 +39,25 @@ export class SvgRendererAdapter implements RendererPort {
   readonly contentType = "image/svg+xml";
   private readonly layouter = new LayeredLayoutService();
 
-  render(a: Analysis, visible: Dag = a.dag): string {
+  render(a: Analysis, visible: Dag = a.dag, marker = "arrow"): string {
+    if (!/^[a-z-]+$/.test(marker)) { throw new Error("Invalid SVG marker scope"); }
     const layout = this.layouter.layout(visible);
     const width = PAD * 2 + layout.layerCount * NODE_W + Math.max(0, layout.layerCount - 1) * GAP_X;
     const height = PAD * 2 + layout.maxRows * NODE_H + Math.max(0, layout.maxRows - 1) * GAP_Y;
     const parts = [
-      `<svg xmlns="http://www.w3.org/2000/svg" width="${String(width)}" height="${String(height)}" viewBox="0 0 ${String(width)} ${String(height)}">`,
-      `<style>${STYLE}</style>`,
-      '<defs><marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#555"/></marker></defs>',
+      `<svg data-render="${marker}" xmlns="http://www.w3.org/2000/svg" width="${String(width)}" height="${String(height)}" viewBox="0 0 ${String(width)} ${String(height)}">`,
+      `<style>${this.style(marker)}</style>`,
+      `<defs><marker id="${marker}" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#555"/></marker></defs>`,
       this.isolatedLabel(visible, layout),
       ...this.edges(a, layout, visible),
       ...this.nodes(a, layout, visible),
       "</svg>",
     ];
     return `${parts.join("\n")}\n`;
+  }
+
+  private style(marker: string): string {
+    return STYLE.replaceAll(".node", `svg[data-render="${marker}"] .node`).replaceAll(".edge", `svg[data-render="${marker}"] .edge`).replace("url(#arrow)", `url(#${marker})`);
   }
 
   private isolatedLabel(dag: Dag, layout: Layout): string {

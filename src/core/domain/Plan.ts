@@ -25,6 +25,7 @@ export class Unmatched {
 }
 
 export interface PlanFields {
+  prerequisiteVersion?: string | undefined;
   mutations: readonly Mutation[];
   unmatched: readonly Unmatched[];
   /** Source specs, recorded so `apply` can refuse a plan aimed at something else. */
@@ -36,6 +37,7 @@ export interface PlanFields {
 }
 
 export class Plan {
+  readonly prerequisiteVersion: string | undefined;
   readonly mutations: readonly Mutation[];
   readonly unmatched: readonly Unmatched[];
   readonly desiredSource: string;
@@ -44,6 +46,8 @@ export class Plan {
   readonly labels: Readonly<Record<string, string>>;
 
   constructor(f: PlanFields) {
+    if (f.prerequisiteVersion !== undefined && !/^[a-f0-9]{64}$/.test(f.prerequisiteVersion)) { throw new Error("plan: invalid prerequisite version"); }
+    this.prerequisiteVersion = f.prerequisiteVersion;
     this.mutations = Object.freeze([...f.mutations]);
     this.unmatched = Object.freeze([...f.unmatched]);
     this.desiredSource = f.desiredSource;
@@ -76,6 +80,7 @@ export class Plan {
 
   toJSON(): Record<string, unknown> {
     return {
+      ...(this.prerequisiteVersion !== undefined && { prerequisiteVersion: this.prerequisiteVersion }),
       desiredSource: this.desiredSource,
       currentSource: this.currentSource,
       createdAt: this.createdAt,
