@@ -48,7 +48,7 @@ export class Analysis {
   readonly grid: Grid;
 
   constructor(f: AnalysisFields) {
-    this.planning = new PlanningCoverage({ dag: f.dag, waves: f.waves, shared: f.gatekeepers, workstreams: f.workstreams });
+    this.planning = new PlanningCoverage({ dag: f.dag, waves: f.waves, shared: f.gatekeepers, workstreams: f.workstreams, grid: f.grid });
     this.dag = f.dag;
     this.source = f.source;
     this.account = f.account;
@@ -58,9 +58,9 @@ export class Analysis {
     this.states = f.states;
     this.frontier = f.frontier;
     this.conflicts = f.conflicts;
-    this.waves = f.waves;
-    this.gatekeepers = f.gatekeepers;
-    this.workstreams = f.workstreams;
+    this.waves = Object.freeze(f.waves.map(wave => Object.freeze([...wave])));
+    this.gatekeepers = this.planning.shared;
+    this.workstreams = this.planning.workstreams;
     this.criticalByDepth = f.criticalByDepth;
     this.criticalByEffort = f.criticalByEffort;
     this.findings = f.findings;
