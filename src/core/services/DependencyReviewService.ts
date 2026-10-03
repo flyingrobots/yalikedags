@@ -2,6 +2,8 @@ import { DependencyDiscoveryService } from "./DependencyDiscoveryService.ts";
 import type { DependencyReview } from "../domain/DependencyReview.ts";
 import type { Analysis } from "./Analysis.ts";
 import { ReviewDecision } from "../domain/ReviewDecision.ts";
+import { AuditService } from "./AuditService.ts";
+import { StateService } from "./StateService.ts";
 
 export type DependencyReviewState = "unreviewed" | "reviewed" | "exceptions" | "stale";
 
@@ -34,9 +36,28 @@ export class DependencyReviewService {
   }
 
   knownExceptions(analysis: Analysis): string[] {
+    const findings = new AuditService().audit(analysis.dag);
+    const states = new StateService().states(analysis.dag);
     return [...new Set([...analysis.warnings,
-      ...analysis.findings.filter(finding => ["cycle", "dangling-blocker", "canceled-blocker"].includes(finding.kind)).map(finding => finding.detail),
-      ...analysis.dag.tasks.filter(task => analysis.stateOf(task.id) === "unresolved").map(task => `Unresolved task: ${task.key}`)])];
+      ...findings.filter(finding => ["cycle", "dangling-blocker", "canceled-blocker"].includes(finding.kind)).map(finding => finding.detail),
+      ...analysis.dag.tasks.filter(task => states.get(task.id) === "unresolved").map(task => `Unresolved task: ${task.key}`)])];
+  }
+
+  missingDecisions(review: DependencyReview, analysis: Analysis): ReviewDecision[] {
+    const decisions = new Set(review.decisions.map(decision => ReviewDecision.key(decision.blocker, decision.dependent)));
+    return this.requiredDecisions(analysis).filter(decision => !decisions.has(ReviewDecision.key(decision.blocker, decision.dependent)));
+  }
+
+  outsideDecisions(review: DependencyReview, analysis: Analysis): string[] {
+    const recorded = new Set(this.requiredDecisions(analysis).map(decision => ReviewDecision.key(decision.blocker, decision.dependent)));
+    return review.decisions.filter(decision => !recorded.has(ReviewDecision.key(decision.blocker, decision.dependent)))
+      .map(decision => `${decision.blocker} → ${decision.dependent}: decision is outside the recorded relationships or discovered candidates in this capture.`);
+  }
+
+  private requiredDecisions(analysis: Analysis): ReviewDecision[] {
+    const recorded = analysis.dag.tasks.flatMap(task => task.blockedBy.map(blocker => ({ blocker, dependent: task.id })));
+    return [...recorded, ...new DependencyDiscoveryService().discover(analysis.dag)].map(edge => new ReviewDecision({
+      blocker: edge.blocker, dependent: edge.dependent, outcome: "unreviewed", note: "No decision recorded for this captured relationship or candidate." }));
   }
 
 }

@@ -9,9 +9,13 @@ export class ExportController {
   constructor(analysis: Analysis, review: () => DependencyReview | undefined = () => analysis.review) {
     element("export-content").addEventListener("change", () => { this.describe(); });
     element("export-snapshot").addEventListener("click", () => {
+      try {
       const structure = this.structureOnly();
       const output = structure ? new StructureOnlyAnalysisAdapter().transform(analysis) : analysis;
       this.download(new JsonSnapshotAdapter().render(output, structure ? undefined : review()), structure ? "yalikedags-structure.json" : "yalikedags-snapshot.json");
+      } catch (error) {
+        element("export-warning").textContent = `Export failed. Your in-page data is retained. ${error instanceof Error ? error.message : "Snapshot could not be exported."}`;
+      }
     });
     this.describe();
   }

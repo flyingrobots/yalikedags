@@ -5,6 +5,7 @@ import { DependencyReviewService } from "../../core/services/DependencyReviewSer
 import { DependencyReviewCodec } from "../../adapters/review/DependencyReviewCodec.ts";
 import { ReviewIdentityAdapter } from "../../adapters/review/ReviewIdentityAdapter.ts";
 import { SnapshotBudget } from "../../adapters/input/SnapshotBudget.ts";
+import { JsonSnapshotAdapter } from "../../adapters/output/JsonSnapshotAdapter.ts";
 import { element } from "./Dom.ts";
 
 /** Local review evidence is independent of tracker data; failed persistence is explicitly reported. */
@@ -60,10 +61,21 @@ export class DependencyReviewController {
     const text = JSON.stringify(this.codec.encode(review));
     new SnapshotBudget().parse(text);
     this.review = review; this.origin = "Local review record (self-reported)";
-    try { localStorage.setItem(this.key, text); this.notice("Review saved on this browser. Export a full snapshot to carry its evidence with the project."); }
-    catch { this.notice("Review is available only in this page: browser storage failed. Export a full snapshot before leaving to preserve it."); }
+    this.persist(text);
     element("dependency-review-form").hidden = true;
     this.render();
+  }
+
+  private persist(text: string): void {
+    let persistence = "Review saved on this browser.";
+    try { localStorage.setItem(this.key, text); }
+    catch { persistence = "Review is available only in this page: browser storage failed."; }
+    try {
+      new JsonSnapshotAdapter().render(this.analysis, this.review);
+      this.notice(`${persistence} Export a full snapshot before leaving to preserve it.`);
+    } catch (error) {
+      this.notice(`${persistence} Full snapshot export is unavailable: ${error instanceof Error ? error.message : "snapshot could not be exported"}. Keep this page open and copy your review evidence before leaving.`);
+    }
   }
 
   private render(): void {
@@ -74,8 +86,10 @@ export class DependencyReviewController {
     target.replaceChildren(heading);
     this.paragraph("A review records evidence checked for this scope; it does not prove that every real-world dependency was discovered.");
     if (this.review === undefined) { return; }
-    const exceptions = [...new Set([...this.review.exceptions, ...new DependencyReviewService().knownExceptions(this.analysis)])];
-    const undecided = this.review.decisions.filter(decision => decision.outcome !== "accepted").length;
+    const service = new DependencyReviewService();
+    const exceptions = [...new Set([...this.review.exceptions, ...service.knownExceptions(this.analysis), ...service.outsideDecisions(this.review, this.analysis)])];
+    const decisions = [...this.review.decisions, ...service.missingDecisions(this.review, this.analysis)];
+    const undecided = decisions.filter(decision => decision.outcome !== "accepted").length;
     this.paragraph(`${String(this.review.taskIds.length)} captured tasks · ${String(exceptions.length)} exceptions · ${String(undecided)} rejected or unreviewed relationships.`);
     if (status === "stale") { this.paragraph("Task scope or prerequisite evidence changed. Previous decisions are historical; review this capture again before relying on them."); }
     const details = document.createElement("details");
@@ -87,7 +101,7 @@ export class DependencyReviewController {
     this.paragraph(`Basis: ${this.review.basis}`, details);
     for (const exception of exceptions) { this.paragraph(`Unresolved exception: ${exception}`, details); }
     if (status === "exceptions") { this.paragraph("Resolve listed exceptions and review every recorded relationship and discovered candidate before claiming complete coverage.", details); }
-    for (const decision of this.review.decisions) {
+    for (const decision of decisions) {
       const row = document.createElement("p"); row.textContent = `${decision.blocker} → ${decision.dependent}: ${decision.outcome}${status === "stale" ? " (historical)" : ""}. ${decision.note}`; details.append(row);
     }
     target.append(details);

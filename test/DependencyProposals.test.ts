@@ -122,3 +122,11 @@ test("imported accepted candidate requires an evidence and direction rationale",
   expect(new DependencyReviewService().state(record, record.sourceVersion, analysis)).toBe("exceptions");
   expect(() => new DependencyProposalService().plan(analysis, record, record.sourceVersion)).toThrow("rationale");
 });
+
+test("review coverage includes missing candidates without calling accepted candidates extraneous", async () => {
+  // oracle: integrating review coverage with discovery preserves both the missing-decision disclosure and candidate ownership.
+  const service = new DependencyReviewService();
+  expect(service.missingDecisions(await review([]), analysis)).toMatchObject([{ blocker: "a", dependent: "b", outcome: "unreviewed" }]);
+  expect(service.missingDecisions(await review(), analysis)).toEqual([]);
+  expect(service.outsideDecisions(await review(), analysis)).toEqual([]);
+});

@@ -5,6 +5,8 @@ import type { DependencyReview } from "../../core/domain/DependencyReview.ts";
 import type { RendererPort } from "../../ports/RendererPort.ts";
 import { PlanningCoverageAdapter } from "./PlanningCoverageAdapter.ts";
 
+import { SnapshotBudget } from "../input/SnapshotBudget.ts";
+
 export const SNAPSHOT_SCHEMA = "yalikedags/snapshot/2";
 
 /**
@@ -17,7 +19,9 @@ export class JsonSnapshotAdapter implements RendererPort {
   readonly contentType = "application/json";
 
   render(a: Analysis, review: DependencyReview | undefined = a.review): string {
-    return JSON.stringify(this.toObject(a, review), null, 2);
+    const text = JSON.stringify(this.toObject(a, review), null, 2);
+    new SnapshotBudget().parse(text);
+    return text;
   }
 
   toObject(a: Analysis, review: DependencyReview | undefined = a.review): Record<string, unknown> {

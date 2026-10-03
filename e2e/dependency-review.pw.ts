@@ -43,6 +43,8 @@ test("changed source makes recorded relationship decisions historical", async ({
 
 test("storage failure leaves a usable review with an explicit export recovery", async ({ page }) => {
   // oracle: persistence failure must not claim a durable save or prevent in-page review.
+  const { readFileSync } = await import("node:fs");
+  const { JsonSnapshotRepositoryAdapter } = await import("../src/adapters/input/JsonSnapshotRepositoryAdapter.ts");
   await page.addInitScript(() => {
     Object.defineProperty(window, "localStorage", { get: () => { throw new DOMException("Storage unavailable", "SecurityError"); } });
   });
@@ -52,6 +54,13 @@ test("storage failure leaves a usable review with an explicit export recovery", 
   await page.getByRole("button", { name: "Record review", exact: true }).click();
   await expect(page.locator("#dependency-review-notice")).toContainText("browser storage failed");
   await expect(page.locator("#dependency-review-status")).toContainText("Reviewed with exceptions");
+  await page.getByRole("button", { name: "Import/Export", exact: true }).click();
+  const download = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Export snapshot JSON", exact: true }).click();
+  const path = await (await download).path();
+  const reopened = new JsonSnapshotRepositoryAdapter(readFileSync(path, "utf8"), "recovery");
+  await reopened.load();
+  expect(reopened.review?.basis).toBe("Checked recorded relationships.");
 });
 
 test("full exports carry a review claim while structure-only exports omit it", async ({ page }, info) => {
@@ -111,3 +120,81 @@ test("imported review cannot hide known source uncertainty", async ({ page }) =>
   await expect(page.locator("#dependency-review-status")).toContainText("Reviewed with exceptions");
   await expect(page.locator("#dependency-review-status")).not.toContainText("Reviewed for this source version");
 });
+
+test("offline inconsistent derived metadata cannot erase a captured obligation", async ({ page }, info) => {
+  // oracle: an offline payload with forged derived fields still exposes the obligation encoded in captured task facts.
+  const { writeFileSync } = await import("node:fs");
+  const { pathToFileURL } = await import("node:url");
+  const { rec } = await import("../src/adapters/linear/GraphqlJson.ts");
+  const { Task } = await import("../src/core/domain/Task.ts");
+  const { AnalysisService } = await import("../src/core/services/AnalysisService.ts");
+  const { DependencyReview } = await import("../src/core/domain/DependencyReview.ts");
+  const { ReviewDecision } = await import("../src/core/domain/ReviewDecision.ts");
+  const { ReviewIdentityAdapter } = await import("../src/adapters/review/ReviewIdentityAdapter.ts");
+  const { ViewerData } = await import("../src/viewer/ViewerData.ts");
+  const { viewerPage } = await import("../src/viewer/ViewerPage.ts");
+  const analyzer = new AnalysisService({ today: (): string => "2026-10-02" });
+  const tasks = [new Task({ id: "a", title: "Canceled output", status: "canceled" }), new Task({ id: "b", title: "Consumer", blockedBy: ["a"] })];
+  const source = analyzer.analyse(tasks, "Offline inconsistent evidence");
+  const review = new DependencyReview({ sourceVersion: await new ReviewIdentityAdapter().identify(source), taskIds: ["a", "b"], basis: "Imported complete claim", exceptions: [], reviewer: "Imported reviewer", reviewedAt: "2026-10-02",
+    decisions: [new ReviewDecision({ blocker: "a", dependent: "b", outcome: "accepted", note: "Imported assertion" })] });
+  const data = rec(JSON.parse(new ViewerData().render(analyzer.analyse(tasks, source.source, { review }))));
+  const snapshot = rec(data["snapshot"]); snapshot["findings"] = [];
+  const rows = snapshot["tasks"];
+  if (!Array.isArray(rows)) { throw new Error("Invalid fixture tasks"); }
+  rows.forEach((row: unknown) => { rec(row)["state"] = "blocked"; });
+  const path = info.outputPath("inconsistent-review.html"); writeFileSync(path, viewerPage(JSON.stringify(data)));
+  await page.context().setOffline(true);
+  await page.goto(pathToFileURL(path).href);
+  await expect(page.locator("#dependency-review-status")).toContainText("Reviewed with exceptions");
+  await expect(page.locator("#dependency-review-status")).toContainText("Canceled prerequisite a");
+});
+
+test("oversized recovery export reports the limit and retains the in-page review", async ({ page }) => {
+  // oracle: failed persistence never promises an unreopenable download or silently drops reviewed evidence.
+  const { Task } = await import("../src/core/domain/Task.ts");
+  const { AnalysisService } = await import("../src/core/services/AnalysisService.ts");
+  const { ViewerData } = await import("../src/viewer/ViewerData.ts");
+  const tasks = Array.from({ length: 81 }, (_, i) => new Task({ id: String(i), title: "Example", description: "d".repeat(60000), blockedBy: i === 0 ? [] : ["0"] }));
+  const data = new ViewerData().render(new AnalysisService({ today: (): string => "2026-10-02" }).analyse(tasks, "synthetic large capture"));
+  await page.route("**/viewer.json", route => route.fulfill({ contentType: "application/json", body: data }));
+  await page.addInitScript(() => { Object.defineProperty(window, "localStorage", { get: () => { throw new DOMException("Storage unavailable", "SecurityError"); } }); });
+  await page.goto("http://127.0.0.1:4178/");
+  await page.getByRole("button", { name: "Review dependencies", exact: true }).click();
+  await page.getByLabel("Review basis", { exact: true }).fill("Retain this review evidence");
+  await page.getByText("Recorded relationship decisions", { exact: true }).click();
+  await page.locator("[data-review-note]").evaluateAll(notes => {
+    notes.forEach(note => { if (note instanceof HTMLInputElement) { note.value = "n".repeat(60000); } });
+  });
+  await page.getByRole("button", { name: "Record review", exact: true }).click();
+  await expect(page.locator("#dependency-review-notice")).toContainText("Full snapshot export is unavailable");
+  await expect(page.locator("#dependency-review-notice")).toContainText("browser storage failed");
+  await expect(page.locator("#dependency-review-status")).toContainText("Retain this review evidence");
+  await page.getByRole("button", { name: "Import/Export", exact: true }).click();
+  await page.getByRole("button", { name: "Export snapshot JSON", exact: true }).click();
+  await expect(page.locator("#export-warning")).toContainText("snapshot_limit");
+  await expect(page.locator("#dependency-review-status")).toContainText("Retain this review evidence");
+});
+
+for (const partial of [false, true]) {
+  test(`imported ${partial ? "partial" : "empty"} decisions disclose every missing relationship`, async ({ page }) => {
+    // oracle: absent dispositions remain visible unreviewed obligations, while extraneous claims are explained.
+    const { Task } = await import("../src/core/domain/Task.ts");
+    const { AnalysisService } = await import("../src/core/services/AnalysisService.ts");
+    const { DependencyReview } = await import("../src/core/domain/DependencyReview.ts");
+    const { ReviewDecision } = await import("../src/core/domain/ReviewDecision.ts");
+    const { ReviewIdentityAdapter } = await import("../src/adapters/review/ReviewIdentityAdapter.ts");
+    const { ViewerData } = await import("../src/viewer/ViewerData.ts");
+    const tasks = [new Task({ id: "a", title: "Schema" }), new Task({ id: "b", title: "Consumer", blockedBy: ["a"] }), new Task({ id: "c", title: "Other consumer", blockedBy: ["a"] })];
+    const analyzer = new AnalysisService({ today: (): string => "2026-10-02" });
+    const source = analyzer.analyse(tasks, "Partial review fixture");
+    const decisions = partial ? [new ReviewDecision({ blocker: "a", dependent: "b", outcome: "accepted", note: "Required output" }), new ReviewDecision({ blocker: "b", dependent: "c", outcome: "accepted", note: "Extra claim" })] : [];
+    const review = new DependencyReview({ sourceVersion: await new ReviewIdentityAdapter().identify(source), taskIds: ["a", "b", "c"], basis: "Imported review", exceptions: [], reviewedAt: "2026-10-02", reviewer: "Example", decisions });
+    const data = new ViewerData().render(analyzer.analyse(tasks, source.source, { review }));
+    await page.route("**/viewer.json", route => route.fulfill({ contentType: "application/json", body: data }));
+    await page.goto("http://127.0.0.1:4178/");
+    await expect(page.locator("#dependency-review-status")).toContainText(`${partial ? "1" : "2"} rejected or unreviewed relationships`);
+    await expect(page.locator("#dependency-review-status")).toContainText("a → c: unreviewed");
+    if (partial) { await expect(page.locator("#dependency-review-status")).toContainText("b → c: decision is outside the recorded relationships"); }
+  });
+}
