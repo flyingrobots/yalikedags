@@ -6,6 +6,7 @@ import type { Workstream } from "./WavesService.ts";
 import type { CriticalPath } from "./CriticalPathService.ts";
 import type { Finding } from "./AuditService.ts";
 import type { Grid } from "./GridService.ts";
+import { PlanningCoverage } from "./PlanningCoverage.ts";
 
 export interface AnalysisFields {
   dag: Dag;
@@ -28,6 +29,7 @@ export interface AnalysisFields {
 
 /** Everything the renderers and the viewer need, computed once from a Dag. Read-only. */
 export class Analysis {
+  readonly planning: PlanningCoverage;
   readonly dag: Dag;
   readonly source: string;
   readonly asOf: string;
@@ -46,6 +48,7 @@ export class Analysis {
   readonly grid: Grid;
 
   constructor(f: AnalysisFields) {
+    this.planning = new PlanningCoverage({ dag: f.dag, waves: f.waves, shared: f.gatekeepers, workstreams: f.workstreams });
     this.dag = f.dag;
     this.source = f.source;
     this.account = f.account;

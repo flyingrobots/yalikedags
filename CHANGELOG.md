@@ -4,6 +4,8 @@ All notable changes to this project are documented here. The format follows Keep
 
 ## [Unreleased]
 
+- Validate planning coverage against the captured graph, expose unresolved work separately from shared prerequisites and temporary workstreams, and retain exact topology/state evidence in snapshot exports. Preserve full-analysis task state when filtering the displayed graph.
+
 - Keep canceled prerequisites unresolved instead of declaring their dependents ready. Exclude affected chains from waves and critical paths, preserve canceled tasks as inactive history, and expose the unresolved obligation in findings and task details without changing Linear.
 
 - Preserve package license declarations and shipped README notices when an offline dependency has no standalone license file, including GSAP.

@@ -32,18 +32,20 @@ FOLDS:   done ─┐
 
 **Resource conflicts.** Resources are attributes on tasks, never edges, because contention is symmetric and non-transitive. Ready tasks are flagged when their combined contention with in-progress holders exceeds an exclusive or capacity limit. `advisory` never blocks. The task-dag file source supplies resource policy; sources without a policy report no capacity conflicts.
 
-**Waves.** Kahn layering over the open subgraph: wave 0 is every task with a known open status whose stored blockers are all known and done, wave 1 what those free, and so on. Each wave is an antichain, a set that could be worked in parallel. Waves are a forecast, not a barrier; the frontier rolls.
+**Waves.** Kahn layering over the open subgraph: wave 0 is every task with a known open status whose stored blockers are all known and done, wave 1 what those free, and so on. Each wave is an antichain in the active graph, where completed outputs end prerequisite paths. This is dependency-compatible parallelism, not a maximum-antichain optimization or a resource-feasible schedule. Waves are a forecast, not a barrier; the frontier rolls.
 
-**Gatekeepers and workstreams.** A gatekeeper is an open task with two or more open dependents: a shared prerequisite. Cut the gatekeepers out of the open graph and the connected pieces that remain are the workstreams. Every open non-gatekeeper task is in exactly one workstream, so the decomposition is mutually exclusive and collectively exhaustive by construction.
+**Gatekeepers and workstreams.** A gatekeeper is a schedulable task with two or more schedulable dependents: a shared prerequisite. Cut the gatekeepers out of the schedulable graph and the connected pieces that remain are temporary analytical workstreams. Each schedulable card belongs to either the shared category or exactly one workstream. Active cards without a wave belong to a separate exception category.
 
-**Grid.** Waves cut the open graph by time and workstreams cut it by topology, and both partition the same open tasks, so their product is a grid in which every open schedulable task has exactly one cell. One row per workstream, one column per wave, and a shared row first for the gatekeepers, which belong to a wave but to no workstream. This is what the viewer's Grid view draws.
+This partition does not establish deliverables or ownership. In a diamond A → B/C → D, A is shared and B, C, D form one workstream. A workstream ID is its smallest member ID; completing that member can change the ID. Different member sets can reuse an ID, so compare the captured graph and member list, not the ID alone. Selection and filters use task identities. Source assignees on shared prerequisites remain visible without assigning their effort to multiple groups.
+
+**Grid.** Waves layer the schedulable graph by prerequisite order and workstreams partition it by topology, so their product is a grid in which every open schedulable task has exactly one cell. One row per workstream, one column per wave, and a shared row first for the gatekeepers, which belong to a wave but to no workstream. This is what the viewer's Grid view draws.
 
 **Critical path.** The longest chain of open tasks without unresolved prerequisite obligations, computed twice: by depth (number of hand-offs) and by effort (summed estimate, unestimated tasks weighing 1 as Linear counts them). Unknown tasks and chains reaching canceled, unknown, or missing prerequisites are excluded; Findings and the wave exceptions retain their evidence. The two lengths can disagree, and both are reported. There is no float, no forward or backward pass: those need durations, and this graph carries effort.
 
 ## Important invariants
 
 - Completed tasks satisfy prerequisites and belong to no wave, workstream, or grid cell. Canceled tasks also remain outside executable work, but do not satisfy remaining prerequisite edges.
-- Every schedulable open task is in exactly one wave. Every open non-gatekeeper task is in one workstream; unschedulable tasks have no grid cell.
+- Every schedulable open task is in exactly one wave. Every schedulable non-gatekeeper task is in one workstream; unschedulable tasks have no grid cell or workstream.
 - `dependents` is derived; storing both directions would be two sources of truth for one edge.
 - The layout used by the SVG and the viewer is the same pure service, so what you see is what the report computed.
 
@@ -60,3 +62,7 @@ Time-based CPM, PERT and critical-chain buffers were deliberately not implemente
 ## Related tasks and reference
 
 - [Audit a project](../how-to/audit-a-project.md), [snapshot JSON](../reference/snapshot.md)
+
+## Coverage evidence
+
+Every analysis validates wave ordering, complete schedulable coverage, disjoint group membership, shared prerequisites, and connected components. Exported planning evidence identifies the exact sorted task IDs, statuses, and recorded blocker lists used by that plan. It accounts for active included cards, terminal exclusions, labeled containers, shared prerequisites, grouped cards, unresolved exceptions, and cross-group edges. The three active categories cover each included card once. Containers remain explicitly annotated; card counts do not claim an executable-PR count. Missing dependency discovery can still change the graph and invalidate the plan.

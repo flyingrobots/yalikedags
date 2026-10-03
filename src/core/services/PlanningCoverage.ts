@@ -1,0 +1,108 @@
+import type { Dag } from "../domain/Dag.ts";
+import type { Task } from "../domain/Task.ts";
+import type { Workstream } from "./WavesService.ts";
+import { WavesService } from "./WavesService.ts";
+import { PlanningEvidence } from "./PlanningEvidence.ts";
+
+export interface PlanningCoverageFields {
+  dag: Dag;
+  waves: readonly (readonly string[])[];
+  shared: readonly string[];
+  workstreams: readonly Workstream[];
+}
+
+/** A validated partition of active captured cards, not a claim of deliverable cohesion or ownership. */
+export class PlanningCoverage {
+  readonly graphTasks: readonly Task[];
+  readonly included: readonly string[];
+  readonly excluded: readonly string[];
+  readonly containers: readonly string[];
+  readonly exceptions: readonly string[];
+  readonly shared: readonly string[];
+  readonly workstreams: readonly Workstream[];
+  readonly crossGroupEdges: readonly { readonly blocker: string; readonly dependent: string }[];
+
+  constructor(f: PlanningCoverageFields) {
+    this.graphTasks = Object.freeze(f.dag.tasks.sort((a, b) => a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+    this.included = Object.freeze(this.graphTasks.filter(task => !task.isDone()).map(task => task.id));
+    this.excluded = Object.freeze(this.graphTasks.filter(task => task.isDone()).map(task => task.id));
+    this.containers = Object.freeze(this.graphTasks.filter(task => !task.isDone() && new PlanningEvidence().kind(task) === "Tracking container").map(task => task.id));
+    const scheduled = this.validateWaves(f);
+    this.exceptions = Object.freeze(this.included.filter(id => !scheduled.has(id)));
+    const membership = this.validateGroups(f, scheduled);
+    this.shared = Object.freeze([...f.shared].sort());
+    this.workstreams = Object.freeze([...f.workstreams]);
+    this.crossGroupEdges = Object.freeze(this.graphTasks.flatMap(task => [...task.blockedBy].sort()
+      .filter(blocker => scheduled.has(blocker) && scheduled.has(task.id) && membership.get(blocker) !== membership.get(task.id))
+      .map(blocker => Object.freeze({ blocker, dependent: task.id }))));
+    Object.freeze(this);
+  }
+
+  private validateWaves(f: PlanningCoverageFields): Map<string, number> {
+    const included = new Set(this.included);
+    const scheduled = new Map<string, number>();
+    f.waves.forEach((wave, index) => {
+      if (wave.length === 0) { throw new Error("planning: empty wave"); }
+      for (const id of wave) {
+        if (!included.has(id) || scheduled.has(id)) { throw new Error("planning: wave contains excluded or duplicate task"); }
+        scheduled.set(id, index);
+      }
+    });
+    for (const [id, wave] of scheduled) {
+      const task = f.dag.get(id);
+      if (task.status === "unknown") { throw new Error("planning: unknown task cannot be scheduled"); }
+      for (const blocker of task.blockedBy) {
+        if (!f.dag.has(blocker)) { throw new Error("planning: missing prerequisite cannot be scheduled"); }
+        if (f.dag.get(blocker).satisfiesPrerequisite()) { continue; }
+        const prerequisiteWave = scheduled.get(blocker);
+        if (prerequisiteWave === undefined || prerequisiteWave >= wave) { throw new Error("planning: waves violate prerequisite order"); }
+      }
+    }
+    const expected = new WavesService().waves(f.dag).flat();
+    if (expected.length !== scheduled.size || expected.some(id => !scheduled.has(id))) { throw new Error("planning: wave coverage omitted schedulable work"); }
+    return scheduled;
+  }
+
+  private validateGroups(f: PlanningCoverageFields, scheduled: ReadonlyMap<string, number>): Map<string, string> {
+    const membership = new Map<string, string>();
+    for (const id of f.shared) {
+      if (membership.has(id) || !scheduled.has(id)) { throw new Error("planning: invalid shared prerequisite"); }
+      membership.set(id, `shared:${id}`);
+    }
+    f.workstreams.forEach(stream => {
+      if (stream.tasks.length === 0 || [...stream.tasks].sort()[0] !== stream.id) { throw new Error("planning: invalid analytical group identity"); }
+      for (const id of stream.tasks) {
+        if (membership.has(id) || !scheduled.has(id)) { throw new Error("planning: duplicate or unschedulable group member"); }
+        membership.set(id, `stream:${stream.id}`);
+      }
+      this.connected(f.dag, stream);
+    });
+    if (membership.size !== scheduled.size) { throw new Error("planning: group coverage omitted scheduled work"); }
+    this.boundaries(f, scheduled, membership);
+    return membership;
+  }
+
+  private boundaries(f: PlanningCoverageFields, scheduled: ReadonlyMap<string, number>, membership: ReadonlyMap<string, string>): void {
+    const shared = new Set(f.shared);
+    for (const id of scheduled.keys()) {
+      const dependents = f.dag.dependents(id).filter(next => scheduled.has(next));
+      if ((dependents.length >= 2) !== shared.has(id)) { throw new Error("planning: shared prerequisite rule mismatch"); }
+      for (const next of dependents) {
+        if (!shared.has(id) && !shared.has(next) && membership.get(id) !== membership.get(next)) { throw new Error("planning: connected work split across analytical groups"); }
+      }
+    }
+  }
+
+  private connected(dag: Dag, stream: Workstream): void {
+    const members = new Set(stream.tasks);
+    const visited = new Set<string>();
+    const pending = [stream.id];
+    while (pending.length > 0) {
+      const id = pending.pop();
+      if (id === undefined || visited.has(id)) { continue; }
+      visited.add(id);
+      pending.push(...[...dag.blockers(id), ...dag.dependents(id)].filter(next => members.has(next) && !visited.has(next)));
+    }
+    if (visited.size !== members.size) { throw new Error("planning: disconnected tasks merged into one analytical group"); }
+  }
+}

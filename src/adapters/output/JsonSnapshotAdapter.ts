@@ -1,5 +1,6 @@
 import type { Analysis } from "../../core/services/Analysis.ts";
 import type { RendererPort } from "../../ports/RendererPort.ts";
+import { PlanningCoverageAdapter } from "./PlanningCoverageAdapter.ts";
 
 export const SNAPSHOT_SCHEMA = "yalikedags/snapshot/2";
 
@@ -19,6 +20,7 @@ export class JsonSnapshotAdapter implements RendererPort {
   toObject(a: Analysis): Record<string, unknown> {
     return {
       schema: SNAPSHOT_SCHEMA,
+      planning: new PlanningCoverageAdapter().toObject(a.planning),
       source: a.source,
       ...(a.account !== undefined && { account: a.account }),
       asOf: a.asOf,

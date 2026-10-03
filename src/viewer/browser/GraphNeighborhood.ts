@@ -1,4 +1,4 @@
-import { Analysis } from "../../core/services/Analysis.ts";
+import type { Analysis } from "../../core/services/Analysis.ts";
 import { Dag } from "../../core/domain/Dag.ts";
 import { SvgRendererAdapter } from "../../adapters/output/SvgRendererAdapter.ts";
 import { element } from "./Dom.ts";
@@ -58,14 +58,7 @@ export class GraphNeighborhood {
 
   private scene(ids: Set<string>): void {
     const tasks = this.analysis.dag.tasks.filter((task) => ids.has(task.id)).map((task) => task.with({ blockedBy: task.blockedBy.filter((id) => ids.has(id)) }));
-    this.graph.scene(new SvgRendererAdapter().render(this.subgraph(new Dag(tasks))));
-  }
-
-  private subgraph(dag: Dag): Analysis {
-    const a = this.analysis;
-    return new Analysis({ dag, source: a.source, asOf: a.asOf, states: a.states, frontier: a.frontier,
-      conflicts: a.conflicts, waves: a.waves, gatekeepers: a.gatekeepers, workstreams: a.workstreams,
-      criticalByDepth: a.criticalByDepth, criticalByEffort: a.criticalByEffort, grid: a.grid, findings: a.findings });
+    this.graph.scene(new SvgRendererAdapter().render(this.analysis, new Dag(tasks)));
   }
 
   private all(): void {

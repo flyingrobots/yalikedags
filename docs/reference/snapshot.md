@@ -84,3 +84,9 @@ Choose **Structure only** in Import/Export, or pass `--redact` to `sync` or `ren
 - Recomputed: all derived views and findings. Effort defaults to one, due dates are absent, `asOf` is the placeholder `1970-01-01`, `capturedAt` is `null`, and a fixed warning describes the reduction. Resource conflicts and urgency cannot preserve their original meaning.
 
 Full export remains the default and preserves all snapshot fields. Neither choice modifies the loaded project. The regression tests in `test/Redaction.test.ts` verify content removal and relation preservation through CLI JSON/HTML exports; `e2e/export-privacy.pw.ts` verifies both browser choices and unchanged task content in served and offline viewers.
+
+## Planning coverage
+
+The additive `planning` field uses `yalikedags/planning/1`. Its `graph.nodes` is the canonical sorted list of task IDs, statuses, and sorted `blockedBy` references: the exact supplied topology and state behind the partition, not a claim that dependency discovery is complete. `included` lists active cards; `excluded` lists completed/canceled cards; `containers` annotates labeled tracking containers. `shared`, `workstreams[].tasks`, and `exceptions` partition `included` without duplication or omission. `crossGroupEdges` retains dependencies across shared/group boundaries. Exceptions have no wave or group.
+
+Workstream IDs use the smallest current member ID, are not unique across graph versions, and are not durable ownership identities. A refresh can change membership and IDs. This is a temporary analytical grouping, not a promise of cohesive deliverables. Like other derived fields, planning evidence is recomputed when importing a snapshot.

@@ -434,3 +434,5 @@ footer:has(#selection-status:empty):has(#viewer-notice[hidden]) {display:var(--u
 .snapshot-summary>div {display:flex;flex-direction:column;flex:1}
 .graph-region-label {fill:var(--muted);font-size:var(--graph-region-font)}
 .planning-warning {padding:var(--snapshot-summary-padding);background:var(--snapshot-summary-background);border-bottom:var(--snapshot-summary-border);font-size:var(--snapshot-summary-font)}
+
+#planning-coverage { max-height: 20rem; overflow: auto; }

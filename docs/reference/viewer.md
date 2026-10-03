@@ -278,3 +278,7 @@ Containers are excluded from the dependency frontier count. Wave membership stil
 reflects the supplied graph and may include containers; it is not an executable-PR
 count. Proposed dependencies require evidence and review outside this viewer and
 are never manufactured from domains, shared files, or parent membership.
+
+### Planning coverage disclosure
+
+The Waves page exposes active scope, terminal exclusions, tracking-container counts, shared prerequisite assignees, unresolved exceptions, and cross-group edges in a bounded disclosure. These counts describe captured cards rather than executable PRs. Workstreams are temporary connected components, not team assignments; IDs and membership may change after refresh. Export the snapshot to retain the exact topology and state behind the displayed partition.
