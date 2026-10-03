@@ -14,13 +14,15 @@ import { element } from "./Dom.ts";
 /** Discovery and preview are local; the downloaded plan goes through the existing explicit CLI apply gate. */
 export class DependencyProposalController {
   constructor(private readonly analysis: Analysis, private readonly review: DependencyReviewController) {
-    element("dependency-candidates").innerHTML = new DependencyProposalMarkup().candidates(analysis, new DependencyDiscoveryService().discover(analysis.dag));
+    const discovery = new DependencyDiscoveryService().scan(analysis.dag);
+    const summary = `${String(discovery.candidates.length)} candidates. ${discovery.truncated ? "Additional candidate pairs were omitted; review coverage is incomplete." : "No candidate pairs omitted by the retention limit; unreferenced dependencies may still exist."}`;
+    element("dependency-candidates").innerHTML = new DependencyProposalMarkup().candidates(analysis, discovery.candidates);
+    element("dependency-discovery-status").textContent = summary;
     element("export-proposal-evidence").addEventListener("click", () => { void this.exportEvidence().catch((error: unknown) => { this.notice(error); }); });
     element("discover-dependencies").addEventListener("click", () => { this.run(() => {
-      const candidates = new DependencyDiscoveryService().discover(analysis.dag);
       element("dependency-candidate-details").setAttribute("open", "");
       element("review-dependencies").click();
-      element("proposal-notice").textContent = `${String(candidates.length)} candidates. Review the cited direction, then record decisions. No tracker writes.`;
+      element("proposal-notice").textContent = `${summary} Review the cited direction, then record decisions. No tracker writes.`;
     }); });
     element("preview-proposals").addEventListener("click", () => { this.run(() => { this.preview(); }); });
     element("export-proposal-plan").addEventListener("click", () => { void this.exportPlan().catch((error: unknown) => { this.notice(error); }); });

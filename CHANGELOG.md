@@ -4,6 +4,8 @@ All notable changes to this project are documented here. The format follows Keep
 
 ## [Unreleased]
 
+- Disclose omitted candidate pairs in the discovery notice and list header before a review is saved.
+
 - Keep hedged, conditional, historical, and unpunctuated-question references uncertain during local discovery.
 
 - Distinguish an exact candidate ceiling from omitted pairs and continue scanning to strengthen retained evidence after the limit.

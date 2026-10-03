@@ -174,3 +174,16 @@ test("a canceled proposed blocker is disclosed and leaves the accepted dependent
   await expect(page.locator("#proposal-preview-content")).toContainText("unresolved");
   await expect(page.locator("#frontier [data-task]")).toHaveCount(2);
 });
+
+test("discovery discloses omitted pairs before any review is recorded", async ({ page }) => {
+  const tasks = Array.from({ length: 46 }, (_, i) => new Task({ id: String(i), key: `DEMO-${String(i)}`, title: "Example",
+    description: Array.from({ length: 46 }, (_entry, j) => `Requires DEMO-${String(j)}.`).join("\n") }));
+  const crowded = new AnalysisService({ today: (): string => "2026-10-02" }).analyse(tasks, "synthetic");
+  await page.route("**/viewer.json", route => route.fulfill({ contentType: "application/json", body: new ViewerData().render(crowded) }));
+  await page.goto("http://127.0.0.1:4178");
+  await page.locator("#discover-dependencies").click();
+  await expect(page.locator("#proposal-notice")).toContainText("Additional candidate pairs were omitted; review coverage is incomplete");
+  await expect(page.locator("#dependency-discovery-status")).toContainText("Additional candidate pairs were omitted; review coverage is incomplete");
+  await expect(page.locator("[data-candidate]")).toHaveCount(2000);
+  await expect(page.locator("#dependency-review-status")).toContainText("Dependency review is incomplete");
+});
