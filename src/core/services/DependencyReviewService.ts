@@ -39,8 +39,15 @@ export class DependencyReviewService {
     const findings = new AuditService().audit(analysis.dag);
     const states = new StateService().states(analysis.dag);
     return [...new Set([...analysis.warnings,
+      ...(new DependencyDiscoveryService().discover(analysis.dag).length === 2000 ? ["Candidate discovery reached 2,000 results; remaining references have not been inspected."] : []),
       ...findings.filter(finding => ["cycle", "dangling-blocker", "canceled-blocker"].includes(finding.kind)).map(finding => finding.detail),
       ...analysis.dag.tasks.filter(task => states.get(task.id) === "unresolved").map(task => `Unresolved task: ${task.key}`)])];
+  }
+
+  candidateExceptions(review: DependencyReview, analysis: Analysis): string[] {
+    const candidates = new Set(new DependencyDiscoveryService().discover(analysis.dag).map(edge => ReviewDecision.key(edge.blocker, edge.dependent)));
+    return review.decisions.filter(decision => candidates.has(ReviewDecision.key(decision.blocker, decision.dependent)) && decision.outcome === "accepted" && !decision.note.trim())
+      .map(decision => `${decision.blocker} → ${decision.dependent}: accepted candidate lacks an evidence and direction rationale.`);
   }
 
   missingDecisions(review: DependencyReview, analysis: Analysis): ReviewDecision[] {

@@ -87,7 +87,7 @@ export class DependencyReviewController {
     this.paragraph("A review records evidence checked for this scope; it does not prove that every real-world dependency was discovered.");
     if (this.review === undefined) { return; }
     const service = new DependencyReviewService();
-    const exceptions = [...new Set([...this.review.exceptions, ...service.knownExceptions(this.analysis), ...service.outsideDecisions(this.review, this.analysis)])];
+    const exceptions = [...new Set([...this.review.exceptions, ...service.knownExceptions(this.analysis), ...service.outsideDecisions(this.review, this.analysis), ...service.candidateExceptions(this.review, this.analysis)])];
     const decisions = [...this.review.decisions, ...service.missingDecisions(this.review, this.analysis)];
     const undecided = decisions.filter(decision => decision.outcome !== "accepted").length;
     this.paragraph(`${String(this.review.taskIds.length)} captured tasks · ${String(exceptions.length)} exceptions · ${String(undecided)} rejected or unreviewed relationships.`);

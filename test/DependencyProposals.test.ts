@@ -140,6 +140,7 @@ test("bounded discovery is invariant to capture task order", async () => {
   const discover = new DependencyDiscoveryService();
   const candidates = discover.discover(first.dag);
   expect(candidates).toHaveLength(2000);
+  expect(new DependencyReviewService().knownExceptions(first)).toContain("Candidate discovery reached 2,000 results; remaining references have not been inspected.");
   expect(discover.discover(reversed.dag).map(c => [c.blocker, c.dependent])).toEqual(candidates.map(c => [c.blocker, c.dependent]));
 });
 

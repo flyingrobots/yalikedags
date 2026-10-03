@@ -49,3 +49,17 @@ test("description evidence produces a reviewable proposal without changing the r
   await page.screenshot({ path: "test-results/dependency-proposal-preview.png", fullPage: true });
 
 });
+
+test("imported rationale-free acceptance discloses its unresolved evidence", async ({ page }) => {
+  // oracle: refusing plan export must also explain the imported acceptance's visible review exception.
+  const { DependencyReview } = await import("../src/core/domain/DependencyReview.ts");
+  const { ReviewDecision } = await import("../src/core/domain/ReviewDecision.ts");
+  const { ReviewIdentityAdapter } = await import("../src/adapters/review/ReviewIdentityAdapter.ts");
+  const review = new DependencyReview({ sourceVersion: await new ReviewIdentityAdapter().identify(analysis), taskIds: analysis.dag.tasks.map(t => t.id), basis: "Imported claim", reviewer: "Example", reviewedAt: "2026-10-02", exceptions: [],
+    decisions: [new ReviewDecision({ blocker: "schema", dependent: "consumer", outcome: "accepted", note: "" })] });
+  const imported = new AnalysisService({ today: (): string => "2026-10-02" }).analyse(analysis.dag.tasks, analysis.source, { account: analysis.account, review });
+  await page.route("**/viewer.json", route => route.fulfill({ contentType: "application/json", body: new ViewerData().render(imported) }));
+  await page.goto("http://127.0.0.1:4178");
+  await expect(page.locator("#dependency-review-status")).toContainText("1 exceptions");
+  await expect(page.locator("#dependency-review-status")).toContainText("accepted candidate lacks an evidence and direction rationale");
+});
