@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format follows Keep
 
 - Discover bounded issue-reference dependency candidates locally in stable task-identity order, retain bounded cited evidence and human dispositions, preview proposed/accepted graph plans, and export evidence plus accepted relation plans. Disclose exhausted discovery and rationale-free acceptance as review exceptions. Reject stale-scope or rationale-free imported acceptances at plan export and keep stale-scope decisions out of accepted previews, check fresh prerequisite evidence before CLI writeback and verify the actual tracker result through the existing receipt path.
 
+- Mark only genuinely omitted sides of bounded candidate evidence excerpts.
+
 - Disclose omitted candidate pairs in the discovery notice and list header before a review is saved.
 
 - Keep hedged, conditional, historical, and unpunctuated-question references uncertain during local discovery.

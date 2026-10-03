@@ -187,3 +187,14 @@ test("mutually proposed prerequisites remain visible as cyclic hypothetical cove
   expect(preview.findings.some(f => f.kind === "cycle")).toBe(true);
   expect(capture.waves).toEqual([["a", "b"]]);
 });
+
+test("candidate excerpt markers identify only sides where text was omitted", () => {
+  for (const description of [`DEMO-1 ${"x".repeat(2000)}`, `${"x".repeat(2000)} DEMO-1`]) {
+    const capture = analyzer.analyse(tasks.map(t => t.id === "b" ? t.with({ description }) : t), "synthetic");
+    const evidence = new DependencyDiscoveryService().discover(capture.dag)[0]?.evidence ?? "";
+    expect(evidence.startsWith("…")).toBe(!description.startsWith("DEMO-1"));
+    expect(evidence.endsWith("…")).toBe(!description.endsWith("DEMO-1"));
+    expect(evidence).toContain("DEMO-1");
+    expect(evidence.length).toBeLessThanOrEqual(1024);
+  }
+});
