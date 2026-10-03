@@ -35,6 +35,8 @@ Start with what can be done now. It'll show ya what that frees up next. Follow t
 
 Had a proper look at the dependencies? **Review dependencies** lets ya record what ya checked, which relationships ya accept, and what still needs sorting. Change the underlying cards and it'll tell ya the review is stale. A review isn't a promise that nothing's missing. [Here's how it works](docs/reference/viewer.md#record-a-dependency-review).
 
+Canceled the card that was meant to unblock it? That doesn't mean the work got done. The dependent chain stays unresolved until ya review and correct the dependency. Findings and the task details show what's missing.
+
 ## 📍 Start here
 
 Go on, try the example. No key needed, about two minutes: [See your first DAG](docs/tutorials/first-dag.md). My mam's already got hers open. She's asking why you're still reading.

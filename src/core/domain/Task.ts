@@ -102,9 +102,18 @@ export class Task {
     }
   }
 
-  /** Done for scheduling purposes: the task can no longer block anything. */
+  /** Terminal history: not executable work. This does not establish prerequisite satisfaction. */
   isDone(): boolean {
     return this.status === "done" || this.status === "canceled";
+  }
+
+  /** Only completed work supplies its promised output; cancellation supplies none. */
+  satisfiesPrerequisite(): boolean {
+    return this.status === "done";
+  }
+
+  isCanceled(): boolean {
+    return this.status === "canceled";
   }
 
   isInProgress(): boolean {

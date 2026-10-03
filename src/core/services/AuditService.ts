@@ -1,7 +1,7 @@
 import type { Dag } from "../domain/Dag.ts";
 import type { Task } from "../domain/Task.ts";
 
-export type FindingKind = "isolated" | "redundant-edge" | "stale-blocker" | "dangling-blocker" | "cycle" | "split-candidate";
+export type FindingKind = "isolated" | "redundant-edge" | "stale-blocker" | "canceled-blocker" | "dangling-blocker" | "cycle" | "split-candidate";
 
 export interface FindingFields {
   kind: FindingKind;
@@ -49,6 +49,7 @@ export class AuditService {
       ...v.dangling.map((d) => finding("dangling-blocker")(d.task, `blocked by ${d.ref}, which is not in this graph`, "the referenced issue is in another project and that is intended")),
       ...v.redundant.map((r) => finding("redundant-edge")(r.from, `blocked by ${r.to} is implied via ${r.via}`, "the direct edge carries a meaning the chain does not")),
       ...this.staleBlockers(dag),
+      ...this.canceledBlockers(dag),
       ...this.isolated(dag),
       ...dag.tasks.filter((t) => !t.isDone()).flatMap((t) => this.splitCandidates(dag, t)),
     ];
@@ -59,9 +60,15 @@ export class AuditService {
       .filter((t) => !t.isDone())
       .flatMap((t) =>
         dag.blockers(t.id)
-          .filter((b) => dag.get(b).isDone())
+          .filter((b) => dag.get(b).satisfiesPrerequisite())
           .map((b) => finding("stale-blocker")(t.id, `blocked by ${b}, which is ${dag.get(b).status}`, "the relation is kept deliberately as history")),
       );
+  }
+
+  private canceledBlockers(dag: Dag): Finding[] {
+    return dag.tasks.filter((t) => !t.isDone()).flatMap((t) =>
+      dag.blockers(t.id).filter((b) => dag.get(b).isCanceled()).map((b) =>
+        finding("canceled-blocker")(t.id, `Canceled prerequisite ${b} supplies no completed output; review or replace the dependency before scheduling ${t.id}`, "the source dependency has been explicitly removed or replaced after review")));
   }
 
   private isolated(dag: Dag): Finding[] {

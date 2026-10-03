@@ -5,7 +5,7 @@ export class DependencyImpact {
   immediate(dag: Dag, id: string): string[] {
     return dag.dependents(id).filter((next) => {
       const task = dag.get(next);
-      return task.status === "open" && task.blockedBy.every((b) => b === id || (dag.has(b) && dag.get(b).isDone()));
+      return task.status === "open" && task.blockedBy.every((b) => b === id || (dag.has(b) && dag.get(b).satisfiesPrerequisite()));
     });
   }
 

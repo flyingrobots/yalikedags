@@ -7,7 +7,7 @@ export class FindingsMarkup {
     return [this.group(a, true), this.group(a, false)].join("");
   }
   private group(a: Analysis, structural: boolean): string {
-    const findings = a.findings.filter((f) => ["cycle", "dangling-blocker"].includes(f.kind) === structural);
+    const findings = a.findings.filter((f) => ["cycle", "dangling-blocker", "canceled-blocker"].includes(f.kind) === structural);
     const title = structural ? "Structural problems" : "Suggestions to review";
     const kinds = [...new Set(findings.map((f) => f.kind))];
     return `<section class="finding-section"><h3>${title} <span class="count">${String(findings.length)}</span></h3>${kinds.map((kind) => {
