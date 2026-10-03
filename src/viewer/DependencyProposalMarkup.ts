@@ -9,7 +9,7 @@ export class DependencyProposalMarkup {
   }
 
   introduction(): string {
-    return `<p>Local rule-based discovery reads titles and descriptions. It finds issue-key references, not every real dependency. No task context leaves this browser. Discovery stops at 2,000 candidates; reaching that limit leaves review coverage incomplete. Explicit wording still needs your review; uncertain references may have the wrong direction or no prerequisite at all.</p>`;
+    return `<p>Local rule-based discovery reads titles and descriptions. It finds issue-key references, not every real dependency. No task context leaves this browser. Discovery retains up to 2,000 candidates; omitting additional pairs leaves review coverage incomplete. All references are scanned so retained candidates can receive stronger evidence. Explicit wording still needs your review; uncertain references may have the wrong direction or no prerequisite at all.</p>`;
   }
 
   controls(): string {

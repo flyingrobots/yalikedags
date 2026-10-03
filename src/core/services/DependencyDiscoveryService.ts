@@ -1,3 +1,4 @@
+import { DependencyDiscovery } from "../domain/DependencyDiscovery.ts";
 import type { Dag } from "../domain/Dag.ts";
 import { DependencyCandidate } from "../domain/DependencyCandidate.ts";
 import type { Task } from "../domain/Task.ts";
@@ -7,17 +8,22 @@ const compare = (left: string, right: string): number => left < right ? -1 : lef
 /** Bounded local evidence extraction: explicit issue references, never thematic similarity. */
 export class DependencyDiscoveryService {
   discover(dag: Dag): DependencyCandidate[] {
+    return [...this.scan(dag).candidates];
+  }
+
+  scan(dag: Dag): DependencyDiscovery {
     const keys = new Map<string, Task[]>();
     for (const task of dag.tasks) { keys.set(task.key.toUpperCase(), [...(keys.get(task.key.toUpperCase()) ?? []), task]); }
     const candidates = new Map<string, DependencyCandidate>();
+    let truncated = false;
     for (const task of dag.tasks.filter(t => !t.isDone()).sort((a, b) => compare(a.id, b.id))) {
       for (const candidate of this.references(task, keys)) {
         const key = JSON.stringify([candidate.blocker, candidate.dependent]);
+        if (!candidates.has(key) && candidates.size >= DependencyDiscovery.limit) { truncated = true; continue; }
         if (candidates.get(key)?.confidence !== "explicit") { candidates.set(key, candidate); }
-        if (candidates.size >= 2000) { return this.sorted(candidates); }
       }
     }
-    return this.sorted(candidates);
+    return new DependencyDiscovery(this.sorted(candidates), truncated);
   }
 
   private sorted(candidates: ReadonlyMap<string, DependencyCandidate>): DependencyCandidate[] {

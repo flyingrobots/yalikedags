@@ -4,6 +4,8 @@ All notable changes to this project are documented here. The format follows Keep
 
 ## [Unreleased]
 
+- Distinguish an exact candidate ceiling from omitted pairs and continue scanning to strengthen retained evidence after the limit.
+
 - Show candidate blocker status and explicitly disclose that accepting a canceled prerequisite leaves its dependent unresolved.
 
 - Count rejected candidates as completed dispositions in review summaries while keeping rejected recorded relationships unresolved.

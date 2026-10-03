@@ -16,7 +16,6 @@ export class DependencyReviewService {
     if (this.knownExceptions(analysis).length > 0) { return "exceptions"; }
     const recorded = new Set(dag.tasks.flatMap(task => task.blockedBy.map(blocker => ReviewDecision.key(blocker, task.id))));
     const discovered = new DependencyDiscoveryService().discover(dag);
-    if (discovered.length === 2000) { return "exceptions"; }
     const candidates = new Set(discovered.map(c => ReviewDecision.key(c.blocker, c.dependent)));
     const required = new Set([...recorded, ...candidates]);
     if (required.size !== review.decisions.length || review.decisions.some(decision => !required.has(ReviewDecision.key(decision.blocker, decision.dependent)))) { return "exceptions"; }
@@ -39,7 +38,7 @@ export class DependencyReviewService {
     const findings = new AuditService().audit(analysis.dag);
     const states = new StateService().states(analysis.dag);
     return [...new Set([...analysis.warnings,
-      ...(new DependencyDiscoveryService().discover(analysis.dag).length === 2000 ? ["Candidate discovery reached 2,000 results; remaining references have not been inspected."] : []),
+      ...(new DependencyDiscoveryService().scan(analysis.dag).truncated ? ["Candidate discovery omitted additional pairs beyond its 2,000-result limit; review coverage is incomplete."] : []),
       ...findings.filter(finding => ["cycle", "dangling-blocker", "canceled-blocker"].includes(finding.kind)).map(finding => finding.detail),
       ...analysis.dag.tasks.filter(task => states.get(task.id) === "unresolved").map(task => `Unresolved task: ${task.key}`)])];
   }

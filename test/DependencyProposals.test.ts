@@ -140,7 +140,7 @@ test("bounded discovery is invariant to capture task order", async () => {
   const discover = new DependencyDiscoveryService();
   const candidates = discover.discover(first.dag);
   expect(candidates).toHaveLength(2000);
-  expect(new DependencyReviewService().knownExceptions(first)).toContain("Candidate discovery reached 2,000 results; remaining references have not been inspected.");
+  expect(new DependencyReviewService().knownExceptions(first)).toContain("Candidate discovery omitted additional pairs beyond its 2,000-result limit; review coverage is incomplete.");
   expect(discover.discover(reversed.dag).map(c => [c.blocker, c.dependent])).toEqual(candidates.map(c => [c.blocker, c.dependent]));
 });
 
@@ -158,4 +158,14 @@ test("negated contractions, questions, and word suffixes never claim explicit pr
     const capture = analyzer.analyse(tasks.map(t => t.id === "b" ? t.with({ description }) : t), "synthetic");
     expect(new DependencyDiscoveryService().discover(capture.dag)[0]).toMatchObject({ evidence: description, confidence: "uncertain" });
   }
+});
+
+test("an exact candidate ceiling is complete and retained evidence can improve after the ceiling", () => {
+  const blockers = Array.from({ length: 2000 }, (_, i) => new Task({ id: `b-${String(i)}`, key: `DEMO-${String(i)}`, title: "Output" }));
+  const description = `${blockers.map(t => `Related to ${t.key}.`).join("\n")}\nRequires DEMO-0.`;
+  const capture = analyzer.analyse([...blockers, new Task({ id: "zz-consumer", title: "Consumer", description })], "synthetic");
+  expect(new DependencyReviewService().knownExceptions(capture)).toEqual([]);
+  const candidates = new DependencyDiscoveryService().discover(capture.dag);
+  expect(candidates).toHaveLength(2000);
+  expect(candidates.find(c => c.blocker === "b-0")).toMatchObject({ confidence: "explicit", evidence: "Requires DEMO-0." });
 });
