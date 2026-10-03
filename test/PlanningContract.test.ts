@@ -49,6 +49,11 @@ test("invalid proposed partitions are rejected at the planning boundary", async 
   expect(() => new PlanningCoverage({ ...valid, waves: [["a"]] })).toThrow("omitted schedulable work");
   expect(() => new PlanningCoverage({ ...valid, workstreams: [] })).toThrow("group coverage");
   expect(() => new PlanningCoverage({ ...valid, workstreams: [new Workstream("a", ["a", "b"]), new Workstream("b", ["b"])] })).toThrow("duplicate");
+  expect(() => new PlanningCoverage({ ...valid, shared: ["missing"] })).toThrow("invalid shared prerequisite");
+  expect(() => new PlanningCoverage({ ...valid, shared: ["a"], workstreams: [new Workstream("b", ["b"])] })).toThrow("shared prerequisite rule mismatch");
+  expect(() => new PlanningCoverage({ ...valid, workstreams: [new Workstream("wrong", ["a", "b"])] })).toThrow("analytical group identity");
+  const disconnected = analyzer.analyse([task("a"), task("b")], "synthetic");
+  expect(() => new PlanningCoverage({ dag: disconnected.dag, grid: disconnected.grid, waves: disconnected.waves, shared: [], workstreams: [new Workstream("a", ["a", "b"])] })).toThrow("disconnected tasks");
 });
 
 test("cycles and disconnected work retain explicit coverage without invented ownership", () => {
@@ -103,4 +108,14 @@ test("grid validation rejects duplicated and misplaced members", async () => {
     expect(() => new PlanningCoverage({ ...fields, grid: new Grid(2, [new GridRow("a", cells)]) })).toThrow("planning: grid cell");
   }
   expect(() => new PlanningCoverage({ ...fields, grid: a.grid })).not.toThrow();
+});
+
+test("imported planning cannot delay ready work beyond its Kahn layer", async () => {
+  // oracle: a valid topological partition is insufficient when the viewer claims earliest dependency waves.
+  const { PlanningCoverage } = await import("../src/core/services/PlanningCoverage.ts");
+  const { GridService } = await import("../src/core/services/GridService.ts");
+  const a = analyzer.analyse([task("a"), task("b", ["a"]), task("c")], "synthetic");
+  const waves = [["a"], ["c"], ["b"]];
+  const grid = new GridService().grid(waves, a.gatekeepers, a.workstreams);
+  expect(() => { new PlanningCoverage({ dag: a.dag, grid, waves, shared: a.gatekeepers, workstreams: a.workstreams }); }).toThrow("Kahn layers");
 });

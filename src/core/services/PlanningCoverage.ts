@@ -62,9 +62,15 @@ export class PlanningCoverage {
         if (prerequisiteWave === undefined || prerequisiteWave >= wave) { throw new Error("planning: waves violate prerequisite order"); }
       }
     }
-    const expected = new WavesService().waves(f.dag).flat();
-    if (expected.length !== scheduled.size || expected.some(id => !scheduled.has(id))) { throw new Error("planning: wave coverage omitted schedulable work"); }
+    this.validateLayers(f.dag, scheduled);
     return scheduled;
+  }
+
+  private validateLayers(dag: Dag, scheduled: ReadonlyMap<string, number>): void {
+    const expected = new WavesService().waves(dag);
+    const ids = expected.flat();
+    if (ids.length !== scheduled.size || ids.some(id => !scheduled.has(id))) { throw new Error("planning: wave coverage omitted schedulable work"); }
+    if (expected.some((wave, index) => wave.some(id => scheduled.get(id) !== index))) { throw new Error("planning: wave positions disagree with Kahn layers"); }
   }
 
   private validateGroups(f: PlanningCoverageFields, scheduled: ReadonlyMap<string, number>): Map<string, string> {
