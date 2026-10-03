@@ -40,7 +40,8 @@ test("recomputable candidate quotes do not crowd out a valid source snapshot", a
     description: Array.from({ length: 20 }, (_entry, j) => `Requires DEMO-${String((i + j + 1) % 120)} `).join("").padEnd(60000, "x") }));
   const analysis = new AnalysisService({ today: (): string => "2026-10-02" }).analyse(tasks, "synthetic");
   const renderer = new JsonSnapshotAdapter();
-  const sourceOnly = renderer.toObject(analysis); delete sourceOnly["dependencyProposals"];
+  const sourceOnly = renderer.toObject(analysis);
+  expect(sourceOnly).not.toHaveProperty("dependencyProposals");
   expect(() => { new SnapshotBudget().parse(JSON.stringify(sourceOnly, null, 2)); }).not.toThrow();
   const text = renderer.render(analysis);
   const reopened = await new JsonSnapshotRepositoryAdapter(text, "export").load();
