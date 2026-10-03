@@ -4,6 +4,16 @@
 
 `serve` hosts the viewer on `127.0.0.1`. `render --format html --out dag.html` writes the same workspace as one self-contained file. The browser renders all views and the SVG graph. The local server delivers a minimal HTML shell, then `/viewer.json` supplies the analyzed project data and refresh/comparison metadata. No external assets are fetched. Offline HTML embeds that same JSON payload alongside the client code and styles, and opens without a key, running server, or network request.
 
+## Record a dependency review
+
+On **Start here**, choose **Review dependencies**. Supply a reviewer name and the evidence you inspected in **Review basis**. Under **Recorded relationship decisions**, accept, reject, or leave each recorded prerequisite unreviewed; rejection requires a note. Add missing evidence and obligations under **Unresolved exceptions**, then choose **Record review**. This reviews the whole captured task scope, including recorded relationships; it does not discover edges, edit the graph, or write to Linear.
+
+The overview distinguishes unreviewed, reviewed for this source version, reviewed with exceptions, and stale. Source warnings, structural findings, and unresolved task states are retained as exceptions even when the free-text box is empty. Rejected or unreviewed relationships prevent a claim of complete coverage. An explicit completed review only records what was checked; it cannot prove that no dependency was missed.
+
+The source version is SHA-256 over task IDs, titles, descriptions, statuses, blocker relationships, parent/child relationships, labels, source warnings, and available workspace/project identity. New or removed tasks and changes to these fields make previous decisions historical. Task ordering, capture time, display names, assignments, priorities, and estimates do not change this prerequisite-evidence identity. External evidence not captured in these fields must be rechecked manually; a URL alone does not monitor a remote document.
+
+Review records stay in this browser and source context until **Clear local review** or site-data removal. Storage failures are visible; export before leaving if saving failed. **Import/Export → Export snapshot JSON** includes the current review in full exports and omits it from structure-only exports. Reopen an exported JSON with `--snapshot`, or render it as HTML, to carry its review evidence forward. Imported records are labeled self-reported claims, never authenticated reviewer identity; a local record for the same source takes precedence and is labeled separately. Clearing a local record reveals any embedded claim without deleting the source file. Offline views compare the review against the embedded capture and cannot establish whether live Linear has changed.
+
 ![Start here: ready work, unblocking impact, and the critical path](../images/viewer-overview.png)
 
 The viewer embeds a hash-based script policy. Offline files permit no connections; served pages use same-origin JSON. Theme and SVG inline styles remain supported. The local server additionally denies embedding in frames.

@@ -45,7 +45,13 @@ The reader rejects snapshots above 8 MiB, 5,000 tasks, or 20,000 blocker referen
 
 `grid` is waves by workstreams: `waves` is the number of columns, each row is one workstream (`workstream` is its id, or `null` for the shared gatekeepers row, which comes first when there are any), and `cells[i]` lists the row's tasks in wave `i`. Every open schedulable task appears in exactly one cell. Cycles, unknown statuses, and missing blockers can prevent tasks and their descendants from receiving a wave. The viewer draws its Waves view from this field.
 
-Only the stored task fields and provenance are read back by `--snapshot`; derived fields are recomputed. `daysUntilDue` is `9999` for undated tasks.
+Only the stored task fields, provenance, and optional dependency-review claim are read back by `--snapshot`; derived fields are recomputed. `daysUntilDue` is `9999` for undated tasks.
+
+## Dependency-review metadata
+
+Optional `dependencyReview` uses schema `yalikedags/dependency-review/1`. It carries `sourceVersion` (a SHA-256 prerequisite-evidence identity), `taskIds` (the unique captured scope), `basis`, `exceptions`, `reviewedAt`, `reviewer`, and `decisions`. Each decision has `blocker`, `dependent`, `outcome` (`accepted`, `rejected`, or `unreviewed`), and `note`; rejection requires a nonempty note. Decisions describe human judgments, not mutations of the task graph. The viewer checks the captured content and scope before presenting a review as current; absent metadata means unreviewed. Imported reviewer names and timestamps are self-reported claims.
+
+Review limits are 5,000 scoped tasks, 20,000 relationship decisions, 5,000 exception entries, 256 characters for the reviewer name, and 65,536 characters for basis, individual notes, and exception text. The overall snapshot budgets also apply. Duplicate scope identities, duplicate edge decisions, decisions outside the dependent-task scope, malformed versions, and unsupported review schemas are rejected. Full JSON/HTML exports retain captured review metadata; structure-only exports omit it. See [recording a review](viewer.md#record-a-dependency-review) for invalidation and local persistence behavior.
 
 
 ## Linear account metadata

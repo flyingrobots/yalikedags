@@ -1,4 +1,5 @@
 import type { LinearAccount } from "../domain/LinearAccount.ts";
+import type { DependencyReview } from "../domain/DependencyReview.ts";
 import type { Dag } from "../domain/Dag.ts";
 import type { TaskState } from "./StateService.ts";
 import type { FrontierEntry } from "./FrontierService.ts";
@@ -9,6 +10,7 @@ import type { Grid } from "./GridService.ts";
 import { PlanningCoverage } from "./PlanningCoverage.ts";
 
 export interface AnalysisFields {
+  review?: DependencyReview | undefined;
   dag: Dag;
   source: string;
   asOf: string;
@@ -30,6 +32,7 @@ export interface AnalysisFields {
 /** Everything the renderers and the viewer need, computed once from a Dag. Read-only. */
 export class Analysis {
   readonly planning: PlanningCoverage;
+  readonly review: DependencyReview | undefined;
   readonly dag: Dag;
   readonly source: string;
   readonly asOf: string;
@@ -49,6 +52,7 @@ export class Analysis {
 
   constructor(f: AnalysisFields) {
     this.planning = new PlanningCoverage({ dag: f.dag, waves: f.waves, shared: f.gatekeepers, workstreams: f.workstreams });
+    this.review = f.review;
     this.dag = f.dag;
     this.source = f.source;
     this.account = f.account;

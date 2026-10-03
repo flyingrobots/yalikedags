@@ -1,16 +1,17 @@
 import type { Analysis } from "../../core/services/Analysis.ts";
+import type { DependencyReview } from "../../core/domain/DependencyReview.ts";
 import { JsonSnapshotAdapter } from "../../adapters/output/JsonSnapshotAdapter.ts";
 import { StructureOnlyAnalysisAdapter } from "../../adapters/output/StructureOnlyAnalysisAdapter.ts";
 import { element } from "./Dom.ts";
 
 /** Export a separate copy; changing export scope never mutates the captured dataset. */
 export class ExportController {
-  constructor(analysis: Analysis) {
+  constructor(analysis: Analysis, review: () => DependencyReview | undefined = () => analysis.review) {
     element("export-content").addEventListener("change", () => { this.describe(); });
     element("export-snapshot").addEventListener("click", () => {
       const structure = this.structureOnly();
       const output = structure ? new StructureOnlyAnalysisAdapter().transform(analysis) : analysis;
-      this.download(new JsonSnapshotAdapter().render(output), structure ? "yalikedags-structure.json" : "yalikedags-snapshot.json");
+      this.download(new JsonSnapshotAdapter().render(output, structure ? undefined : review()), structure ? "yalikedags-structure.json" : "yalikedags-snapshot.json");
     });
     this.describe();
   }

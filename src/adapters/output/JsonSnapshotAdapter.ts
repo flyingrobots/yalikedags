@@ -1,4 +1,6 @@
 import type { Analysis } from "../../core/services/Analysis.ts";
+import { DependencyReviewCodec } from "../review/DependencyReviewCodec.ts";
+import type { DependencyReview } from "../../core/domain/DependencyReview.ts";
 import type { RendererPort } from "../../ports/RendererPort.ts";
 import { PlanningCoverageAdapter } from "./PlanningCoverageAdapter.ts";
 
@@ -13,14 +15,15 @@ export const SNAPSHOT_SCHEMA = "yalikedags/snapshot/2";
 export class JsonSnapshotAdapter implements RendererPort {
   readonly contentType = "application/json";
 
-  render(a: Analysis): string {
-    return JSON.stringify(this.toObject(a), null, 2);
+  render(a: Analysis, review: DependencyReview | undefined = a.review): string {
+    return JSON.stringify(this.toObject(a, review), null, 2);
   }
 
-  toObject(a: Analysis): Record<string, unknown> {
+  toObject(a: Analysis, review: DependencyReview | undefined = a.review): Record<string, unknown> {
     return {
       schema: SNAPSHOT_SCHEMA,
       planning: new PlanningCoverageAdapter().toObject(a.planning),
+      ...(review !== undefined && { dependencyReview: new DependencyReviewCodec().encode(review) }),
       source: a.source,
       ...(a.account !== undefined && { account: a.account }),
       asOf: a.asOf,
