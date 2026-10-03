@@ -1,4 +1,5 @@
-import { expect, test } from "bun:test";
+import { DependencyDiscoveryService } from "../src/core/services/DependencyDiscoveryService.ts";
+import { expect, test, spyOn } from "bun:test";
 import { ReviewDecision } from "../src/core/domain/ReviewDecision.ts";
 import { Task } from "../src/core/domain/Task.ts";
 import { DependencyReview } from "../src/core/domain/DependencyReview.ts";
@@ -141,4 +142,22 @@ test("combined recorded and candidate decision overflow gives a capacity recover
   const decisions = Array.from({ length: 20001 }, (_, i) => new ReviewDecision({ blocker: String(i), dependent: "consumer", outcome: "unreviewed", note: "" }));
   expect(() => new DependencyReview({ sourceVersion: "a".repeat(64), taskIds: ["consumer"], basis: "Read captured requirements", exceptions: [],
     reviewedAt: "2026-10-02", reviewer: "Example", decisions })).toThrow("review: maximum combined recorded and candidate decisions is 20000; use a smaller capture");
+});
+
+test("one review service scans immutable capture text once across coverage disclosures", async () => {
+  const record = review(await identity.identify(original));
+  const coverage = new DependencyReviewService();
+  const scan = spyOn(DependencyDiscoveryService.prototype, "scan");
+  try {
+    coverage.state(record, record.sourceVersion, original);
+    coverage.knownExceptions(original);
+    coverage.outsideDecisions(record, original);
+    coverage.candidateExceptions(record, original);
+    coverage.completedCandidateRejections(record, original);
+    coverage.missingDecisions(record, original);
+    expect(scan).toHaveBeenCalledTimes(1);
+    const changed = analyzer.analyse([task, consumer.with({ description: "New requirements" })], "synthetic");
+    coverage.knownExceptions(changed);
+    expect(scan).toHaveBeenCalledTimes(2);
+  } finally { scan.mockRestore(); }
 });

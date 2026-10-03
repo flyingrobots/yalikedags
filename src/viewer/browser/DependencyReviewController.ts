@@ -80,14 +80,14 @@ export class DependencyReviewController {
   }
 
   private render(): void {
-    const status = new DependencyReviewService().state(this.review, this.sourceVersion, this.analysis);
+    const service = new DependencyReviewService();
+    const status = service.state(this.review, this.sourceVersion, this.analysis);
     const heading = document.createElement("strong");
     heading.textContent = { unreviewed: "Dependency review is incomplete.", reviewed: "Reviewed for this source version", exceptions: "Reviewed with exceptions", stale: "Dependency review is stale" }[status];
     const target = element("dependency-review-status");
     target.replaceChildren(heading);
     this.paragraph("A review records evidence checked for this scope; it does not prove that every real-world dependency was discovered.");
     if (this.review === undefined) { return; }
-    const service = new DependencyReviewService();
     const exceptions = [...new Set([...this.review.exceptions, ...service.knownExceptions(this.analysis), ...service.outsideDecisions(this.review, this.analysis), ...service.candidateExceptions(this.review, this.analysis)])];
     const decisions = [...this.review.decisions, ...service.missingDecisions(this.review, this.analysis)];
     const rejectedCandidates = service.completedCandidateRejections(this.review, this.analysis);
