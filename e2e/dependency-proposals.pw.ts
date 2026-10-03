@@ -106,3 +106,39 @@ test("rediscovery and reopening review preserve unsaved evidence and disposition
     await expect(page.locator("#review-exceptions")).toHaveValue("Follow up the recorded relation.");
   }
 });
+
+test("unsaved proposal evidence identifies its source version and export time", async ({ page }) => {
+  await page.clock.setFixedTime(new Date("2026-10-02T12:00:00Z"));
+  const { ReviewIdentityAdapter } = await import("../src/adapters/review/ReviewIdentityAdapter.ts");
+  await page.route("**/viewer.json", route => route.fulfill({ contentType: "application/json", body: new ViewerData().render(analysis) }));
+  await page.goto("http://127.0.0.1:4178");
+  await page.locator("#discover-dependencies").click();
+  await page.locator("[data-candidate]").selectOption("accepted");
+  await page.locator("#dependency-candidates [data-review-note]").fill("Requires schema output.");
+  await page.locator("#dependency-proposal-tools > summary").click();
+  const downloading = page.waitForEvent("download");
+  await page.locator("#export-proposal-evidence").click();
+  const download = await downloading;
+  const document: unknown = JSON.parse(await readFile(await download.path(), "utf8"));
+  expect(document).toHaveProperty("sourceVersion", await new ReviewIdentityAdapter().identify(analysis));
+  expect(document).toHaveProperty("exportedAt", "2026-10-02T12:00:00.000Z");
+  await expect(page.locator("#proposal-notice")).toContainText("Evidence bundle exported");
+  expect(document).toHaveProperty("candidates", [expect.objectContaining({ blocker: "schema", dependent: "consumer", evidence: "Requires DEMO-1 output before this can merge." })]);
+  expect(document).toHaveProperty("decisions", [expect.objectContaining({ outcome: "accepted", note: "Requires schema output." })]);
+});
+
+test("oversized evidence bundle is refused while the draft remains available", async ({ page }) => {
+  const large = new AnalysisService({ today: (): string => "2026-10-02" }).analyse(Array.from({ length: 81 }, (_, i) =>
+    new Task({ id: String(i), title: "Example", description: "x".repeat(60000) })), "synthetic");
+  await page.route("**/viewer.json", route => route.fulfill({ contentType: "application/json", body: new ViewerData().render(large) }));
+  await page.goto("http://127.0.0.1:4178");
+  await page.locator("#review-dependencies").click();
+  await page.getByLabel("Review basis", { exact: true }).fill("Draft evidence to retain.");
+  await page.locator("#dependency-proposal-tools > summary").click();
+  let downloads = 0;
+  page.on("download", () => { downloads++; });
+  await page.locator("#export-proposal-evidence").click();
+  await expect(page.locator("#proposal-notice")).toContainText("maximum file size is 8 MiB");
+  await expect(page.getByLabel("Review basis", { exact: true })).toHaveValue("Draft evidence to retain.");
+  expect(downloads).toBe(0);
+});

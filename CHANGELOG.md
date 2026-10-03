@@ -4,6 +4,8 @@ All notable changes to this project are documented here. The format follows Keep
 
 ## [Unreleased]
 
+- Bound complete proposal evidence bundles and include source-version and export-time provenance even for unsaved decisions; export failures retain the current draft.
+
 - Recompute dependency candidates from saved source text instead of duplicating quotes in ordinary snapshots; retain explicit quotes in proposal evidence bundles.
 
 - Preserve unsaved dependency review decisions and evidence when Discover or Review is clicked again.

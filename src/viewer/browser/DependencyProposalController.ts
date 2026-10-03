@@ -3,6 +3,7 @@ import { DependencyDiscoveryService } from "../../core/services/DependencyDiscov
 import { DependencyProposalService } from "../../core/services/DependencyProposalService.ts";
 import { ReviewIdentityAdapter } from "../../adapters/review/ReviewIdentityAdapter.ts";
 import { JsonSnapshotAdapter } from "../../adapters/output/JsonSnapshotAdapter.ts";
+import { SnapshotBudget } from "../../adapters/input/SnapshotBudget.ts";
 import { PlanJsonCodec } from "../../adapters/plan/PlanJsonCodec.ts";
 import { SvgRendererAdapter, escapeXml as esc } from "../../adapters/output/SvgRendererAdapter.ts";
 import { PlanningCoverageMarkup } from "../PlanningCoverageMarkup.ts";
@@ -14,7 +15,7 @@ import { element } from "./Dom.ts";
 export class DependencyProposalController {
   constructor(private readonly analysis: Analysis, private readonly review: DependencyReviewController) {
     element("dependency-candidates").innerHTML = new DependencyProposalMarkup().candidates(analysis, new DependencyDiscoveryService().discover(analysis.dag));
-    element("export-proposal-evidence").addEventListener("click", () => { this.run(() => { this.exportEvidence(); }); });
+    element("export-proposal-evidence").addEventListener("click", () => { void this.exportEvidence().catch((error: unknown) => { this.notice(error); }); });
     element("discover-dependencies").addEventListener("click", () => { this.run(() => {
       const candidates = new DependencyDiscoveryService().discover(analysis.dag);
       element("dependency-candidate-details").setAttribute("open", "");
@@ -38,14 +39,17 @@ export class DependencyProposalController {
     element("proposal-preview").setAttribute("open", "");
   }
 
-  private exportEvidence(): void {
+  private async exportEvidence(): Promise<void> {
     const decisions = this.review.draftDecisions();
     const accepted = new DependencyProposalService().preview(this.analysis, decisions, "accepted");
     const output = new JsonSnapshotAdapter();
-    this.download(JSON.stringify({ schema: "yalikedags/proposal-evidence/1", graphKind: "recorded plus locally accepted candidates; not tracker state",
+    const text = JSON.stringify({ schema: "yalikedags/proposal-evidence/1",
+      sourceVersion: await new ReviewIdentityAdapter().identify(this.analysis), exportedAt: new Date().toISOString(), graphKind: "recorded plus locally accepted candidates; not tracker state",
       candidates: new DependencyDiscoveryService().discover(this.analysis.dag).map(c => ({ blocker: c.blocker, dependent: c.dependent, evidence: c.evidence, confidence: c.confidence })),
       recorded: output.toObject(this.analysis, this.review.current()), accepted: output.toObject(accepted),
-      decisions: decisions.map(d => ({ blocker: d.blocker, dependent: d.dependent, outcome: d.outcome, note: d.note })) }, null, 2), "yalikedags-proposal-evidence.json");
+      decisions: decisions.map(d => ({ blocker: d.blocker, dependent: d.dependent, outcome: d.outcome, note: d.note })) }, null, 2);
+    new SnapshotBudget().parse(text);
+    this.download(text, "yalikedags-proposal-evidence.json");
     element("proposal-notice").textContent = "Evidence bundle exported with original source, local decisions, and the accepted graph analysis. It does not certify tracker writes.";
   }
 
