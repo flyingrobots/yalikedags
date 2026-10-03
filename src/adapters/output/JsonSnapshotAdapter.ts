@@ -3,6 +3,7 @@ import { DependencyReviewCodec } from "../review/DependencyReviewCodec.ts";
 import type { DependencyReview } from "../../core/domain/DependencyReview.ts";
 import type { RendererPort } from "../../ports/RendererPort.ts";
 import { PlanningCoverageAdapter } from "./PlanningCoverageAdapter.ts";
+
 import { SnapshotBudget } from "../input/SnapshotBudget.ts";
 
 export const SNAPSHOT_SCHEMA = "yalikedags/snapshot/2";

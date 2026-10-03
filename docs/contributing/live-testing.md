@@ -103,3 +103,5 @@ Neither deviation applies to the hermetic suite, and neither may leak into it.
 - `N teams have key "..."`: create the team first; the script does not create teams.
 - `two issues ... are titled "..."`: an earlier run half-created the fixture. Archive the duplicate in Linear and re-provision.
 - The suite left relations behind after a crash: run `bun run fixture:provision` again. Reset is idempotent.
+
+The proposal acceptance tier (`YALIKEDAGS_PROPOSAL_LIVE=1`) uses its dedicated `yalikedags-test-proposals` project. An existing project must explicitly belong to the configured fixture team before issue writes. If provisioning does not establish both endpoints, cleanup skips endpoint assertions so the provisioning failure remains the primary diagnostic. Once both endpoints exist, cleanup still removes the relation and description and verifies the baseline.

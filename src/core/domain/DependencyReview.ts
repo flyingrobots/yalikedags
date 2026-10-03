@@ -31,7 +31,7 @@ export class DependencyReview {
     this.decisions = Object.freeze([...(f.decisions ?? [])]);
     const identities = this.decisions.map(decision => ReviewDecision.key(decision.blocker, decision.dependent));
     const scope = new Set(this.taskIds);
-    if (this.decisions.length > 20000 || new Set(identities).size !== identities.length || this.decisions.some(decision => !scope.has(decision.dependent))) { throw new Error("review: invalid decision scope"); }
+    if (new Set(identities).size !== identities.length || this.decisions.some(decision => !scope.has(decision.dependent))) { throw new Error("review: invalid decision scope"); }
     Object.freeze(this);
   }
 
@@ -43,6 +43,7 @@ export class DependencyReview {
   }
 
   private static limits(f: DependencyReviewFields): void {
+    if ((f.decisions?.length ?? 0) > 20000) { throw new Error("review: maximum combined recorded and candidate decisions is 20000; use a smaller capture"); }
     if (f.basis.length > 65536 || f.reviewer.length > 256 || f.taskIds.length > 5000 || f.exceptions.length > 5000) { throw new Error("review: evidence exceeds supported limits"); }
     if (f.exceptions.some(value => !value.trim() || value.length > 65536)) { throw new Error("review: invalid exception"); }
   }

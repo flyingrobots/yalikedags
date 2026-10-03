@@ -6,7 +6,7 @@ An executable Linear issue represents one coherent PR: a reviewable change with 
 
 Atomic means one verifiable outcome, not one file, one layer, or one commit inside the PR. An API change and its consumers may belong together. Conversely, one feature may require several independently mergeable PRs.
 
-This is the planning contract for yalikedags. The current tool analyzes supplied dependency edges and flags possible splits; it does not yet discover dependencies or generate and apply split proposals.
+This is the planning contract for yalikedags. The current tool analyzes supplied dependency edges, discovers bounded local issue-reference candidates for human review, and flags possible splits. General semantic discovery and generating or applying split proposals remain planned.
 
 ## A working state at every merge
 
@@ -56,10 +56,10 @@ Keep a durable link from each executable issue to its PR and resulting mainline 
 
 Given a known-good revision, a known-bad revision, and a reproducible regression check, first-parent bisection can identify the PR that introduced the regression. It identifies an integration boundary, not necessarily the faulty commit within the PR. Green CI only establishes what its checks cover; historical environments, migrations, and external services can also limit reproducibility.
 
-## Planned implementation
+## Implementation and planned extensions
 
-- [Dependency discovery](https://github.com/flyingrobots/yalikedags/issues/20) supplies the missing proposed graph.
-- [Antichain and MECE contracts](https://github.com/flyingrobots/yalikedags/issues/21) define and validate the resulting plan.
+- [Dependency discovery](https://github.com/flyingrobots/yalikedags/issues/20) supplies local issue-reference candidates, reviewed graph previews, and explicit relation-plan export. General semantic discovery remains outside this implementation.
+- [Antichain and MECE contracts](https://github.com/flyingrobots/yalikedags/issues/21) validate coverage and qualify temporary grouping for the resulting plan.
 - [Split proposals](https://github.com/flyingrobots/yalikedags/issues/24) apply this merge-boundary criterion to decomposition.
 - [Reviewed split application](https://github.com/flyingrobots/yalikedags/issues/25) turns approved plans into tracker tasks; generating a proposal alone never writes to Linear.
 

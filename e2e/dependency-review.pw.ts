@@ -28,7 +28,7 @@ test("changed source makes recorded relationship decisions historical", async ({
   await page.goto("http://127.0.0.1:4178/");
   await page.getByRole("button", { name: "Review dependencies", exact: true }).click();
   await page.getByLabel("Review basis", { exact: true }).fill("Consumer needs the schema output.");
-  await page.locator("#dependency-review-form summary").click();
+  await page.getByText("Recorded relationship decisions", { exact: true }).click();
   await page.getByLabel("Decision for a to b", { exact: true }).selectOption("accepted");
   await page.getByRole("button", { name: "Record review", exact: true }).click();
   await expect(page.locator("#dependency-review-status")).toContainText("Reviewed for this source version");
@@ -162,7 +162,7 @@ test("oversized recovery export reports the limit and retains the in-page review
   await page.goto("http://127.0.0.1:4178/");
   await page.getByRole("button", { name: "Review dependencies", exact: true }).click();
   await page.getByLabel("Review basis", { exact: true }).fill("Retain this review evidence");
-  await page.locator("#dependency-review-form summary").click();
+  await page.getByText("Recorded relationship decisions", { exact: true }).click();
   await page.locator("[data-review-note]").evaluateAll(notes => {
     notes.forEach(note => { if (note instanceof HTMLInputElement) { note.value = "n".repeat(60000); } });
   });

@@ -1,6 +1,6 @@
 # Plan and receipt JSON
 
-A plan is written by `plan --out <file>` or `plan --json`, and read by `apply --plan <file>`. Schema id `yalikedags/plan/1`. Encoded and decoded in `src/adapters/plan/PlanJsonCodec.ts`; the mutation classes are in `src/core/domain/Mutation.ts`.
+A plan is written by `plan --out <file>` or `plan --json`, and read by `apply --plan <file>`. Ordinary plans use schema `yalikedags/plan/1`; evidence-guarded proposals use `yalikedags/plan/2`. Encoded and decoded in `src/adapters/plan/PlanJsonCodec.ts`; the mutation classes are in `src/core/domain/Mutation.ts`.
 
 ## Plan
 
@@ -110,3 +110,11 @@ Written by `apply --confirm --receipt <file>`.
 `stale` is not `skipped`: nobody chose it, and it means the plan no longer describes the source. Plan again rather than passing another flag.
 
 `apply --confirm` exits `0` when `complete` is true and `8` otherwise.
+
+## Plans exported from dependency review
+
+The viewer downloads accepted candidate additions in schema `yalikedags/plan/2`. Older CLIs refuse this schema instead of silently dropping its freshness guard. The plan model rejects all mutation kinds except `add-blocking-relation` when a prerequisite guard is present, including hand-edited removals, estimates, and milestones. These plans contain only `add-blocking-relation` mutations, the captured Linear project ID, and a required `prerequisiteVersion` SHA-256 field. Before obtaining a writer, `apply` compares this identity against a fresh capture of prerequisite evidence. Changed task keys, titles, descriptions, statuses, scope, hierarchy, labels, relations, warnings, or project/workspace identity refuse the plan with `stale_proposal`. Capture time, assignment, priority, and estimates do not change prerequisite evidence.
+
+This check is not a tracker transaction: concurrent edits after the read remain possible. The existing cycle checks and final verification still apply. An incomplete receipt is never success. Since a successful or partially successful apply changes the evidence, capture and review again before retrying a guarded proposal plan. Legacy schema `/1` plans retain their existing mutation preconditions. The decoder rejects a `/1` document containing `prerequisiteVersion` and a `/2` document missing it; changing only the schema cannot silently disable the guard.
+
+The prerequisite version is an evidence-freshness check, not a signature or authentication of the mutation list. A person can edit a `/2` file to propose different additions; the CLI still enforces source freshness, additions-only scope, cycle safety, and post-write verification, but cannot attest that those additions came from saved viewer decisions. Inspect the exact file passed to `apply --confirm`; never treat its hash as approval of its contents.

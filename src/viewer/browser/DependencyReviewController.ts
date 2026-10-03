@@ -32,6 +32,7 @@ export class DependencyReviewController {
     } catch { this.notice("Saved review could not be read. Captured review evidence, if present, is shown instead."); }
     this.render();
     element("review-dependencies").addEventListener("click", () => {
+      if (!element("dependency-review-form").hidden) { this.field("review-basis").focus(); return; }
       element("dependency-review-form").hidden = false;
       this.field("review-basis").value = this.review?.basis ?? "";
       this.field("review-exceptions").value = this.review?.exceptions.join("\n") ?? "";
@@ -57,7 +58,7 @@ export class DependencyReviewController {
     const known = new DependencyReviewService().knownExceptions(this.analysis);
     const exceptions = [...new Set([...this.field("review-exceptions").value.split("\n").map(value => value.trim()).filter(Boolean), ...known])];
     const review = new DependencyReview({ sourceVersion: this.sourceVersion, taskIds: this.analysis.dag.tasks.map(task => task.id),
-      basis: this.field("review-basis").value.trim(), exceptions, reviewedAt: new Date().toISOString(), reviewer: this.field("reviewer-name").value.trim(), decisions: this.decisions() });
+      basis: this.field("review-basis").value.trim(), exceptions, reviewedAt: new Date().toISOString(), reviewer: this.field("reviewer-name").value.trim(), decisions: this.draftDecisions() });
     const text = JSON.stringify(this.codec.encode(review));
     new SnapshotBudget().parse(text);
     this.review = review; this.origin = "Local review record (self-reported)";
@@ -79,18 +80,19 @@ export class DependencyReviewController {
   }
 
   private render(): void {
-    const status = new DependencyReviewService().state(this.review, this.sourceVersion, this.analysis);
+    const service = new DependencyReviewService();
+    const status = service.state(this.review, this.sourceVersion, this.analysis);
     const heading = document.createElement("strong");
     heading.textContent = { unreviewed: "Dependency review is incomplete.", reviewed: "Reviewed for this source version", exceptions: "Reviewed with exceptions", stale: "Dependency review is stale" }[status];
     const target = element("dependency-review-status");
     target.replaceChildren(heading);
     this.paragraph("A review records evidence checked for this scope; it does not prove that every real-world dependency was discovered.");
     if (this.review === undefined) { return; }
-    const service = new DependencyReviewService();
-    const exceptions = [...new Set([...this.review.exceptions, ...service.knownExceptions(this.analysis), ...service.outsideDecisions(this.review, this.analysis)])];
+    const exceptions = [...new Set([...this.review.exceptions, ...service.knownExceptions(this.analysis), ...service.outsideDecisions(this.review, this.analysis), ...service.candidateExceptions(this.review, this.analysis)])];
     const decisions = [...this.review.decisions, ...service.missingDecisions(this.review, this.analysis)];
-    const undecided = decisions.filter(decision => decision.outcome !== "accepted").length;
-    this.paragraph(`${String(this.review.taskIds.length)} captured tasks · ${String(exceptions.length)} exceptions · ${String(undecided)} rejected or unreviewed relationships.`);
+    const rejectedCandidates = service.completedCandidateRejections(this.review, this.analysis);
+    const undecided = decisions.filter(decision => decision.outcome !== "accepted").length - rejectedCandidates;
+    this.paragraph(`${String(this.review.taskIds.length)} captured tasks · ${String(exceptions.length)} exceptions · ${String(undecided)} rejected or unreviewed relationships. ${String(rejectedCandidates)} candidate rejections completed.`);
     if (status === "stale") { this.paragraph("Task scope or prerequisite evidence changed. Previous decisions are historical; review this capture again before relying on them."); }
     const details = document.createElement("details");
     const summary = document.createElement("summary"); summary.textContent = "Review evidence, scope and exceptions";
@@ -100,20 +102,29 @@ export class DependencyReviewController {
     this.paragraph(`${this.origin}. ${this.review.reviewer} · ${this.review.reviewedAt}.`, details);
     this.paragraph(`Basis: ${this.review.basis}`, details);
     for (const exception of exceptions) { this.paragraph(`Unresolved exception: ${exception}`, details); }
-    if (status === "exceptions") { this.paragraph("Resolve listed exceptions and review every recorded relationship before claiming complete coverage.", details); }
+    if (status === "exceptions") { this.paragraph("Resolve listed exceptions and review every recorded relationship and discovered candidate before claiming complete coverage.", details); }
     for (const decision of decisions) {
       const row = document.createElement("p"); row.textContent = `${decision.blocker} → ${decision.dependent}: ${decision.outcome}${status === "stale" ? " (historical)" : ""}. ${decision.note}`; details.append(row);
     }
     target.append(details);
   }
 
-  private decisions(): ReviewDecision[] {
+  draftDecisions(): ReviewDecision[] {
+    if (element("dependency-review-form").hidden) {
+      const current = new DependencyReviewService().state(this.review, this.sourceVersion, this.analysis) !== "stale";
+      return current ? [...this.review?.decisions ?? []] : [];
+    }
     return [...document.querySelectorAll<HTMLSelectElement>("[data-review-edge]")].map(control => {
       const outcome = control.value;
       if (outcome !== "accepted" && outcome !== "rejected" && outcome !== "unreviewed") { throw new Error("Invalid relationship decision"); }
       const note = control.closest("li")?.querySelector<HTMLInputElement>("[data-review-note]")?.value ?? "";
+      this.requireCandidateNote(control, note);
       return new ReviewDecision({ blocker: control.dataset["blocker"] ?? "", dependent: control.dataset["dependent"] ?? "", outcome, note });
     });
+  }
+
+  private requireCandidateNote(control: HTMLSelectElement, note: string): void {
+    if (control.hasAttribute("data-candidate") && control.value !== "unreviewed" && !note.trim()) { throw new Error("Candidate decisions require an evidence and direction rationale."); }
   }
 
   private restoreDecisions(): void {

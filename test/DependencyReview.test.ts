@@ -1,4 +1,5 @@
-import { expect, test } from "bun:test";
+import { DependencyDiscoveryService } from "../src/core/services/DependencyDiscoveryService.ts";
+import { expect, test, spyOn } from "bun:test";
 import { ReviewDecision } from "../src/core/domain/ReviewDecision.ts";
 import { Task } from "../src/core/domain/Task.ts";
 import { DependencyReview } from "../src/core/domain/DependencyReview.ts";
@@ -135,4 +136,36 @@ test("viewer uncertainty is derived from task facts instead of embedded derived 
     expect(await identity.identify(decoded.analysis)).toBe(version);
     expect(service.state(decoded.analysis.review, version, decoded.analysis)).toBe("exceptions");
   }
+});
+
+test("combined recorded and candidate decision overflow gives a capacity recovery message", () => {
+  const decisions = Array.from({ length: 20001 }, (_, i) => new ReviewDecision({ blocker: String(i), dependent: "consumer", outcome: "unreviewed", note: "" }));
+  expect(() => new DependencyReview({ sourceVersion: "a".repeat(64), taskIds: ["consumer"], basis: "Read captured requirements", exceptions: [],
+    reviewedAt: "2026-10-02", reviewer: "Example", decisions })).toThrow("review: maximum combined recorded and candidate decisions is 20000; use a smaller capture");
+});
+
+test("one review service scans immutable capture text once across coverage disclosures", async () => {
+  const record = review(await identity.identify(original));
+  const coverage = new DependencyReviewService();
+  const scan = spyOn(DependencyDiscoveryService.prototype, "scan");
+  try {
+    coverage.state(record, record.sourceVersion, original);
+    coverage.knownExceptions(original);
+    coverage.outsideDecisions(record, original);
+    coverage.candidateExceptions(record, original);
+    coverage.completedCandidateRejections(record, original);
+    coverage.missingDecisions(record, original);
+    expect(scan).toHaveBeenCalledTimes(1);
+    const changed = analyzer.analyse([task, consumer.with({ description: "New requirements" })], "synthetic");
+    coverage.knownExceptions(changed);
+    expect(scan).toHaveBeenCalledTimes(2);
+  } finally { scan.mockRestore(); }
+});
+
+test("key-aware prerequisite identity uses the version-two canonical hash contract", async () => {
+  const capture = analyzer.analyse([new Task({ id: "a", key: "DEMO-1", title: "Output" })], "synthetic");
+  const canonical = '{"schema":"yalikedags/review-source/2","workspace":null,"project":null,"warnings":[],"tasks":[{"id":"a","key":"DEMO-1","title":"Output","description":"","status":"open","blockedBy":[],"parent":null,"children":[],"labels":[]}]}';
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(canonical));
+  const expected = [...new Uint8Array(digest)].map(value => value.toString(16).padStart(2, "0")).join("");
+  expect(await identity.identify(capture)).toBe(expected);
 });

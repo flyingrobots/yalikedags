@@ -20,7 +20,7 @@ The write path does not change that ownership; it is how a file-held graph gets 
 ## Consequences
 
 - To add a dependency, add the relation in Linear (M then B on the blocked card). The next sync shows it.
-- Only captured prerequisite relations can be analyzed. If Linear removes or reclassifies a relation, the next capture no longer proves that obligation existed; dependency review must resolve that uncertainty. A remaining edge to completed work is a `stale-blocker` finding. A remaining edge to canceled work is an unresolved `canceled-blocker`, not evidence that the required output exists.
+- The main viewer analyzes captured prerequisite relations. A separate proposed/accepted preview can analyze locally reviewed candidates without changing the source. If Linear removes or reclassifies a relation, the next capture no longer proves that obligation existed; dependency review must resolve that uncertainty. A remaining edge to completed work is a `stale-blocker` finding. A remaining edge to canceled work is an unresolved `canceled-blocker`, not evidence that the required output exists.
 - Effort preserves Linear's estimate field exactly, including values above three and fractions. The team controls its scale. Effort-based paths sum these values without converting them to durations or normalizing different team scales.
 - Workstreams are computed, not assigned. A milestone can be pushed from a desired graph's own `milestone` field, or from a task-dag node's `group` with `--groups-as-milestones`, but the tool never invents a milestone name from a computed workstream id, and it never creates a milestone that does not already exist.
 - Status, assignee, priority and title have no method on the writer port at all, so no plan can contain them. Ownership is enforced by the shape of the interface rather than by remembering.
@@ -29,4 +29,4 @@ The write path does not change that ownership; it is how a file-held graph gets 
 
 A shared overlay store (a git-warp graph in a dedicated bare repository) was designed for edge history, resources, and an offline outbox, and set aside once it was clear Linear can carry the edges. It remains the answer if a need appears that Linear cannot express.
 
-An offline outbox was considered for the write path and left out: every queued write has exactly one destination, so a failed `apply` needs no log to recover from. Re-running the plan is the recovery, which is why every mutation reads before it writes.
+An offline outbox was considered for the write path and left out: every queued write has exactly one destination, so a failed `apply` needs no log to recover from. Legacy mutation plans can be rerun because every mutation reads before it writes. Evidence-guarded proposal plans instead require a fresh capture and review after any source change, including partial application.

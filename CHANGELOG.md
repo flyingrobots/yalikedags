@@ -4,6 +4,36 @@ All notable changes to this project are documented here. The format follows Keep
 
 ## [Unreleased]
 
+- Discover bounded issue-reference dependency candidates locally in stable task-identity order, retain bounded cited evidence and human dispositions, preview proposed/accepted graph plans, and export evidence plus accepted relation plans. Disclose exhausted discovery and rationale-free acceptance as review exceptions. Reject stale-scope or rationale-free imported acceptances at plan export and keep stale-scope decisions out of accepted previews, check fresh prerequisite evidence before CLI writeback and verify the actual tracker result through the existing receipt path.
+
+- Version key-aware prerequisite hashes as review-source/2. Earlier saved/imported reviews become stale and require a new review; old guarded proposal plans must be regenerated.
+
+- Mark only genuinely omitted sides of bounded candidate evidence excerpts.
+
+- Disclose omitted candidate pairs in the discovery notice and list header before a review is saved.
+
+- Keep hedged, conditional, historical, and unpunctuated-question references uncertain during local discovery.
+
+- Distinguish an exact candidate ceiling from omitted pairs and continue scanning to strengthen retained evidence after the limit.
+
+- Show candidate blocker status and explicitly disclose that accepting a canceled prerequisite leaves its dependent unresolved.
+
+- Count rejected candidates as completed dispositions in review summaries while keeping rejected recorded relationships unresolved.
+
+- Explain the combined recorded/candidate review decision limit and smaller-capture recovery instead of reporting an invalid scope.
+
+- Bound complete proposal evidence bundles and include source-version and export-time provenance even for unsaved decisions; export failures retain the current draft.
+
+- Recompute dependency candidates from saved source text instead of duplicating quotes in ordinary snapshots; retain explicit quotes in proposal evidence bundles.
+
+- Preserve unsaved dependency review decisions and evidence when Discover or Review is clicked again.
+
+- Keep negated contractions, questions, and word-suffix matches uncertain during local dependency discovery.
+
+- Enforce additions-only mutations in guarded proposal plans, including hand-edited input, while retaining ordinary reconciliation plans.
+
+- Version evidence-guarded proposal plans separately so older CLIs refuse them instead of silently omitting the prerequisite freshness check.
+
 - Validate exact Kahn wave positions, planning coverage, and the displayed wave grid against the captured graph, expose unresolved work separately from shared prerequisites and temporary workstreams, and retain exact topology/state evidence in snapshot exports. Bound additive planning evidence separately from captured data so previously admissible large exports remain usable. Reuse computed waves for shared prerequisites and groups while retaining independent boundary validation. Preserve full-analysis task state when filtering the displayed graph.
 
 - Record a manual dependency review with explicit source scope, evidence basis, relationship dispositions, and unresolved exceptions. Recompute structural uncertainty from captured task facts even when imported claims or derived metadata omit it. Refuse unreopenable combined review exports and served viewer payloads with visible recovery limits, including derived HTML snapshot data. Disclose missing relationship decisions and out-of-capture claims explicitly. Detect changed prerequisite evidence, distinguish local records from imported claims, preserve reviews in full exports, and omit them from structure-only exports.

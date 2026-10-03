@@ -238,3 +238,7 @@ Required tests run automatically before integration. A failure blocks, names an 
 19. CI gates on hermetic suites, calibration evidence, and crash findings; never on coverage percentages, mutation scores, or anything retriable into green.
 
 A good test, in one sentence, is a deterministic, self-contained experiment that fails if and only if a stated promise is broken, and whose failure names the promise. Do not count tests. Account for claims, counterexamples, and blind spots.
+
+### Isolated proposal acceptance
+
+`YALIKEDAGS_PROPOSAL_LIVE=1 bun test test/live/DependencyProposals.live.test.ts` exercises description discovery, review, plan codec, CLI dry-run/apply, and a fresh verified Linear relation. It uses the dedicated `YALIKEDAGS_LIVE_KEY` credential and `YALIKEDAGS_LIVE_TEAM` existing team. It creates only the `yalikedags-test-proposals` project and two `yld-fixture proposal` cards, refuses unexpected cards, changes no team settings, and resets its relation and synthetic description after the test. Run through Docker with credentials passed via stdin, never committed or printed. Ordinary tests skip this tier.
