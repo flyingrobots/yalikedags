@@ -142,3 +142,11 @@ test("bounded discovery is invariant to capture task order", async () => {
   expect(candidates).toHaveLength(2000);
   expect(discover.discover(reversed.dag).map(c => [c.blocker, c.dependent])).toEqual(candidates.map(c => [c.blocker, c.dependent]));
 });
+
+test("candidate excerpts retain the reference within the documented length limit", () => {
+  // oracle: truncation markers count toward the excerpt bound without removing the cited issue key.
+  const long = analyzer.analyse([new Task({ id: "a", key: "DEMO-1", title: "Schema" }), new Task({ id: "b", title: "Consumer", description: `${"x".repeat(500)} Requires DEMO-1 ${"y".repeat(1000)}` })], "synthetic");
+  const candidate = new DependencyDiscoveryService().discover(long.dag)[0];
+  expect(candidate?.evidence).toContain("DEMO-1");
+  expect(candidate?.evidence.length).toBeLessThanOrEqual(1024);
+});

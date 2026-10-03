@@ -39,6 +39,6 @@ export class DependencyDiscoveryService {
     const before = context.line.slice(0, context.referenceAt);
     // Negation and reverse direction deliberately remain uncertain. Human acceptance always supplies the final rationale.
     const explicit = /(?:requires?|depends? on|blocked by|needs?)\s*$/i.test(before.trim()) && !/\b(?:not|no|never|without|unrelated)\b/i.test(context.line);
-    return new DependencyCandidate({ blocker: blocker.id, dependent: dependent.id, evidence: context.line.length > 1024 ? `…${context.line.slice(Math.max(0, context.referenceAt - 256), context.referenceAt + 768)}…` : context.line.trim(), confidence: explicit ? "explicit" : "uncertain" });
+    return new DependencyCandidate({ blocker: blocker.id, dependent: dependent.id, evidence: context.line.length > 1024 ? `…${context.line.slice(Math.max(0, context.referenceAt - 256), context.referenceAt + 766)}…` : context.line.trim(), confidence: explicit ? "explicit" : "uncertain" });
   }
 }
