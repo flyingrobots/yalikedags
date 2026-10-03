@@ -91,3 +91,23 @@ test("full exports carry a review claim while structure-only exports omit it", a
   await expect(page.locator("#dependency-review-status")).toContainText("Imported review claim (self-reported)");
   await expect(page.locator("#dependency-review-status")).toContainText("Reviewed with exceptions");
 });
+
+test("imported review cannot hide known source uncertainty", async ({ page }) => {
+  // oracle: source-matching self-reported metadata cannot override an unresolved canceled output.
+  const { Task } = await import("../src/core/domain/Task.ts");
+  const { AnalysisService } = await import("../src/core/services/AnalysisService.ts");
+  const { DependencyReview } = await import("../src/core/domain/DependencyReview.ts");
+  const { ReviewDecision } = await import("../src/core/domain/ReviewDecision.ts");
+  const { ReviewIdentityAdapter } = await import("../src/adapters/review/ReviewIdentityAdapter.ts");
+  const { ViewerData } = await import("../src/viewer/ViewerData.ts");
+  const analyzer = new AnalysisService({ today: (): string => "2026-10-02" });
+  const tasks = [new Task({ id: "a", title: "Canceled output", status: "canceled" }), new Task({ id: "b", title: "Consumer", blockedBy: ["a"] })];
+  const source = analyzer.analyse(tasks, "Imported uncertainty");
+  const review = new DependencyReview({ sourceVersion: await new ReviewIdentityAdapter().identify(source), taskIds: ["a", "b"], basis: "Claimed complete", exceptions: [], reviewer: "Imported reviewer", reviewedAt: "2026-10-02",
+    decisions: [new ReviewDecision({ blocker: "a", dependent: "b", outcome: "accepted", note: "Claimed valid" })] });
+  const data = new ViewerData().render(analyzer.analyse(tasks, "Imported uncertainty", { review }));
+  await page.route("**/viewer.json", route => route.fulfill({ contentType: "application/json", body: data }));
+  await page.goto("http://127.0.0.1:4178/");
+  await expect(page.locator("#dependency-review-status")).toContainText("Reviewed with exceptions");
+  await expect(page.locator("#dependency-review-status")).not.toContainText("Reviewed for this source version");
+});
