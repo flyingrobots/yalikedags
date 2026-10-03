@@ -305,7 +305,7 @@ Under **Preview and export proposals**, choose Recorded, Proposed, or Recorded +
 
 **Download proposal evidence** retains the source snapshot, candidate provenance, current dispositions, and accepted graph analysis in an audit bundle (`yalikedags/proposal-evidence/1`). It is an evidence document, not a tracker receipt or a snapshot import. A full ordinary snapshot retains candidate evidence and the saved review; structure-only exports omit identifying text and review claims. Unsaved form choices belong only to the evidence bundle until the review is recorded.
 
-**Download accepted relation plan** requires a recorded current review and a captured Linear project. It exports only saved accepted additions and refuses newly cyclic plans. Inspect that exact plan, then use the existing CLI:
+**Download accepted relation plan** requires a recorded current review and a captured Linear project. It exports only saved accepted additions with an evidence/direction rationale, refuses stale source or task scope, and refuses newly cyclic plans. Other unresolved candidates can remain explicit exceptions; exporting accepted additions does not claim the whole review is complete. Inspect that exact plan, then use the existing CLI:
 
 ```sh
 bun src/cli.ts apply --plan yalikedags-accepted-relations.json

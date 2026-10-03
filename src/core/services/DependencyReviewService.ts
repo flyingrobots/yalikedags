@@ -18,7 +18,14 @@ export class DependencyReviewService {
     const candidates = new Set(discovered.map(c => ReviewDecision.key(c.blocker, c.dependent)));
     const required = new Set([...recorded, ...candidates]);
     if (required.size !== review.decisions.length || review.decisions.some(decision => !required.has(ReviewDecision.key(decision.blocker, decision.dependent)))) { return "exceptions"; }
-    return review.exceptions.length > 0 || review.decisions.some(decision => decision.outcome === "unreviewed" || (decision.outcome === "rejected" && recorded.has(ReviewDecision.key(decision.blocker, decision.dependent)))) ? "exceptions" : "reviewed";
+    return review.exceptions.length > 0 || review.decisions.some(decision => this.incompleteDecision(decision, recorded, candidates)) ? "exceptions" : "reviewed";
+  }
+
+  private incompleteDecision(decision: ReviewDecision, recorded: ReadonlySet<string>, candidates: ReadonlySet<string>): boolean {
+    if (decision.outcome === "unreviewed") { return true; }
+    const key = ReviewDecision.key(decision.blocker, decision.dependent);
+    if (decision.outcome === "rejected") { return recorded.has(key); }
+    return candidates.has(key) && !decision.note.trim();
   }
 
   private sameScope(review: DependencyReview, analysis: Analysis): boolean {

@@ -106,3 +106,19 @@ test("proposal receipts retain failed verification and ambiguous write outcomes"
   expect(failed.verified).toBe(false);
   expect(failed.complete).toBe(false);
 });
+
+test("imported same-hash incomplete scope cannot export an accepted plan", async () => {
+  // oracle: the review lifecycle's stale scope must also block the plan-export boundary.
+  const version = await new ReviewIdentityAdapter().identify(analysis);
+  const partial = new DependencyReview({ sourceVersion: version, taskIds: ["b"], basis: "Imported partial claim", exceptions: [], reviewer: "Fixture", reviewedAt: "2026-10-02", decisions: [accepted] });
+  expect(new DependencyReviewService().state(partial, version, analysis)).toBe("stale");
+  expect(() => new DependencyProposalService().plan(analysis, partial, version)).toThrow("stale");
+});
+
+test("imported accepted candidate requires an evidence and direction rationale", async () => {
+  // oracle: importing a claim cannot bypass the human evidence required by candidate acceptance.
+  const empty = new ReviewDecision({ blocker: "a", dependent: "b", outcome: "accepted", note: "" });
+  const record = await review([empty]);
+  expect(new DependencyReviewService().state(record, record.sourceVersion, analysis)).toBe("exceptions");
+  expect(() => new DependencyProposalService().plan(analysis, record, record.sourceVersion)).toThrow("rationale");
+});

@@ -4,7 +4,7 @@ All notable changes to this project are documented here. The format follows Keep
 
 ## [Unreleased]
 
-- Discover bounded issue-reference dependency candidates locally, retain cited evidence and human dispositions, preview proposed/accepted graph plans, and export evidence plus accepted relation plans. Check fresh prerequisite evidence before CLI writeback and verify the actual tracker result through the existing receipt path.
+- Discover bounded issue-reference dependency candidates locally, retain cited evidence and human dispositions, preview proposed/accepted graph plans, and export evidence plus accepted relation plans. Reject stale-scope or rationale-free imported acceptances at plan export, check fresh prerequisite evidence before CLI writeback and verify the actual tracker result through the existing receipt path.
 
 - Validate planning coverage and the displayed wave grid against the captured graph, expose unresolved work separately from shared prerequisites and temporary workstreams, and retain exact topology/state evidence in snapshot exports. Preserve full-analysis task state when filtering the displayed graph.
 
