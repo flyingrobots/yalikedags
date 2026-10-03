@@ -4,6 +4,8 @@ All notable changes to this project are documented here. The format follows Keep
 
 ## [Unreleased]
 
+- Count rejected candidates as completed dispositions in review summaries while keeping rejected recorded relationships unresolved.
+
 - Explain the combined recorded/candidate review decision limit and smaller-capture recovery instead of reporting an invalid scope.
 
 - Bound complete proposal evidence bundles and include source-version and export-time provenance even for unsaved decisions; export failures retain the current draft.

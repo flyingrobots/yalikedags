@@ -50,6 +50,11 @@ export class DependencyReviewService {
       .map(decision => `${decision.blocker} → ${decision.dependent}: accepted candidate lacks an evidence and direction rationale.`);
   }
 
+  completedCandidateRejections(review: DependencyReview, analysis: Analysis): number {
+    const candidates = new Set(new DependencyDiscoveryService().discover(analysis.dag).map(edge => ReviewDecision.key(edge.blocker, edge.dependent)));
+    return review.decisions.filter(decision => decision.outcome === "rejected" && candidates.has(ReviewDecision.key(decision.blocker, decision.dependent))).length;
+  }
+
   missingDecisions(review: DependencyReview, analysis: Analysis): ReviewDecision[] {
     const decisions = new Set(review.decisions.map(decision => ReviewDecision.key(decision.blocker, decision.dependent)));
     return this.requiredDecisions(analysis).filter(decision => !decisions.has(ReviewDecision.key(decision.blocker, decision.dependent)));

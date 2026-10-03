@@ -142,3 +142,16 @@ test("oversized evidence bundle is refused while the draft remains available", a
   await expect(page.getByLabel("Review basis", { exact: true })).toHaveValue("Draft evidence to retain.");
   expect(downloads).toBe(0);
 });
+
+test("rejecting a candidate completes its disposition without reporting an unresolved relationship", async ({ page }) => {
+  await page.route("**/viewer.json", route => route.fulfill({ contentType: "application/json", body: new ViewerData().render(analysis) }));
+  await page.goto("http://127.0.0.1:4178");
+  await page.locator("#discover-dependencies").click();
+  await page.locator("[data-candidate]").selectOption("rejected");
+  await page.locator("#dependency-candidates [data-review-note]").fill("The referenced output is already available externally.");
+  await page.getByLabel("Review basis", { exact: true }).fill("Verified the output and reviewed direction.");
+  await page.getByRole("button", { name: "Record review", exact: true }).click();
+  await expect(page.locator("#dependency-review-status")).toContainText("Reviewed for this source version");
+  await expect(page.locator("#dependency-review-status")).toContainText("0 rejected or unreviewed relationships");
+  await expect(page.locator("#dependency-review-status")).toContainText("1 candidate rejections completed");
+});

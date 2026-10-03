@@ -90,8 +90,9 @@ export class DependencyReviewController {
     const service = new DependencyReviewService();
     const exceptions = [...new Set([...this.review.exceptions, ...service.knownExceptions(this.analysis), ...service.outsideDecisions(this.review, this.analysis), ...service.candidateExceptions(this.review, this.analysis)])];
     const decisions = [...this.review.decisions, ...service.missingDecisions(this.review, this.analysis)];
-    const undecided = decisions.filter(decision => decision.outcome !== "accepted").length;
-    this.paragraph(`${String(this.review.taskIds.length)} captured tasks · ${String(exceptions.length)} exceptions · ${String(undecided)} rejected or unreviewed relationships.`);
+    const rejectedCandidates = service.completedCandidateRejections(this.review, this.analysis);
+    const undecided = decisions.filter(decision => decision.outcome !== "accepted").length - rejectedCandidates;
+    this.paragraph(`${String(this.review.taskIds.length)} captured tasks · ${String(exceptions.length)} exceptions · ${String(undecided)} rejected or unreviewed relationships. ${String(rejectedCandidates)} candidate rejections completed.`);
     if (status === "stale") { this.paragraph("Task scope or prerequisite evidence changed. Previous decisions are historical; review this capture again before relying on them."); }
     const details = document.createElement("details");
     const summary = document.createElement("summary"); summary.textContent = "Review evidence, scope and exceptions";
