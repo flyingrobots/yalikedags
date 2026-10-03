@@ -104,3 +104,13 @@ test("grid validation rejects duplicated and misplaced members", async () => {
   }
   expect(() => new PlanningCoverage({ ...fields, grid: a.grid })).not.toThrow();
 });
+
+test("imported planning cannot delay ready work beyond its Kahn layer", async () => {
+  // oracle: a valid topological partition is insufficient when the viewer claims earliest dependency waves.
+  const { PlanningCoverage } = await import("../src/core/services/PlanningCoverage.ts");
+  const { GridService } = await import("../src/core/services/GridService.ts");
+  const a = analyzer.analyse([task("a"), task("b", ["a"]), task("c")], "synthetic");
+  const waves = [["a"], ["c"], ["b"]];
+  const grid = new GridService().grid(waves, a.gatekeepers, a.workstreams);
+  expect(() => { new PlanningCoverage({ dag: a.dag, grid, waves, shared: a.gatekeepers, workstreams: a.workstreams }); }).toThrow("Kahn layers");
+});
