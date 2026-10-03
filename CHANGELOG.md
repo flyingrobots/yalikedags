@@ -4,6 +4,8 @@ All notable changes to this project are documented here. The format follows Keep
 
 ## [Unreleased]
 
+- Keep negated contractions, questions, and word-suffix matches uncertain during local dependency discovery.
+
 - Enforce additions-only mutations in guarded proposal plans, including hand-edited input, while retaining ordinary reconciliation plans.
 
 - Version evidence-guarded proposal plans separately so older CLIs refuse them instead of silently omitting the prerequisite freshness check.

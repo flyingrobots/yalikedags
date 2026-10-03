@@ -151,3 +151,11 @@ test("candidate excerpts retain the reference within the documented length limit
   expect(candidate?.evidence).toContain("DEMO-1");
   expect(candidate?.evidence.length).toBeLessThanOrEqual(1024);
 });
+
+test("negated contractions, questions, and word suffixes never claim explicit prerequisite evidence", () => {
+  // Oracle: these sentences mention a key but do not affirm a prerequisite.
+  for (const description of ["Doesn't require DEMO-1", "Doesn’t require DEMO-1", "Cannot require DEMO-1", "Can't require DEMO-1", "Would this require DEMO-1?", "Requires DEMO-1?", "Prerequires DEMO-1"]) {
+    const capture = analyzer.analyse(tasks.map(t => t.id === "b" ? t.with({ description }) : t), "synthetic");
+    expect(new DependencyDiscoveryService().discover(capture.dag)[0]).toMatchObject({ evidence: description, confidence: "uncertain" });
+  }
+});
