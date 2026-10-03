@@ -27,4 +27,16 @@ export class DependencyReviewService {
       ...analysis.dag.tasks.filter(task => states.get(task.id) === "unresolved").map(task => `Unresolved task: ${task.key}`)])];
   }
 
+  missingDecisions(review: DependencyReview, analysis: Analysis): ReviewDecision[] {
+    const decisions = new Set(review.decisions.map(decision => ReviewDecision.key(decision.blocker, decision.dependent)));
+    return analysis.dag.tasks.flatMap(task => task.blockedBy.filter(blocker => !decisions.has(ReviewDecision.key(blocker, task.id)))
+      .map(blocker => new ReviewDecision({ blocker, dependent: task.id, outcome: "unreviewed", note: "No decision recorded for this captured relationship." })));
+  }
+
+  outsideDecisions(review: DependencyReview, analysis: Analysis): string[] {
+    const recorded = new Set(analysis.dag.tasks.flatMap(task => task.blockedBy.map(blocker => ReviewDecision.key(blocker, task.id))));
+    return review.decisions.filter(decision => !recorded.has(ReviewDecision.key(decision.blocker, decision.dependent)))
+      .map(decision => `${decision.blocker} → ${decision.dependent}: decision is outside the recorded relationships in this capture.`);
+  }
+
 }

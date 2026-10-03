@@ -86,8 +86,10 @@ export class DependencyReviewController {
     target.replaceChildren(heading);
     this.paragraph("A review records evidence checked for this scope; it does not prove that every real-world dependency was discovered.");
     if (this.review === undefined) { return; }
-    const exceptions = [...new Set([...this.review.exceptions, ...new DependencyReviewService().knownExceptions(this.analysis)])];
-    const undecided = this.review.decisions.filter(decision => decision.outcome !== "accepted").length;
+    const service = new DependencyReviewService();
+    const exceptions = [...new Set([...this.review.exceptions, ...service.knownExceptions(this.analysis), ...service.outsideDecisions(this.review, this.analysis)])];
+    const decisions = [...this.review.decisions, ...service.missingDecisions(this.review, this.analysis)];
+    const undecided = decisions.filter(decision => decision.outcome !== "accepted").length;
     this.paragraph(`${String(this.review.taskIds.length)} captured tasks · ${String(exceptions.length)} exceptions · ${String(undecided)} rejected or unreviewed relationships.`);
     if (status === "stale") { this.paragraph("Task scope or prerequisite evidence changed. Previous decisions are historical; review this capture again before relying on them."); }
     const details = document.createElement("details");
@@ -99,7 +101,7 @@ export class DependencyReviewController {
     this.paragraph(`Basis: ${this.review.basis}`, details);
     for (const exception of exceptions) { this.paragraph(`Unresolved exception: ${exception}`, details); }
     if (status === "exceptions") { this.paragraph("Resolve listed exceptions and review every recorded relationship before claiming complete coverage.", details); }
-    for (const decision of this.review.decisions) {
+    for (const decision of decisions) {
       const row = document.createElement("p"); row.textContent = `${decision.blocker} → ${decision.dependent}: ${decision.outcome}${status === "stale" ? " (historical)" : ""}. ${decision.note}`; details.append(row);
     }
     target.append(details);

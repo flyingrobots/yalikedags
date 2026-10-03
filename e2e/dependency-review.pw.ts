@@ -175,3 +175,26 @@ test("oversized recovery export reports the limit and retains the in-page review
   await expect(page.locator("#export-warning")).toContainText("snapshot_limit");
   await expect(page.locator("#dependency-review-status")).toContainText("Retain this review evidence");
 });
+
+for (const partial of [false, true]) {
+  test(`imported ${partial ? "partial" : "empty"} decisions disclose every missing relationship`, async ({ page }) => {
+    // oracle: absent dispositions remain visible unreviewed obligations, while extraneous claims are explained.
+    const { Task } = await import("../src/core/domain/Task.ts");
+    const { AnalysisService } = await import("../src/core/services/AnalysisService.ts");
+    const { DependencyReview } = await import("../src/core/domain/DependencyReview.ts");
+    const { ReviewDecision } = await import("../src/core/domain/ReviewDecision.ts");
+    const { ReviewIdentityAdapter } = await import("../src/adapters/review/ReviewIdentityAdapter.ts");
+    const { ViewerData } = await import("../src/viewer/ViewerData.ts");
+    const tasks = [new Task({ id: "a", title: "Schema" }), new Task({ id: "b", title: "Consumer", blockedBy: ["a"] }), new Task({ id: "c", title: "Other consumer", blockedBy: ["a"] })];
+    const analyzer = new AnalysisService({ today: (): string => "2026-10-02" });
+    const source = analyzer.analyse(tasks, "Partial review fixture");
+    const decisions = partial ? [new ReviewDecision({ blocker: "a", dependent: "b", outcome: "accepted", note: "Required output" }), new ReviewDecision({ blocker: "b", dependent: "c", outcome: "accepted", note: "Extra claim" })] : [];
+    const review = new DependencyReview({ sourceVersion: await new ReviewIdentityAdapter().identify(source), taskIds: ["a", "b", "c"], basis: "Imported review", exceptions: [], reviewedAt: "2026-10-02", reviewer: "Example", decisions });
+    const data = new ViewerData().render(analyzer.analyse(tasks, source.source, { review }));
+    await page.route("**/viewer.json", route => route.fulfill({ contentType: "application/json", body: data }));
+    await page.goto("http://127.0.0.1:4178/");
+    await expect(page.locator("#dependency-review-status")).toContainText(`${partial ? "1" : "2"} rejected or unreviewed relationships`);
+    await expect(page.locator("#dependency-review-status")).toContainText("a → c: unreviewed");
+    if (partial) { await expect(page.locator("#dependency-review-status")).toContainText("b → c: decision is outside the recorded relationships"); }
+  });
+}
