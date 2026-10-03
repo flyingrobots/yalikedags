@@ -1,4 +1,5 @@
 import { PlanningEvidence } from "../core/services/PlanningEvidence.ts";
+import { PrerequisiteService } from "../core/services/PrerequisiteService.ts";
 import { viewerMetadata } from "./ViewerMetadata.ts";
 import { ImpactMarkup } from "./ImpactMarkup.ts";
 import { ChangesMarkup } from "./ChangesMarkup.ts";
@@ -82,6 +83,7 @@ export class ViewerPanels {
 
   private detail(t: Task): string {
     const a = this.analysis;
+    const unresolved = t.isDone() ? [] : new PrerequisiteService().unresolved(a.dag, t.id);
     const fields = [["Work kind (source evidence)", new PlanningEvidence().kind(t)], ["Dependency readiness", "Recorded blockers only; implementation readiness not verified"], ["State", a.stateOf(t.id)], ["Status", t.status], ["Priority", t.priority], ["Effort", t.effort],
       ["Assignee", t.assignee ?? "Unassigned"], ["Milestone", t.milestone], ["Due", t.due], ["Labels", t.labels.join(", ")],
       ["Workstream", a.workstreamOf(t.id)]];
@@ -90,7 +92,8 @@ export class ViewerPanels {
     const link = t.url !== undefined && /^https?:\/\//i.test(t.url)
       ? `<p><a href="${esc(t.url)}" target="_blank" rel="noopener noreferrer">Open in Linear ↗</a></p>` : "";
     return `<template data-detail="${esc(t.id)}"><p class="eyebrow">${esc(t.key)}</p><h2>${esc(t.title)}</h2><dl>${rows}
-      <dt>Blocked by</dt><dd>${this.links(t.blockedBy)}</dd><dt>Blocks</dt><dd>${this.links(a.dag.dependents(t.id))}</dd></dl>
+      <dt>Blocked by</dt><dd>${this.links(t.blockedBy)}</dd><dt>Blocks</dt><dd>${this.links(a.dag.dependents(t.id))}</dd>
+      ${unresolved.length > 0 ? `<dt>Unresolved prerequisite obligations</dt><dd>${this.links(unresolved)}. Canceled, unknown, or missing prerequisites require review; source execution status does not resolve them.</dd>` : ""}</dl>
       ${link}${t.description ? `<div class="task-description">${esc(t.description)}</div>` : ""}</template>`;
   }
 }

@@ -13,7 +13,8 @@ export class Workstream {
 
 /**
  * Antichains and workstreams over the OPEN subgraph. Done tasks are
- * removed first: they block nothing and belong to no live workstream.
+ * removed first. Canceled tasks also leave executable work, but their
+ * unsatisfied edges remain barriers to scheduling their dependents.
  *
  * Waves are Kahn layers, a forecast of parallelism, never a barrier.
  * Gatekeepers are open tasks with two or more open dependents: the shared
@@ -29,7 +30,7 @@ export class WavesService {
     const remaining = new Map<string, number>();
     for (const id of open) {
       const task = dag.get(id);
-      remaining.set(id, task.blockedBy.filter((b) => !dag.has(b) || open.has(b)).length + (task.status === "unknown" ? 1 : 0));
+      remaining.set(id, task.blockedBy.filter((b) => !dag.has(b) || !dag.get(b).satisfiesPrerequisite()).length + (task.status === "unknown" ? 1 : 0));
     }
     const out: string[][] = [];
     let layer = [...remaining].filter(([, n]) => n === 0).map(([id]) => id).sort();
