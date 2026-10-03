@@ -167,9 +167,14 @@ test("the sit sequence sits its haunches, holds the pose, and stands back up", a
 });
 
 test("seated puppy brings its head over its forearms and retains rounded haunch volume", async ({ page }) => {
+  await page.clock.install({ time: new Date("2026-09-30T00:00:00Z") });
+  await page.clock.pauseAt(new Date("2026-09-30T00:00:10Z"));
   await page.goto(url);
-  await page.evaluate(() => { document.documentElement.dataset["puppyAction"] = "sit-sequence"; document.dispatchEvent(new Event("yalikedags:puppy-action")); });
-  // oracle: head moves backward over the forelegs, with a substantial vertical hip-to-ground span.
+  await expect(page.locator("body")).toHaveAttribute("data-ready", "true");
+  await page.evaluate(() => { document.documentElement.dataset["puppyAction"] = "sit"; document.dispatchEvent(new Event("yalikedags:puppy-action")); });
+  const observationDelay = await page.evaluate(() => Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--motion-sit-duration")) * 1000 + 1000);
+  await page.clock.runFor(observationDelay);
+  // oracle: the held seated geometry remains inspectable after the transient sequence would end, with aligned head and substantial haunch volume.
   await expect.poll(() => page.locator("#puppy-dag-node-eye").getAttribute("cx")).toBe("509");
   const pose = await page.locator(".brand-puppy").evaluate(svg => {
     const node = (id: string): { x: number; y: number } => {
