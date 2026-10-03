@@ -24,7 +24,9 @@ FOLDS:   done ─┐
 
 ## Main mechanism
 
-**State.** A task is `done` when its status is done or canceled (both stop blocking). Otherwise it is `in-progress` if Linear says so, `unresolved` if its status or a blocker status is unknown or a blocker is absent, `ready` if every stored blocker is known and done, else `blocked`. The audit also reports missing references as dangling.
+**State.** A task is terminal history (`done` in the derived state) when its source status is done or canceled; neither is executable work. Only completed work satisfies a prerequisite. Otherwise a task is `in-progress` if Linear says so, `unresolved` if its status is unknown or an unfinished prerequisite chain reaches a canceled, unknown, or absent task, `ready` if every stored blocker is completed, else `blocked`. An in-progress task retains its source execution status while unresolved prerequisite obligations remain visible in its inspector. Completed outputs end prerequisite traversal: an old cancellation upstream of a completed prerequisite does not invalidate the completed output.
+
+**Cancellation and resolution.** Canceling a prerequisite does not deliver its required output. The dependent chain stays outside the wave forecast until the source dependency is explicitly corrected after review. Remove an obsolete edge or replace it with the task that now supplies the output; an unfinished replacement still blocks. Duplicate labels or closure alone are not evidence that another task delivered the output. There is no automatic waiver, edge deletion, or reopening of canceled work.
 
 **Frontier.** The ready tasks, sorted by days until due (undated last), then priority (1 first, unset last), then how many direct dependents become ready upon its completion, then the number of open descendants (more first), then creation time, then id. Priority is a tiebreaker inside the frontier and never overrides an edge.
 
@@ -36,11 +38,11 @@ FOLDS:   done ─┐
 
 **Grid.** Waves cut the open graph by time and workstreams cut it by topology, and both partition the same open tasks, so their product is a grid in which every open schedulable task has exactly one cell. One row per workstream, one column per wave, and a shared row first for the gatekeepers, which belong to a wave but to no workstream. This is what the viewer's Grid view draws.
 
-**Critical path.** The longest chain of open tasks, computed twice: by depth (number of hand-offs) and by effort (summed estimate, unestimated tasks weighing 1 as Linear counts them). The two can disagree, and both are reported. There is no float, no forward or backward pass: those need durations, and this graph carries effort.
+**Critical path.** The longest chain of open tasks without unresolved prerequisite obligations, computed twice: by depth (number of hand-offs) and by effort (summed estimate, unestimated tasks weighing 1 as Linear counts them). Unknown tasks and chains reaching canceled, unknown, or missing prerequisites are excluded; Findings and the wave exceptions retain their evidence. The two lengths can disagree, and both are reported. There is no float, no forward or backward pass: those need durations, and this graph carries effort.
 
 ## Important invariants
 
-- Done tasks never block and belong to no wave, workstream, or grid cell.
+- Completed tasks satisfy prerequisites and belong to no wave, workstream, or grid cell. Canceled tasks also remain outside executable work, but do not satisfy remaining prerequisite edges.
 - Every schedulable open task is in exactly one wave. Every open non-gatekeeper task is in one workstream; unschedulable tasks have no grid cell.
 - `dependents` is derived; storing both directions would be two sources of truth for one edge.
 - The layout used by the SVG and the viewer is the same pure service, so what you see is what the report computed.

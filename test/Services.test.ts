@@ -138,7 +138,7 @@ describe("AuditService", () => {
     expect(f?.task).toBe("c");
     expect(f?.detail).toContain("via b");
   });
-  test("an edge to a done or canceled task is reported as stale", () => {
+  test("an edge to a completed task is reported as stale", () => {
     const dag = new Dag([done("old"), t("a", ["old"]), t("b", ["a"])]);
     const stale = new AuditService().audit(dag).filter((x) => x.kind === "stale-blocker");
     expect(stale.map((x) => x.task)).toEqual(["a"]);

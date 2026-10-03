@@ -1,4 +1,5 @@
 import type { Dag } from "../domain/Dag.ts";
+import { PrerequisiteService } from "./PrerequisiteService.ts";
 
 export class CriticalPath {
   constructor(
@@ -55,7 +56,7 @@ export class CriticalPathService {
     // Stable traversal resolves equal-length candidates independently of source order.
     for (const id of dag.tasks.map((task) => task.id).sort()) {
       const t = dag.get(id);
-      if (!t.isDone()) {
+      if (!t.isDone() && t.status !== "unknown" && new PrerequisiteService().unresolved(dag, id).length === 0) {
         const p = best(t.id);
         if (p.length > top.length) {
           top = p;

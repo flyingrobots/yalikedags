@@ -33,6 +33,8 @@ Want to show your mam? She's not installing all this. Use `render --format html 
 
 Start with what can be done now. It'll show ya what that frees up next. Follow the dependencies, line the work up in waves, or pick a card and see what's in it. Findings has the ones that need sorting out. There's a little dag to keep ya company, too. Doesn't do the work for ya. [Come and have a look](docs/how-to/open-the-viewer.md).
 
+Canceled the card that was meant to unblock it? That doesn't mean the work got done. The dependent chain stays unresolved until ya review and correct the dependency. Findings and the task details show what's missing.
+
 ## 📍 Start here
 
 Go on, try the example. No key needed, about two minutes: [See your first DAG](docs/tutorials/first-dag.md). My mam's already got hers open. She's asking why you're still reading.
