@@ -136,3 +136,9 @@ test("viewer uncertainty is derived from task facts instead of embedded derived 
     expect(service.state(decoded.analysis.review, version, decoded.analysis)).toBe("exceptions");
   }
 });
+
+test("combined recorded and candidate decision overflow gives a capacity recovery message", () => {
+  const decisions = Array.from({ length: 20001 }, (_, i) => new ReviewDecision({ blocker: String(i), dependent: "consumer", outcome: "unreviewed", note: "" }));
+  expect(() => new DependencyReview({ sourceVersion: "a".repeat(64), taskIds: ["consumer"], basis: "Read captured requirements", exceptions: [],
+    reviewedAt: "2026-10-02", reviewer: "Example", decisions })).toThrow("review: maximum combined recorded and candidate decisions is 20000; use a smaller capture");
+});
