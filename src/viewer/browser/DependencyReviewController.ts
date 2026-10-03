@@ -108,7 +108,10 @@ export class DependencyReviewController {
   }
 
   draftDecisions(): ReviewDecision[] {
-    if (element("dependency-review-form").hidden) { return this.review?.sourceVersion === this.sourceVersion ? [...this.review.decisions] : []; }
+    if (element("dependency-review-form").hidden) {
+      const current = new DependencyReviewService().state(this.review, this.sourceVersion, this.analysis) !== "stale";
+      return current ? [...this.review?.decisions ?? []] : [];
+    }
     return [...document.querySelectorAll<HTMLSelectElement>("[data-review-edge]")].map(control => {
       const outcome = control.value;
       if (outcome !== "accepted" && outcome !== "rejected" && outcome !== "unreviewed") { throw new Error("Invalid relationship decision"); }

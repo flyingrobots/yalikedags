@@ -63,3 +63,20 @@ test("imported rationale-free acceptance discloses its unresolved evidence", asy
   await expect(page.locator("#dependency-review-status")).toContainText("1 exceptions");
   await expect(page.locator("#dependency-review-status")).toContainText("accepted candidate lacks an evidence and direction rationale");
 });
+
+test("accepted preview does not reuse decisions from a stale imported scope", async ({ page }) => {
+  // oracle: preview and plan export must agree that incomplete scope makes saved acceptance historical.
+  const { DependencyReview } = await import("../src/core/domain/DependencyReview.ts");
+  const { ReviewDecision } = await import("../src/core/domain/ReviewDecision.ts");
+  const { ReviewIdentityAdapter } = await import("../src/adapters/review/ReviewIdentityAdapter.ts");
+  const review = new DependencyReview({ sourceVersion: await new ReviewIdentityAdapter().identify(analysis), taskIds: ["consumer"], basis: "Partial imported claim", reviewer: "Example", reviewedAt: "2026-10-02", exceptions: [],
+    decisions: [new ReviewDecision({ blocker: "schema", dependent: "consumer", outcome: "accepted", note: "Required output" })] });
+  const imported = new AnalysisService({ today: (): string => "2026-10-02" }).analyse(analysis.dag.tasks, analysis.source, { account: analysis.account, review });
+  await page.route("**/viewer.json", route => route.fulfill({ contentType: "application/json", body: new ViewerData().render(imported) }));
+  await page.goto("http://127.0.0.1:4178");
+  await expect(page.locator("#dependency-review-status")).toContainText("Dependency review is stale");
+  await page.locator("#dependency-proposal-tools > summary").click();
+  await page.getByLabel("Preview graph", { exact: true }).selectOption("accepted");
+  await page.getByRole("button", { name: "Preview selected graph", exact: true }).click();
+  await expect(page.locator("#proposal-preview-content")).toContainText("3 recorded ready cards → 3 preview ready cards");
+});
