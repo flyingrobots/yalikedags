@@ -2,13 +2,15 @@ import type { Dag } from "../domain/Dag.ts";
 import { DependencyCandidate } from "../domain/DependencyCandidate.ts";
 import type { Task } from "../domain/Task.ts";
 
+const compare = (left: string, right: string): number => left < right ? -1 : left > right ? 1 : 0;
+
 /** Bounded local evidence extraction: explicit issue references, never thematic similarity. */
 export class DependencyDiscoveryService {
   discover(dag: Dag): DependencyCandidate[] {
     const keys = new Map<string, Task[]>();
     for (const task of dag.tasks) { keys.set(task.key.toUpperCase(), [...(keys.get(task.key.toUpperCase()) ?? []), task]); }
     const candidates = new Map<string, DependencyCandidate>();
-    for (const task of dag.tasks.filter(t => !t.isDone())) {
+    for (const task of dag.tasks.filter(t => !t.isDone()).sort((a, b) => compare(a.id, b.id))) {
       for (const candidate of this.references(task, keys)) {
         const key = JSON.stringify([candidate.blocker, candidate.dependent]);
         if (candidates.get(key)?.confidence !== "explicit") { candidates.set(key, candidate); }
@@ -19,7 +21,7 @@ export class DependencyDiscoveryService {
   }
 
   private sorted(candidates: ReadonlyMap<string, DependencyCandidate>): DependencyCandidate[] {
-    return [...candidates.values()].sort((a, b) => a.dependent.localeCompare(b.dependent) || a.blocker.localeCompare(b.blocker));
+    return [...candidates.values()].sort((a, b) => compare(a.dependent, b.dependent) || compare(a.blocker, b.blocker));
   }
 
   private *references(task: Task, keys: ReadonlyMap<string, readonly Task[]>): Generator<DependencyCandidate> {

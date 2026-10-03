@@ -130,3 +130,15 @@ test("review coverage includes missing candidates without calling accepted candi
   expect(service.missingDecisions(await review(), analysis)).toEqual([]);
   expect(service.outsideDecisions(await review(), analysis)).toEqual([]);
 });
+
+test("bounded discovery is invariant to capture task order", async () => {
+  // oracle: canonical source identity must select the same candidates when input ordering alone changes at the ceiling.
+  const many = Array.from({ length: 46 }, (_, i) => new Task({ id: `task-${String(i)}`, key: `DEMO-${String(i)}`, title: "Example", description: Array.from({ length: 46 }, (_entry, j) => `Requires DEMO-${String(j)}.`).join("\n") }));
+  const first = analyzer.analyse(many, "synthetic");
+  const reversed = analyzer.analyse([...many].reverse(), "synthetic");
+  expect(await new ReviewIdentityAdapter().identify(first)).toBe(await new ReviewIdentityAdapter().identify(reversed));
+  const discover = new DependencyDiscoveryService();
+  const candidates = discover.discover(first.dag);
+  expect(candidates).toHaveLength(2000);
+  expect(discover.discover(reversed.dag).map(c => [c.blocker, c.dependent])).toEqual(candidates.map(c => [c.blocker, c.dependent]));
+});
