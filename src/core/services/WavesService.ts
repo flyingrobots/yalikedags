@@ -62,14 +62,14 @@ export class WavesService {
     return freed;
   }
 
-  gatekeepers(dag: Dag): string[] {
-    const open = new Set(this.waves(dag).flat());
+  gatekeepers(dag: Dag, waves: readonly (readonly string[])[] = this.waves(dag)): string[] {
+    const open = new Set(waves.flat());
     return [...open].filter((id) => dag.dependents(id).filter((d) => open.has(d)).length >= 2).sort();
   }
 
-  workstreams(dag: Dag): Workstream[] {
-    const open = new Set(this.waves(dag).flat());
-    const gates = new Set(this.gatekeepers(dag));
+  workstreams(dag: Dag, waves: readonly (readonly string[])[] = this.waves(dag)): Workstream[] {
+    const open = new Set(waves.flat());
+    const gates = new Set(this.gatekeepers(dag, waves));
     const members = [...open].filter((id) => !gates.has(id));
     const seen = new Set<string>();
     const streams: Workstream[] = [];

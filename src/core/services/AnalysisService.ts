@@ -31,8 +31,8 @@ export class AnalysisService {
   analyse(tasks: readonly Task[], source: string, provenance: { account?: LinearAccount | undefined; capturedAt?: string | null; warnings?: readonly string[]; review?: DependencyReview | undefined } = {}): Analysis {
     const dag = new Dag(tasks);
     const waves = this.waves.waves(dag);
-    const gatekeepers = this.waves.gatekeepers(dag);
-    const workstreams = this.waves.workstreams(dag);
+    const gatekeepers = this.waves.gatekeepers(dag, waves);
+    const workstreams = this.waves.workstreams(dag, waves);
     return new Analysis({
       review: provenance.review,
       dag,
