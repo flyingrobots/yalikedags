@@ -34,7 +34,7 @@ Every finding carries the observation that would kill it. The audit proposes; yo
 | `isolated` | open card with no blockers and no dependents | add the `blocks` or `blocked by` relation in Linear, or accept that it is independent |
 | `redundant-edge` | `blocked by X` is already implied through another blocker | remove the direct relation, or keep it if it carries meaning |
 | `stale-blocker` | an edge to a completed card remains | retain it as history or review whether it is still needed |
-| `canceled-blocker` | a canceled card still supplies a required prerequisite | review the obligation; explicitly remove an obsolete edge or replace it with the task supplying the output |
+| `canceled-blocker` | an edge still requires output from a canceled card | review the obligation; explicitly remove an obsolete edge or replace it with the task supplying the output |
 | `dangling-blocker` | blocked by a card outside this project | intended cross-project dependency, or a mistake |
 | `cycle` | a set of cards that block each other | break the cycle; the graph is invalid until you do (exit `6`) |
 | `split-candidate` | a title joining two things, or four or more open dependents | split the card, or record why it is one thing |
