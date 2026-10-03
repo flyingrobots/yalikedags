@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format follows Keep
 
 - Validate planning coverage and the displayed wave grid against the captured graph, expose unresolved work separately from shared prerequisites and temporary workstreams, and retain exact topology/state evidence in snapshot exports. Preserve full-analysis task state when filtering the displayed graph.
 
+- Record a manual dependency review with explicit source scope, evidence basis, relationship dispositions, and unresolved exceptions. Recompute structural uncertainty from captured task facts even when imported claims or derived metadata omit it. Refuse unreopenable combined review exports and served viewer payloads with visible recovery limits, including derived HTML snapshot data. Disclose missing relationship decisions and out-of-capture claims explicitly. Detect changed prerequisite evidence, distinguish local records from imported claims, preserve reviews in full exports, and omit them from structure-only exports.
+
 - Keep canceled prerequisites unresolved instead of declaring their dependents ready. Exclude affected chains from waves and critical paths, preserve canceled tasks as inactive history, and expose the unresolved obligation in findings and task details without changing Linear.
 
 - Preserve package license declarations and shipped README notices when an offline dependency has no standalone license file, including GSAP.

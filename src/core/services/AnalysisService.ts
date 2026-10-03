@@ -1,4 +1,5 @@
 import type { LinearAccount } from "../domain/LinearAccount.ts";
+import type { DependencyReview } from "../domain/DependencyReview.ts";
 import { Dag } from "../domain/Dag.ts";
 import type { Task } from "../domain/Task.ts";
 import { ResourcePolicy } from "../domain/ResourcePolicy.ts";
@@ -27,12 +28,13 @@ export class AnalysisService {
     this.frontier = new FrontierService(clock);
   }
 
-  analyse(tasks: readonly Task[], source: string, provenance: { account?: LinearAccount | undefined; capturedAt?: string | null; warnings?: readonly string[] } = {}): Analysis {
+  analyse(tasks: readonly Task[], source: string, provenance: { account?: LinearAccount | undefined; capturedAt?: string | null; warnings?: readonly string[]; review?: DependencyReview | undefined } = {}): Analysis {
     const dag = new Dag(tasks);
     const waves = this.waves.waves(dag);
     const gatekeepers = this.waves.gatekeepers(dag);
     const workstreams = this.waves.workstreams(dag);
     return new Analysis({
+      review: provenance.review,
       dag,
       source,
       account: provenance.account,
