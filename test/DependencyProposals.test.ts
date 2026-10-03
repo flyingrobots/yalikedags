@@ -176,3 +176,14 @@ test("hedged, conditional, historical, and unpunctuated questions remain uncerta
     expect(new DependencyDiscoveryService().discover(capture.dag)[0]?.confidence).toBe("uncertain");
   }
 });
+
+test("mutually proposed prerequisites remain visible as cyclic hypothetical coverage", () => {
+  const capture = analyzer.analyse([new Task({ id: "a", key: "DEMO-1", title: "A", description: "Requires DEMO-2." }),
+    new Task({ id: "b", key: "DEMO-2", title: "B", description: "Requires DEMO-1." })], "synthetic");
+  const preview = new DependencyProposalService().preview(capture, [], "proposed");
+  expect(preview.dag.validate().cycles.length).toBeGreaterThan(0);
+  expect(preview.waves).toEqual([]);
+  expect(preview.frontier).toEqual([]);
+  expect(preview.findings.some(f => f.kind === "cycle")).toBe(true);
+  expect(capture.waves).toEqual([["a", "b"]]);
+});
