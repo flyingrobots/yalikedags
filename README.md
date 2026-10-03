@@ -33,6 +33,8 @@ Want to show your mam? She's not installing all this. Use `render --format html 
 
 Start with what can be done now. It'll show ya what that frees up next. Follow the dependencies, line the work up in waves, or pick a card and see what's in it. Findings has the ones that need sorting out. There's a little dag to keep ya company, too. Doesn't do the work for ya. [Come and have a look](docs/how-to/open-the-viewer.md).
 
+Had a proper look at the dependencies? **Review dependencies** lets ya record what ya checked, which relationships ya accept, and what still needs sorting. Change the underlying cards and it'll tell ya the review is stale. A review isn't a promise that nothing's missing. [Here's how it works](docs/reference/viewer.md#record-a-dependency-review).
+
 Canceled the card that was meant to unblock it? That doesn't mean the work got done. The dependent chain stays unresolved until ya review and correct the dependency. Findings and the task details show what's missing.
 
 ## 📍 Start here

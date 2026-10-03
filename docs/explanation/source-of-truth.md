@@ -11,6 +11,7 @@ If dependencies live in a file, teammates need the file, and the file needs merg
 | **Linear** | issues, state, assignee, priority, estimate, labels, milestone, and the edges as `blocks` / `blocked by` relations |
 | **derived here** | state (ready, blocked), frontier, waves, gatekeepers, workstreams, critical path, findings |
 | **the desired graph, a file** | which edges you mean there to be, and resource attributes. It proposes; it never wins by default. |
+| **a dependency-review record** | a self-reported human review of a captured scope, with evidence basis, edge dispositions, exceptions, and source identity. Stored locally or carried in an export; never authoritative tracker state. |
 
 Reading is therefore never a merge: a sync is a read, and a stale view is fixed by reading again.
 

@@ -93,7 +93,7 @@ async function load(repo: TaskRepositoryPort, analyser: AnalysisService): Promis
     }
   }
   console.error(`loaded ${String(tasks.length)} tasks from ${repo.describe()}`);
-  return analyser.analyse(tasks, repo.describe(), { ...(repo.capturedAt !== undefined && { capturedAt: repo.capturedAt }), warnings: repo.warnings ?? [], account: repo.account });
+  return analyser.analyse(tasks, repo.describe(), { ...(repo.capturedAt !== undefined && { capturedAt: repo.capturedAt }), warnings: repo.warnings ?? [], account: repo.account, review: repo.review });
 }
 
 async function keyCommand(args: Args, vault: VaultSecretsAdapter): Promise<ExitCodeValue> {

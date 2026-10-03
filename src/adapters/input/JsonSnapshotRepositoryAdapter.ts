@@ -1,4 +1,6 @@
 import { SnapshotBudget } from "./SnapshotBudget.ts";
+import { DependencyReviewCodec } from "../review/DependencyReviewCodec.ts";
+import type { DependencyReview } from "../../core/domain/DependencyReview.ts";
 import type { LinearAccount } from "../../core/domain/LinearAccount.ts";
 import { LinearAccountCodec } from "./LinearAccountCodec.ts";
 import { Task } from "../../core/domain/Task.ts";
@@ -95,6 +97,7 @@ export function decodeTask(raw: unknown): Task {
 }
 
 export class JsonSnapshotRepositoryAdapter implements TaskRepositoryPort {
+  review: DependencyReview | undefined;
   account: LinearAccount | undefined;
   capturedAt: string | null = null;
   warnings: string[] = [];
@@ -116,6 +119,7 @@ export class JsonSnapshotRepositoryAdapter implements TaskRepositoryPort {
     this.capturedAt = capturedAt !== undefined && Number.isFinite(Date.parse(capturedAt)) ? capturedAt : null;
     this.warnings = strList(parsed, "warnings");
     this.account = new LinearAccountCodec().decode(parsed["account"]);
+    this.review = new DependencyReviewCodec().decode(parsed["dependencyReview"]);
     const tasks = parsed["tasks"];
     if (!Array.isArray(tasks)) {
       return Promise.reject(new Error("snapshot: tasks must be a list"));

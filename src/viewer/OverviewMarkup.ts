@@ -1,4 +1,5 @@
 import { PlanningEvidence } from "../core/services/PlanningEvidence.ts";
+import { DependencyReviewMarkup } from "./DependencyReviewMarkup.ts";
 import type { Analysis } from "../core/services/Analysis.ts";
 import { escapeXml as esc } from "../adapters/output/SvgRendererAdapter.ts";
 
@@ -13,7 +14,7 @@ export class OverviewMarkup {
     const active = a.dag.tasks.filter(task => !task.isDone());
     const isolated = active.filter(task => a.dag.blockers(task.id).length + a.dag.dependents(task.id).length === 0).length;
     return `
-    <div class="planning-warning" role="note"><strong>Dependency review is incomplete.</strong><p>${String(isolated)} active cards have no recorded connections. This does not establish independence or implementation readiness. Only recorded blockers are analyzed; proposed dependencies require review.</p><p>${["Tracking container", "Implementation", "Research", "Decision", "Investigation", "Needs disposition"].map(kind => `${String(active.filter(task => planning.kind(task) === kind).length)} ${kind.toLowerCase()}`).join(" · ")}. Containers are not additional executable PRs.</p></div>
+    ${new DependencyReviewMarkup().render(a)}<div class="planning-warning" role="note"><p>${String(isolated)} active cards have no recorded connections. This does not establish independence or implementation readiness. Only recorded blockers are analyzed; proposed dependencies require review.</p><p>${["Tracking container", "Implementation", "Research", "Decision", "Investigation", "Needs disposition"].map(kind => `${String(active.filter(task => planning.kind(task) === kind).length)} ${kind.toLowerCase()}`).join(" · ")}. Containers are not additional executable PRs.</p></div>
     ${a.warnings.length + a.findings.filter((f) => ["cycle", "dangling-blocker", "canceled-blocker"].includes(f.kind)).length + count("unresolved") > 0 ? `<div class="analysis-warning" role="note"><strong>Readiness is based on incomplete data.</strong><p>Unresolved work, cycles, or source warnings may affect this plan.</p><button data-panel="findings">Review uncertainty →</button></div>` : ""}
     <div class="project-stats" aria-label="Project summary">
     <div class="ready"><strong>${String(a.frontier.filter(entry => planning.kind(entry.task) !== "Tracking container").length)}</strong><span>No recorded open blockers</span></div>
