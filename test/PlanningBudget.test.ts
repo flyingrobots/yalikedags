@@ -32,3 +32,20 @@ test("planning allowance is bounded separately without weakening captured-data o
   expect(() => { budget.parse(JSON.stringify({ ...small, planning: { ...evidence, extra: Array.from({ length: 1000 }, () => 0) } })); }).toThrow("maximum structure");
   expect(() => { budget.parse(`{"schema":"yalikedags/snapshot/2","tasks":[],"planning":{"schema":"yalikedags/planning/1","extra":${"[".repeat(31)}0${"]".repeat(31)}}}`); }).toThrow("nesting levels");
 });
+
+test("recomputable candidate quotes do not crowd out a valid source snapshot", async () => {
+  // Oracle: captured text is sufficient to reproduce the same candidates after reopening.
+  const { DependencyDiscoveryService } = await import("../src/core/services/DependencyDiscoveryService.ts");
+  const tasks = Array.from({ length: 120 }, (_, i) => new Task({ id: String(i), key: `DEMO-${String(i)}`, title: "Example",
+    description: Array.from({ length: 20 }, (_entry, j) => `Requires DEMO-${String((i + j + 1) % 120)} `).join("").padEnd(60000, "x") }));
+  const analysis = new AnalysisService({ today: (): string => "2026-10-02" }).analyse(tasks, "synthetic");
+  const renderer = new JsonSnapshotAdapter();
+  const sourceOnly = renderer.toObject(analysis); delete sourceOnly["dependencyProposals"];
+  expect(() => { new SnapshotBudget().parse(JSON.stringify(sourceOnly, null, 2)); }).not.toThrow();
+  const text = renderer.render(analysis);
+  const reopened = await new JsonSnapshotRepositoryAdapter(text, "export").load();
+  const discover = new DependencyDiscoveryService();
+  const restored = new AnalysisService({ today: (): string => "2026-10-02" }).analyse(reopened, "export");
+  expect(discover.discover(restored.dag)).toEqual(discover.discover(analysis.dag));
+  expect(discover.discover(restored.dag)).toHaveLength(2000);
+});

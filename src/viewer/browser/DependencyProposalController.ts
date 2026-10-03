@@ -43,6 +43,7 @@ export class DependencyProposalController {
     const accepted = new DependencyProposalService().preview(this.analysis, decisions, "accepted");
     const output = new JsonSnapshotAdapter();
     this.download(JSON.stringify({ schema: "yalikedags/proposal-evidence/1", graphKind: "recorded plus locally accepted candidates; not tracker state",
+      candidates: new DependencyDiscoveryService().discover(this.analysis.dag).map(c => ({ blocker: c.blocker, dependent: c.dependent, evidence: c.evidence, confidence: c.confidence })),
       recorded: output.toObject(this.analysis, this.review.current()), accepted: output.toObject(accepted),
       decisions: decisions.map(d => ({ blocker: d.blocker, dependent: d.dependent, outcome: d.outcome, note: d.note })) }, null, 2), "yalikedags-proposal-evidence.json");
     element("proposal-notice").textContent = "Evidence bundle exported with original source, local decisions, and the accepted graph analysis. It does not certify tracker writes.";

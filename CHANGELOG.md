@@ -4,6 +4,8 @@ All notable changes to this project are documented here. The format follows Keep
 
 ## [Unreleased]
 
+- Recompute dependency candidates from saved source text instead of duplicating quotes in ordinary snapshots; retain explicit quotes in proposal evidence bundles.
+
 - Preserve unsaved dependency review decisions and evidence when Discover or Review is clicked again.
 
 - Keep negated contractions, questions, and word-suffix matches uncertain during local dependency discovery.
