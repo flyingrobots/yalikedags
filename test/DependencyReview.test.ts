@@ -161,3 +161,11 @@ test("one review service scans immutable capture text once across coverage discl
     expect(scan).toHaveBeenCalledTimes(2);
   } finally { scan.mockRestore(); }
 });
+
+test("key-aware prerequisite identity uses the version-two canonical hash contract", async () => {
+  const capture = analyzer.analyse([new Task({ id: "a", key: "DEMO-1", title: "Output" })], "synthetic");
+  const canonical = '{"schema":"yalikedags/review-source/2","workspace":null,"project":null,"warnings":[],"tasks":[{"id":"a","key":"DEMO-1","title":"Output","description":"","status":"open","blockedBy":[],"parent":null,"children":[],"labels":[]}]}';
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(canonical));
+  const expected = [...new Uint8Array(digest)].map(value => value.toString(16).padStart(2, "0")).join("");
+  expect(await identity.identify(capture)).toBe(expected);
+});
