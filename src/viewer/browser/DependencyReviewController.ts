@@ -32,6 +32,7 @@ export class DependencyReviewController {
     } catch { this.notice("Saved review could not be read. Captured review evidence, if present, is shown instead."); }
     this.render();
     element("review-dependencies").addEventListener("click", () => {
+      if (!element("dependency-review-form").hidden) { this.field("review-basis").focus(); return; }
       element("dependency-review-form").hidden = false;
       this.field("review-basis").value = this.review?.basis ?? "";
       this.field("review-exceptions").value = this.review?.exceptions.join("\n") ?? "";

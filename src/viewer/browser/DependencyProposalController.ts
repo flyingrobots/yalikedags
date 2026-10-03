@@ -17,7 +17,6 @@ export class DependencyProposalController {
     element("export-proposal-evidence").addEventListener("click", () => { this.run(() => { this.exportEvidence(); }); });
     element("discover-dependencies").addEventListener("click", () => { this.run(() => {
       const candidates = new DependencyDiscoveryService().discover(analysis.dag);
-      element("dependency-candidates").innerHTML = new DependencyProposalMarkup().candidates(analysis, candidates);
       element("dependency-candidate-details").setAttribute("open", "");
       element("review-dependencies").click();
       element("proposal-notice").textContent = `${String(candidates.length)} candidates. Review the cited direction, then record decisions. No tracker writes.`;

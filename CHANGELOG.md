@@ -4,6 +4,8 @@ All notable changes to this project are documented here. The format follows Keep
 
 ## [Unreleased]
 
+- Preserve unsaved dependency review decisions and evidence when Discover or Review is clicked again.
+
 - Keep negated contractions, questions, and word-suffix matches uncertain during local dependency discovery.
 
 - Enforce additions-only mutations in guarded proposal plans, including hand-edited input, while retaining ordinary reconciliation plans.

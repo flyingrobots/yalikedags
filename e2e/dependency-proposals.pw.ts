@@ -80,3 +80,29 @@ test("accepted preview does not reuse decisions from a stale imported scope", as
   await page.getByRole("button", { name: "Preview selected graph", exact: true }).click();
   await expect(page.locator("#proposal-preview-content")).toContainText("3 recorded ready cards → 3 preview ready cards");
 });
+
+test("rediscovery and reopening review preserve unsaved evidence and dispositions", async ({ page }) => {
+  const withRecorded = new AnalysisService({ today: (): string => "2026-10-02" }).analyse(
+    analysis.dag.tasks.map(task => task.id === "other" ? task.with({ blockedBy: ["schema"] }) : task), analysis.source, { account: analysis.account });
+  await page.route("**/viewer.json", route => route.fulfill({ contentType: "application/json", body: new ViewerData().render(withRecorded) }));
+  await page.goto("http://127.0.0.1:4178");
+  await page.locator("#discover-dependencies").click();
+  const candidate = page.locator("[data-candidate]");
+  const recorded = page.locator('[data-review-edge]:not([data-candidate])');
+  await candidate.selectOption("accepted");
+  await page.getByText("Recorded relationship decisions", { exact: true }).click();
+  await recorded.selectOption("rejected");
+  await page.locator("#dependency-candidates [data-review-note]").fill("Consumer requires the schema output.");
+  await page.locator("#review-relationships [data-review-note]").fill("Recorded edge needs correction.");
+  await page.getByLabel("Review basis", { exact: true }).fill("Checked both relationships.");
+  await page.locator("#review-exceptions").fill("Follow up the recorded relation.");
+  for (const button of ["#discover-dependencies", "#review-dependencies"]) {
+    await page.locator(button).click();
+    await expect(candidate).toHaveValue("accepted");
+    await expect(recorded).toHaveValue("rejected");
+    await expect(page.locator("#dependency-candidates [data-review-note]")).toHaveValue("Consumer requires the schema output.");
+    await expect(page.locator("#review-relationships [data-review-note]")).toHaveValue("Recorded edge needs correction.");
+    await expect(page.getByLabel("Review basis", { exact: true })).toHaveValue("Checked both relationships.");
+    await expect(page.locator("#review-exceptions")).toHaveValue("Follow up the recorded relation.");
+  }
+});
