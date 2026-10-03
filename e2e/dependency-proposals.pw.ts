@@ -47,6 +47,12 @@ test("description evidence produces a reviewable proposal without changing the r
   await expect(page.locator("#proposal-arrow")).toHaveCount(1);
   await expect(page.locator("#arrow")).toHaveCount(1);
   await page.screenshot({ path: "test-results/dependency-proposal-preview.png", fullPage: true });
+  await page.locator('.proposal-svg .node[data-id="consumer"]').click();
+  await expect(page.locator("#detail h2")).toHaveText("Consume schema");
+  await expect(page.locator('#detail dt:has-text("Blocked by") + dd')).toHaveText("None");
+  await expect(page.locator("#frontier [data-task]")).toHaveCount(3);
+  await page.locator("#close-details").click();
+  await expect(page.locator("#proposal-preview-content")).toContainText("3 recorded ready cards → 2 preview ready cards");
 
 });
 
