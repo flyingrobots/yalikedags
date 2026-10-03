@@ -44,7 +44,7 @@ test("invalid proposed partitions are rejected at the planning boundary", async 
   const { PlanningCoverage } = await import("../src/core/services/PlanningCoverage.ts");
   const { Workstream } = await import("../src/core/services/WavesService.ts");
   const a = analyzer.analyse([task("a"), task("b", ["a"])], "synthetic");
-  const valid = { dag: a.dag, waves: a.waves, shared: a.gatekeepers, workstreams: a.workstreams };
+  const valid = { dag: a.dag, grid: a.grid, waves: a.waves, shared: a.gatekeepers, workstreams: a.workstreams };
   expect(() => new PlanningCoverage({ ...valid, waves: [["a", "b"]] })).toThrow("prerequisite order");
   expect(() => new PlanningCoverage({ ...valid, waves: [["a"]] })).toThrow("omitted schedulable work");
   expect(() => new PlanningCoverage({ ...valid, workstreams: [] })).toThrow("group coverage");
@@ -77,4 +77,30 @@ test("completed outputs end active prerequisite paths", () => {
   const a = analyzer.analyse([task("a"), task("b", ["a"]).with({ status: "done" }), task("c", ["b"])], "synthetic");
   expect(a.waves).toEqual([["a", "c"]]);
   expect(a.planning.excluded).toEqual(["b"]);
+});
+
+test("viewer data cannot claim complete coverage while omitting its visible grid", async () => {
+  // oracle: a grid that hides all scheduled tasks must not survive the actual viewer-data boundary.
+  const { ViewerData } = await import("../src/viewer/ViewerData.ts");
+  const { ViewerDataCodec } = await import("../src/viewer/ViewerDataCodec.ts");
+  const { rec } = await import("../src/adapters/linear/GraphqlJson.ts");
+  const a = analyzer.analyse(diamond, "synthetic");
+  const raw: unknown = JSON.parse(new ViewerData().render(a));
+  const data = rec(raw);
+  rec(data["snapshot"])["grid"] = { waves: a.waves.length, rows: [] };
+  const outcome = await new ViewerDataCodec().decode(JSON.stringify(data)).then(() => "accepted invalid grid", (error: unknown) => error instanceof Error ? error.message : "unexpected error");
+  expect(outcome).toContain("planning: grid");
+});
+
+
+test("grid validation rejects duplicated and misplaced members", async () => {
+  // oracle: every visible cell must agree with the validated wave and group, without duplicate cards.
+  const { PlanningCoverage } = await import("../src/core/services/PlanningCoverage.ts");
+  const { Grid, GridRow } = await import("../src/core/services/GridService.ts");
+  const a = analyzer.analyse([task("a"), task("b", ["a"])], "synthetic");
+  const fields = { dag: a.dag, waves: a.waves, shared: a.gatekeepers, workstreams: a.workstreams };
+  for (const cells of [[["a", "a"], ["b"]], [["b"], ["a"]]]) {
+    expect(() => new PlanningCoverage({ ...fields, grid: new Grid(2, [new GridRow("a", cells)]) })).toThrow("planning: grid cell");
+  }
+  expect(() => new PlanningCoverage({ ...fields, grid: a.grid })).not.toThrow();
 });

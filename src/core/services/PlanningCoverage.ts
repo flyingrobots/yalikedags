@@ -1,3 +1,5 @@
+import type { Grid } from "./GridService.ts";
+import { GridService } from "./GridService.ts";
 import type { Dag } from "../domain/Dag.ts";
 import type { Task } from "../domain/Task.ts";
 import type { Workstream } from "./WavesService.ts";
@@ -6,6 +8,7 @@ import { PlanningEvidence } from "./PlanningEvidence.ts";
 
 export interface PlanningCoverageFields {
   dag: Dag;
+  grid: Grid;
   waves: readonly (readonly string[])[];
   shared: readonly string[];
   workstreams: readonly Workstream[];
@@ -30,6 +33,7 @@ export class PlanningCoverage {
     const scheduled = this.validateWaves(f);
     this.exceptions = Object.freeze(this.included.filter(id => !scheduled.has(id)));
     const membership = this.validateGroups(f, scheduled);
+    this.validateGrid(f);
     this.shared = Object.freeze([...f.shared].sort());
     this.workstreams = Object.freeze([...f.workstreams]);
     this.crossGroupEdges = Object.freeze(this.graphTasks.flatMap(task => [...task.blockedBy].sort()
@@ -80,6 +84,19 @@ export class PlanningCoverage {
     if (membership.size !== scheduled.size) { throw new Error("planning: group coverage omitted scheduled work"); }
     this.boundaries(f, scheduled, membership);
     return membership;
+  }
+
+  private validateGrid(f: PlanningCoverageFields): void {
+    const expected = new GridService().grid(f.waves, f.shared, f.workstreams);
+    if (f.grid.waves !== expected.waves || f.grid.rows.length !== expected.rows.length) { throw new Error("planning: grid dimensions disagree with coverage"); }
+    f.grid.rows.forEach((row, index) => {
+      const wanted = expected.rows[index];
+      if (wanted === undefined || row.workstream !== wanted.workstream || row.cells.length !== f.waves.length) { throw new Error("planning: grid row disagrees with coverage"); }
+      row.cells.forEach((cell, wave) => {
+        const ids = new Set(wanted.cells[wave] ?? []);
+        if (cell.length !== ids.size || new Set(cell).size !== ids.size || cell.some(id => !ids.has(id))) { throw new Error("planning: grid cell disagrees with coverage"); }
+      });
+    });
   }
 
   private boundaries(f: PlanningCoverageFields, scheduled: ReadonlyMap<string, number>, membership: ReadonlyMap<string, string>): void {
