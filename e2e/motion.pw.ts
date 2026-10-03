@@ -150,20 +150,24 @@ test("the sit sequence sits its haunches, holds the pose, and stands back up", a
   const hip = page.locator("#puppy-dag-node-hip");
   const paw = page.locator("#puppy-dag-node-frontPaw");
   const edge = page.locator('.brand-puppy [data-from="back"][data-to="hip"]');
-  const rest = await edge.getAttribute("d");
+  // Exercise the equivalent computed serialization seen during initial animation frames.
+  await edge.evaluate(path => { path.setAttribute("d", (path.getAttribute("d") ?? "").replace(/-?\d+(?:\.\d+)?/g, value => Number(value).toFixed(6))); });
+  const coordinates = async (): Promise<string[]> => ((await edge.getAttribute("d"))?.match(/-?\d+(?:\.\d+)?/g) ?? []).map(value => Number(value).toFixed(2));
+  const rest = await coordinates();
+  expect(rest).toHaveLength(4);
   await page.evaluate(() => { document.documentElement.dataset["puppyAction"] = "sit-sequence"; document.dispatchEvent(new Event("yalikedags:puppy-action")); });
   // oracle: haunches lower and the front paw lifts before the seated hold; all geometry returns to the authored pose.
   await expect.poll(async () => Number(await paw.getAttribute("cy"))).toBeLessThan(650);
   await expect.poll(async () => Number(await hip.getAttribute("cy"))).toBeGreaterThan(450);
   await expect(paw).toHaveAttribute("cy", "657");
-  await expect(edge).not.toHaveAttribute("d", rest ?? "");
+  await expect.poll(coordinates).not.toEqual(rest);
   await expect(hip).toHaveAttribute("cy", "357", { timeout: 7000 });
-  await expect(edge).toHaveAttribute("d", rest ?? "");
+  await expect.poll(coordinates).toEqual(rest);
   await page.evaluate(() => { document.documentElement.dataset["puppyAction"] = "sit-sequence"; document.dispatchEvent(new Event("yalikedags:puppy-action")); });
   await expect.poll(async () => Number(await hip.getAttribute("cy"))).toBeGreaterThan(400);
   await page.emulateMedia({ reducedMotion: "reduce" });
   await expect(hip).toHaveAttribute("cy", "357");
-  await expect(edge).toHaveAttribute("d", rest ?? "");
+  await expect.poll(coordinates).toEqual(rest);
 });
 
 test("seated puppy brings its head over its forearms and retains rounded haunch volume", async ({ page }) => {
