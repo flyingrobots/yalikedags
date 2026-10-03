@@ -13,6 +13,7 @@ import type { Mutation } from "../../core/domain/Mutation.ts";
 import { Plan, Unmatched } from "../../core/domain/Plan.ts";
 
 export const PLAN_SCHEMA = "yalikedags/plan/1";
+export const GUARDED_PLAN_SCHEMA = "yalikedags/plan/2";
 
 type Rec = Record<string, unknown>;
 const isRec = (x: unknown): x is Rec => typeof x === "object" && x !== null && !Array.isArray(x);
@@ -79,20 +80,27 @@ function decodeLabels(raw: unknown): Record<string, string> {
   return out;
 }
 
+function prerequisiteVersion(parsed: Rec): string | undefined {
+  if (parsed["schema"] === GUARDED_PLAN_SCHEMA) { return requireString(parsed, "prerequisiteVersion"); }
+  if (parsed["prerequisiteVersion"] !== undefined) { throw new Error(`plan: a prerequisite guard requires schema ${GUARDED_PLAN_SCHEMA}`); }
+  return undefined;
+}
+
 export class PlanJsonCodec {
   encode(plan: Plan): string {
-    return `${JSON.stringify({ schema: PLAN_SCHEMA, ...plan.toJSON() }, null, 2)}\n`;
+    const schema = plan.prerequisiteVersion === undefined ? PLAN_SCHEMA : GUARDED_PLAN_SCHEMA;
+    return `${JSON.stringify({ schema, ...plan.toJSON() }, null, 2)}\n`;
   }
 
   decode(text: string): Plan {
     const parsed: unknown = JSON.parse(text);
-    if (!isRec(parsed) || parsed["schema"] !== PLAN_SCHEMA) {
-      throw new Error(`plan: expected schema ${PLAN_SCHEMA}`);
+    if (!isRec(parsed) || (parsed["schema"] !== PLAN_SCHEMA && parsed["schema"] !== GUARDED_PLAN_SCHEMA)) {
+      throw new Error(`plan: expected schema ${PLAN_SCHEMA} or ${GUARDED_PLAN_SCHEMA}`);
     }
     const mutations = Array.isArray(parsed["mutations"]) ? parsed["mutations"].map((m: unknown) => decodeMutation(m)) : [];
     const unmatched = Array.isArray(parsed["unmatched"]) ? parsed["unmatched"].filter(isRec) : [];
     return new Plan({
-      prerequisiteVersion: parsed["prerequisiteVersion"] === undefined ? undefined : requireString(parsed, "prerequisiteVersion"),
+      prerequisiteVersion: prerequisiteVersion(parsed),
       mutations,
       unmatched: unmatched.map((u) => new Unmatched(requireString(u, "desiredId"), requireString(u, "desiredKey"), requireString(u, "reason"))),
       desiredSource: requireString(parsed, "desiredSource"),
