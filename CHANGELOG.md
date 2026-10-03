@@ -4,6 +4,8 @@ All notable changes to this project are documented here. The format follows Keep
 
 ## [Unreleased]
 
+- Discover bounded issue-reference dependency candidates locally in stable task-identity order, retain bounded cited evidence and human dispositions, preview proposed/accepted graph plans, and export evidence plus accepted relation plans. Disclose exhausted discovery and rationale-free acceptance as review exceptions. Reject stale-scope or rationale-free imported acceptances at plan export and keep stale-scope decisions out of accepted previews, check fresh prerequisite evidence before CLI writeback and verify the actual tracker result through the existing receipt path.
+
 - Disclose omitted candidate pairs in the discovery notice and list header before a review is saved.
 
 - Keep hedged, conditional, historical, and unpunctuated-question references uncertain during local discovery.
@@ -27,8 +29,6 @@ All notable changes to this project are documented here. The format follows Keep
 - Enforce additions-only mutations in guarded proposal plans, including hand-edited input, while retaining ordinary reconciliation plans.
 
 - Version evidence-guarded proposal plans separately so older CLIs refuse them instead of silently omitting the prerequisite freshness check.
-
-- Discover bounded issue-reference dependency candidates locally in stable task-identity order, retain bounded cited evidence and human dispositions, preview proposed/accepted graph plans, and export evidence plus accepted relation plans. Disclose exhausted discovery and rationale-free acceptance as review exceptions. Reject stale-scope or rationale-free imported acceptances at plan export and keep stale-scope decisions out of accepted previews, check fresh prerequisite evidence before CLI writeback and verify the actual tracker result through the existing receipt path.
 
 - Validate exact Kahn wave positions, planning coverage, and the displayed wave grid against the captured graph, expose unresolved work separately from shared prerequisites and temporary workstreams, and retain exact topology/state evidence in snapshot exports. Bound additive planning evidence separately from captured data so previously admissible large exports remain usable. Reuse computed waves for shared prerequisites and groups while retaining independent boundary validation. Preserve full-analysis task state when filtering the displayed graph.
 
