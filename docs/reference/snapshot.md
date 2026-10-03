@@ -24,7 +24,7 @@ Written by `sync` and `render --format json`; read by `--snapshot` and served at
 
 ## Import budgets
 
-The reader rejects snapshots above 8 MiB, 5,000 tasks, or 20,000 blocker references. Any string is limited to 65,536 UTF-16 code units. The JSON structure is limited to 100,000 values and 32 nesting levels, including ignored fields. These are simultaneous limits, not a guarantee that every graph below the task ceiling is inexpensive to analyze. Limit failures report `snapshot_limit`; split an oversized export at meaningful project boundaries.
+The reader rejects snapshots above 8 MiB, 5,000 tasks, or 20,000 blocker references. Any string is limited to 65,536 UTF-16 code units. The captured snapshot, including review evidence and ignored fields, is limited to 100,000 JSON values. Schema-tagged `planning` metadata has a separate 100,000-value allowance so additive planning evidence does not consume the captured-data allowance; both parts together permit at most 200,000 values. The whole file remains limited to 8 MiB and 32 nesting levels, and every subtree is inspected. Unrecognized planning schemas receive no separate allowance. These are simultaneous limits, not a guarantee that every graph below the task ceiling is inexpensive to analyze. Limit failures report `snapshot_limit`; split an oversized export at meaningful project boundaries.
 
 ## Task fields
 
