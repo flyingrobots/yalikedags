@@ -28,6 +28,7 @@ export class ViewerDataCodec {
     const critical = rec(snapshot["criticalPath"]);
     const grid = rec(snapshot["grid"]);
     const analysis = new Analysis({
+      review: repo.review,
       dag, source: this.text(snapshot["source"]), asOf: this.text(snapshot["asOf"]),
       capturedAt: repo.capturedAt, warnings: repo.warnings, account: repo.account,
       states: new Map(this.array(snapshot["tasks"]).map((value) => this.state(rec(value)))),

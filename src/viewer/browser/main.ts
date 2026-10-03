@@ -1,4 +1,5 @@
 import { DebugOverlay } from "./DebugOverlay.ts";
+import { DependencyReviewController } from "./DependencyReviewController.ts";
 import { ViewerMotion } from "./ViewerMotion.ts";
 import { SelectionNavigation } from "./SelectionNavigation.ts";
 import { GraphFilters } from "./GraphFilters.ts";
@@ -33,7 +34,9 @@ async function start(): Promise<void> {
   theme.bind(); textSize.bind(); new ViewerMotion();
   if (document.documentElement.dataset["development"] === "true") { new DebugOverlay(); }
   if (analysis === undefined) { document.body.dataset["ready"] = "true"; return; }
-  new ExportController(analysis);
+  const review = new DependencyReviewController(analysis);
+  await review.initialize();
+  new ExportController(analysis, () => review.current());
   const state = new ViewerState(analysis.dag.tasks, analysis.states);
   const session = new SessionState();
   const workspace = new Workspace(session.layout());

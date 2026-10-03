@@ -4,6 +4,8 @@ All notable changes to this project are documented here. The format follows Keep
 
 ## [Unreleased]
 
+- Record a manual dependency review with explicit source scope, evidence basis, relationship dispositions, and unresolved exceptions. Detect changed prerequisite evidence, distinguish local records from imported claims, preserve reviews in full exports, and omit them from structure-only exports.
+
 - Preserve package license declarations and shipped README notices when an offline dependency has no standalone license file, including GSAP.
 
 - Keep rapid puppy posture requests on the animation frame queue so they preserve the visible pose until the next paint.
