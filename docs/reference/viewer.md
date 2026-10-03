@@ -71,7 +71,7 @@ The development flag controls presentation, not authentication. All tools run lo
 
 ## Rendering and data
 
-The server computes task states, frontier order, unblocking counts, waves, workstreams, critical paths, audit findings, and resource conflicts. The browser decodes those results and builds the interface; it does not rerun scheduling to draw the views. Graph positioning is a client rendering step. Comparing a locally chosen JSON file remains entirely client-side. `/snapshot.json` is the portable snapshot export; `/viewer.json` wraps it in schema `yalikedags/viewer/1` with refresh capability and optional changes. Neither endpoint writes a JSON file to disk. Use `sync --out` or `render --format json --out` to save one.
+The server computes task states, frontier order, unblocking counts, waves, workstreams, critical paths, audit findings, and resource conflicts. The browser retains those supplied results for display and recomputes Kahn layers to validate planning at the decoding boundary. Dependency review also derives current uncertainty from the captured task facts. Graph positioning is a client rendering step. Comparing a locally chosen JSON file remains entirely client-side. `/snapshot.json` is the portable snapshot export; `/viewer.json` wraps it in schema `yalikedags/viewer/1` with refresh capability and optional changes. Neither endpoint writes a JSON file to disk. Use `sync --out` or `render --format json --out` to save one.
 
 ## Linear account and assignments
 
