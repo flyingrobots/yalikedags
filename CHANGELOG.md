@@ -4,6 +4,8 @@ All notable changes to this project are documented here. The format follows Keep
 
 ## [Unreleased]
 
+- Show candidate blocker status and explicitly disclose that accepting a canceled prerequisite leaves its dependent unresolved.
+
 - Count rejected candidates as completed dispositions in review summaries while keeping rejected recorded relationships unresolved.
 
 - Explain the combined recorded/candidate review decision limit and smaller-capture recovery instead of reporting an invalid scope.

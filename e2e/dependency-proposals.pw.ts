@@ -155,3 +155,22 @@ test("rejecting a candidate completes its disposition without reporting an unres
   await expect(page.locator("#dependency-review-status")).toContainText("0 rejected or unreviewed relationships");
   await expect(page.locator("#dependency-review-status")).toContainText("1 candidate rejections completed");
 });
+
+test("a canceled proposed blocker is disclosed and leaves the accepted dependent unresolved", async ({ page }) => {
+  const canceled = new AnalysisService({ today: (): string => "2026-10-02" }).analyse(
+    analysis.dag.tasks.map(task => task.id === "schema" ? task.with({ status: "canceled" }) : task), analysis.source, { account: analysis.account });
+  await page.route("**/viewer.json", route => route.fulfill({ contentType: "application/json", body: new ViewerData().render(canceled) }));
+  await page.goto("http://127.0.0.1:4178");
+  await page.locator("#discover-dependencies").click();
+  await expect(page.locator("#dependency-candidates")).toContainText("Proposed blocker status: canceled");
+  await expect(page.locator("#dependency-candidates")).toContainText("Cancellation does not supply the required output");
+  await page.locator("[data-candidate]").selectOption("accepted");
+  await page.locator("#dependency-candidates [data-review-note]").fill("The output is still required despite cancellation.");
+  await page.locator("#dependency-proposal-tools > summary").click();
+  await page.getByLabel("Preview graph", { exact: true }).selectOption("accepted");
+  await page.locator("#preview-proposals").click();
+  await expect(page.locator("#proposal-preview-content")).toContainText("2 recorded ready cards → 1 preview ready cards");
+  await expect(page.locator("#proposal-preview-content")).toContainText("DEMO-2");
+  await expect(page.locator("#proposal-preview-content")).toContainText("unresolved");
+  await expect(page.locator("#frontier [data-task]")).toHaveCount(2);
+});
