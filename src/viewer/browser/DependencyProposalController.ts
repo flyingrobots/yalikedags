@@ -52,7 +52,7 @@ export class DependencyProposalController {
       decisions: decisions.map(d => ({ blocker: d.blocker, dependent: d.dependent, outcome: d.outcome, note: d.note })) }, null, 2);
     new SnapshotBudget().parse(text);
     this.download(text, "yalikedags-proposal-evidence.json");
-    element("proposal-notice").textContent = "Evidence bundle exported with original source, local decisions, and the accepted graph analysis. It does not certify tracker writes.";
+    element("proposal-notice").textContent = "Evidence bundle exported as plaintext with original source, people, account metadata, local decisions, and accepted graph analysis. It does not certify tracker writes. Downloaded files remain on your device until you delete them.";
   }
 
   private async exportPlan(): Promise<void> {
