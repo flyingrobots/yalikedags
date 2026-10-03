@@ -6,7 +6,7 @@ An executable Linear issue represents one coherent PR: a reviewable change with 
 
 Atomic means one verifiable outcome, not one file, one layer, or one commit inside the PR. An API change and its consumers may belong together. Conversely, one feature may require several independently mergeable PRs.
 
-This is the planning contract for yalikedags. The current tool analyzes supplied dependency edges and flags possible splits; it does not yet discover dependencies or generate and apply split proposals.
+This is the planning contract for yalikedags. The current tool analyzes supplied dependency edges, discovers bounded local issue-reference candidates for human review, and flags possible splits. General semantic discovery and generating or applying split proposals remain planned.
 
 ## A working state at every merge
 
