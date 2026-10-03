@@ -4,6 +4,8 @@ All notable changes to this project are documented here. The format follows Keep
 
 ## [Unreleased]
 
+- Keep hedged, conditional, historical, and unpunctuated-question references uncertain during local discovery.
+
 - Distinguish an exact candidate ceiling from omitted pairs and continue scanning to strengthen retained evidence after the limit.
 
 - Show candidate blocker status and explicitly disclose that accepting a canceled prerequisite leaves its dependent unresolved.

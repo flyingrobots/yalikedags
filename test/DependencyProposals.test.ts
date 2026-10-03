@@ -169,3 +169,10 @@ test("an exact candidate ceiling is complete and retained evidence can improve a
   expect(candidates).toHaveLength(2000);
   expect(candidates.find(c => c.blocker === "b-0")).toMatchObject({ confidence: "explicit", evidence: "Requires DEMO-0." });
 });
+
+test("hedged, conditional, historical, and unpunctuated questions remain uncertain", () => {
+  for (const description of ["This may need DEMO-1.", "It might depend on DEMO-1", "Could require DEMO-1", "Should require DEMO-1", "Used to require DEMO-1", "Requires DEMO-1 if the flag is on", "Requires DEMO-1 unless replaced", "Requires DEMO-1 once enabled", "Neither requires DEMO-1", "Nor requires DEMO-1", "Does this require DEMO-1"]) {
+    const capture = analyzer.analyse(tasks.map(t => t.id === "b" ? t.with({ description }) : t), "synthetic");
+    expect(new DependencyDiscoveryService().discover(capture.dag)[0]?.confidence).toBe("uncertain");
+  }
+});
