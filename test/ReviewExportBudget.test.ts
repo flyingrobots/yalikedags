@@ -32,3 +32,28 @@ test("full export enforces the combined JSON structure budget", () => {
   expect(() => new SnapshotBudget().parse(JSON.stringify(new DependencyReviewCodec().encode(review)))).not.toThrow();
   expect(() => renderer.render(analysis, review)).toThrow("maximum structure");
 });
+
+test("admissible review input cannot expand into an unreopenable HTML or served snapshot", async () => {
+  // oracle: derived fields can exceed the structure budget even when the original input and review fit.
+  const { JsonSnapshotRepositoryAdapter } = await import("../src/adapters/input/JsonSnapshotRepositoryAdapter.ts");
+  const { HtmlRendererAdapter } = await import("../src/adapters/output/HtmlRendererAdapter.ts");
+  const { ViewerData } = await import("../src/viewer/ViewerData.ts");
+  const task = new Task({ id: "a", title: "Example", labels: Array.from({ length: 99000 }, (_, i) => String(i)) });
+  const review = record([task], Array.from({ length: 960 }, (_, i) => `Evidence ${String(i)}`));
+  const input = JSON.stringify({ schema: "yalikedags/snapshot/2", tasks: [task.toFields()], dependencyReview: new DependencyReviewCodec().encode(review) });
+  const source = new JsonSnapshotRepositoryAdapter(input, "synthetic");
+  const analysis = analyzer.analyse(await source.load(), source.describe(), { review: source.review });
+  expect(source.review).toEqual(review);
+  expect(() => { new HtmlRendererAdapter().render(analysis); }).toThrow("maximum structure");
+  expect(() => { new ViewerData().render(analysis); }).toThrow("maximum structure");
+});
+
+test("HTML and served snapshot payloads enforce their combined byte budget", async () => {
+  // oracle: every producer rejects oversized embedded review data before reporting a usable viewer.
+  const { HtmlRendererAdapter } = await import("../src/adapters/output/HtmlRendererAdapter.ts");
+  const { ViewerData } = await import("../src/viewer/ViewerData.ts");
+  const tasks = Array.from({ length: 81 }, (_, i) => new Task({ id: String(i), title: "Example", description: "d".repeat(60000), blockedBy: i === 0 ? [] : ["0"] }));
+  const analysis = analyzer.analyse(tasks, "synthetic", { review: record(tasks) });
+  expect(() => { new HtmlRendererAdapter().render(analysis); }).toThrow("maximum file size");
+  expect(() => { new ViewerData().render(analysis); }).toThrow("maximum file size");
+});
