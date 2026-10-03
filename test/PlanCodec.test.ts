@@ -120,3 +120,10 @@ describe("guarded proposal wire compatibility", () => {
     expect(() => codec.decode(JSON.stringify({ schema: "yalikedags/plan/2", ...fullPlan().toJSON() }))).toThrow(/prerequisiteVersion must be a string/);
   });
 });
+
+test("guarded proposal plans refuse mutations outside accepted relation additions", () => {
+  for (const mutation of [new RemoveBlockingRelation("a", "b"), new SetEstimate("a", 2, 1), new SetMilestone("a", "Next", null)]) {
+    expect(() => new Plan({ mutations: [mutation], unmatched: [], desiredSource: "proposal:accepted",
+      currentSource: "linear:Example", createdAt: "2026-09-23", labels: {}, prerequisiteVersion: "a".repeat(64) })).toThrow(/guarded.*only.*add-blocking-relation/);
+  }
+});

@@ -4,6 +4,8 @@ All notable changes to this project are documented here. The format follows Keep
 
 ## [Unreleased]
 
+- Enforce additions-only mutations in guarded proposal plans, including hand-edited input, while retaining ordinary reconciliation plans.
+
 - Version evidence-guarded proposal plans separately so older CLIs refuse them instead of silently omitting the prerequisite freshness check.
 
 - Discover bounded issue-reference dependency candidates locally in stable task-identity order, retain bounded cited evidence and human dispositions, preview proposed/accepted graph plans, and export evidence plus accepted relation plans. Disclose exhausted discovery and rationale-free acceptance as review exceptions. Reject stale-scope or rationale-free imported acceptances at plan export and keep stale-scope decisions out of accepted previews, check fresh prerequisite evidence before CLI writeback and verify the actual tracker result through the existing receipt path.

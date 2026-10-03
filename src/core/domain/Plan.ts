@@ -47,6 +47,9 @@ export class Plan {
 
   constructor(f: PlanFields) {
     if (f.prerequisiteVersion !== undefined && !/^[a-f0-9]{64}$/.test(f.prerequisiteVersion)) { throw new Error("plan: invalid prerequisite version"); }
+    if (f.prerequisiteVersion !== undefined && f.mutations.some((m) => m.kind !== "add-blocking-relation")) {
+      throw new Error("plan: guarded proposals allow only add-blocking-relation mutations");
+    }
     this.prerequisiteVersion = f.prerequisiteVersion;
     this.mutations = Object.freeze([...f.mutations]);
     this.unmatched = Object.freeze([...f.unmatched]);
