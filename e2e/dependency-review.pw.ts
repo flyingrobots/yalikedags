@@ -43,6 +43,8 @@ test("changed source makes recorded relationship decisions historical", async ({
 
 test("storage failure leaves a usable review with an explicit export recovery", async ({ page }) => {
   // oracle: persistence failure must not claim a durable save or prevent in-page review.
+  const { readFileSync } = await import("node:fs");
+  const { JsonSnapshotRepositoryAdapter } = await import("../src/adapters/input/JsonSnapshotRepositoryAdapter.ts");
   await page.addInitScript(() => {
     Object.defineProperty(window, "localStorage", { get: () => { throw new DOMException("Storage unavailable", "SecurityError"); } });
   });
@@ -52,6 +54,13 @@ test("storage failure leaves a usable review with an explicit export recovery", 
   await page.getByRole("button", { name: "Record review", exact: true }).click();
   await expect(page.locator("#dependency-review-notice")).toContainText("browser storage failed");
   await expect(page.locator("#dependency-review-status")).toContainText("Reviewed with exceptions");
+  await page.getByRole("button", { name: "Import/Export", exact: true }).click();
+  const download = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Export snapshot JSON", exact: true }).click();
+  const path = await (await download).path();
+  const reopened = new JsonSnapshotRepositoryAdapter(readFileSync(path, "utf8"), "recovery");
+  await reopened.load();
+  expect(reopened.review?.basis).toBe("Checked recorded relationships.");
 });
 
 test("full exports carry a review claim while structure-only exports omit it", async ({ page }, info) => {
@@ -139,4 +148,30 @@ test("offline inconsistent derived metadata cannot erase a captured obligation",
   await page.goto(pathToFileURL(path).href);
   await expect(page.locator("#dependency-review-status")).toContainText("Reviewed with exceptions");
   await expect(page.locator("#dependency-review-status")).toContainText("Canceled prerequisite a");
+});
+
+test("oversized recovery export reports the limit and retains the in-page review", async ({ page }) => {
+  // oracle: failed persistence never promises an unreopenable download or silently drops reviewed evidence.
+  const { Task } = await import("../src/core/domain/Task.ts");
+  const { AnalysisService } = await import("../src/core/services/AnalysisService.ts");
+  const { ViewerData } = await import("../src/viewer/ViewerData.ts");
+  const tasks = Array.from({ length: 81 }, (_, i) => new Task({ id: String(i), title: "Example", description: "d".repeat(60000), blockedBy: i === 0 ? [] : ["0"] }));
+  const data = new ViewerData().render(new AnalysisService({ today: (): string => "2026-10-02" }).analyse(tasks, "synthetic large capture"));
+  await page.route("**/viewer.json", route => route.fulfill({ contentType: "application/json", body: data }));
+  await page.addInitScript(() => { Object.defineProperty(window, "localStorage", { get: () => { throw new DOMException("Storage unavailable", "SecurityError"); } }); });
+  await page.goto("http://127.0.0.1:4178/");
+  await page.getByRole("button", { name: "Review dependencies", exact: true }).click();
+  await page.getByLabel("Review basis", { exact: true }).fill("Retain this review evidence");
+  await page.locator("#dependency-review-form summary").click();
+  await page.locator("[data-review-note]").evaluateAll(notes => {
+    notes.forEach(note => { if (note instanceof HTMLInputElement) { note.value = "n".repeat(60000); } });
+  });
+  await page.getByRole("button", { name: "Record review", exact: true }).click();
+  await expect(page.locator("#dependency-review-notice")).toContainText("Full snapshot export is unavailable");
+  await expect(page.locator("#dependency-review-notice")).toContainText("browser storage failed");
+  await expect(page.locator("#dependency-review-status")).toContainText("Retain this review evidence");
+  await page.getByRole("button", { name: "Import/Export", exact: true }).click();
+  await page.getByRole("button", { name: "Export snapshot JSON", exact: true }).click();
+  await expect(page.locator("#export-warning")).toContainText("snapshot_limit");
+  await expect(page.locator("#dependency-review-status")).toContainText("Retain this review evidence");
 });

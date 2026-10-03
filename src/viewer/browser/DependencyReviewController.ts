@@ -5,6 +5,7 @@ import { DependencyReviewService } from "../../core/services/DependencyReviewSer
 import { DependencyReviewCodec } from "../../adapters/review/DependencyReviewCodec.ts";
 import { ReviewIdentityAdapter } from "../../adapters/review/ReviewIdentityAdapter.ts";
 import { SnapshotBudget } from "../../adapters/input/SnapshotBudget.ts";
+import { JsonSnapshotAdapter } from "../../adapters/output/JsonSnapshotAdapter.ts";
 import { element } from "./Dom.ts";
 
 /** Local review evidence is independent of tracker data; failed persistence is explicitly reported. */
@@ -60,10 +61,21 @@ export class DependencyReviewController {
     const text = JSON.stringify(this.codec.encode(review));
     new SnapshotBudget().parse(text);
     this.review = review; this.origin = "Local review record (self-reported)";
-    try { localStorage.setItem(this.key, text); this.notice("Review saved on this browser. Export a full snapshot to carry its evidence with the project."); }
-    catch { this.notice("Review is available only in this page: browser storage failed. Export a full snapshot before leaving to preserve it."); }
+    this.persist(text);
     element("dependency-review-form").hidden = true;
     this.render();
+  }
+
+  private persist(text: string): void {
+    let persistence = "Review saved on this browser.";
+    try { localStorage.setItem(this.key, text); }
+    catch { persistence = "Review is available only in this page: browser storage failed."; }
+    try {
+      new JsonSnapshotAdapter().render(this.analysis, this.review);
+      this.notice(`${persistence} Export a full snapshot before leaving to preserve it.`);
+    } catch (error) {
+      this.notice(`${persistence} Full snapshot export is unavailable: ${error instanceof Error ? error.message : "snapshot could not be exported"}. Keep this page open and copy your review evidence before leaving.`);
+    }
   }
 
   private render(): void {
