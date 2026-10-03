@@ -18,7 +18,7 @@ suite("isolated live proposal acceptance", () => {
   const fixture = new ProposalFixture();
   beforeAll(async () => { await fixture.provision(); }, 120000);
   afterAll(async () => {
-    await fixture.reset();
+    if (!await fixture.reset()) { return; }
     const restored = await fixture.read();
     expect(restored.find(t => t.id === fixture.id("consumer"))?.blockedBy).toEqual([]);
     expect(restored.find(t => t.id === fixture.id("consumer"))?.description ?? "").toBe("");

@@ -21,16 +21,28 @@ export class ProposalFixture {
     const teams = nodes((await client.query("query($key:String!){teams(first:2,filter:{key:{eq:$key}}){nodes{id}}}", { key: env.team }))["teams"]);
     const team = teams.length === 1 ? str(teams[0]?.["id"]) : undefined;
     if (team === undefined) { throw new Error("Proposal fixture needs exactly one existing team"); }
-    const projects = nodes((await client.query("query($name:String!){projects(first:2,filter:{name:{eq:$name}}){nodes{id}}}", { name: this.projectName }))["projects"]);
+    await this.ensureProject(team);
+    await this.ensureIssues(team);
+    await this.reset();
+  }
+
+  private async ensureProject(team: string): Promise<void> {
+    const client = this.client();
+    const projects = nodes((await client.query("query($name:String!){projects(first:2,filter:{name:{eq:$name}}){nodes{id teams(first:100){nodes{id}}}}}", { name: this.projectName }))["projects"]);
     if (projects.length > 1) { throw new Error("Ambiguous proposal fixture project"); }
+    if (projects[0] !== undefined) { ProposalFixture.assertTeam(projects[0], team); }
     this.project = str(projects[0]?.["id"]) ?? "";
     if (!this.project) {
       const created = await client.query("mutation($input:ProjectCreateInput!){projectCreate(input:$input){success project{id}}}", { input: { name: this.projectName, teamIds: [team] } });
       this.project = str(rec(rec(created["projectCreate"])["project"])["id"]) ?? "";
     }
     if (!this.project) { throw new Error("Proposal fixture project creation failed"); }
-    await this.ensureIssues(team);
-    await this.reset();
+  }
+
+  static assertTeam(project: Record<string, unknown>, team: string): void {
+    if (!nodes(project["teams"]).some(entry => str(entry["id"]) === team)) {
+      throw new Error("Proposal fixture project does not belong to the configured team; refusing writes");
+    }
   }
 
   private async ensureIssues(team: string): Promise<void> {
@@ -59,11 +71,12 @@ export class ProposalFixture {
   credentials(): string { return this.key; }
   id(name: string): string { const id = this.ids.get(name); if (!id) { throw new Error("Missing fixture endpoint"); } return id; }
 
-  async reset(): Promise<void> {
-    if (this.ids.size !== 2) { return; }
+  async reset(): Promise<boolean> {
+    if (this.ids.size !== 2) { return false; }
     await this.read();
     await new LinearTaskWriterAdapter(new FetchHttpAdapter(), this.key, this.project).removeBlockingRelation(this.id("schema"), this.id("consumer"));
     await this.describe("");
+    return true;
   }
 
   async describe(description: string): Promise<void> {
