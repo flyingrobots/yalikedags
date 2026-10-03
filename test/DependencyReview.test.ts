@@ -24,11 +24,11 @@ const review = (version: string, exceptions: string[] = []): DependencyReview =>
 test("review completion is explicitly bounded by content and scope", async () => {
   // oracle: no assertion exists before review, and unresolved exceptions survive completion.
   const version = await identity.identify(original);
-  expect(service.state(undefined, version, original.dag)).toBe("unreviewed");
-  expect(service.state(review(version), version, original.dag)).toBe("reviewed");
-  expect(service.state(review(version, ["External approval missing"]), version, original.dag)).toBe("exceptions");
-  expect(service.state(review(version), version, analyzer.analyse([task, consumer, new Task({ id: "new", title: "New" })], "synthetic").dag)).toBe("stale");
-  expect(service.state(review(version), version, analyzer.analyse([task], "synthetic").dag)).toBe("stale");
+  expect(service.state(undefined, version, original)).toBe("unreviewed");
+  expect(service.state(review(version), version, original)).toBe("reviewed");
+  expect(service.state(review(version, ["External approval missing"]), version, original)).toBe("exceptions");
+  expect(service.state(review(version), version, analyzer.analyse([task, consumer, new Task({ id: "new", title: "New" })], "synthetic"))).toBe("stale");
+  expect(service.state(review(version), version, analyzer.analyse([task], "synthetic"))).toBe("stale");
 });
 
 test("prerequisite evidence changes invalidate the review", async () => {
@@ -38,10 +38,10 @@ test("prerequisite evidence changes invalidate the review", async () => {
     task.with({ parent: "parent" }), task.with({ children: ["child"] }), task.with({ labels: ["container"] })];
   for (const changed of changes) {
     const next = await identity.identify(analyzer.analyse([changed, consumer], "synthetic"));
-    expect(service.state(review(version), next, original.dag)).toBe("stale");
+    expect(service.state(review(version), next, original)).toBe("stale");
   }
   const next = await identity.identify(analyzer.analyse([task, consumer.with({ blockedBy: [] })], "synthetic"));
-  expect(service.state(review(version), next, original.dag)).toBe("stale");
+  expect(service.state(review(version), next, original)).toBe("stale");
 });
 
 test("unchanged prerequisite evidence survives capture and presentation changes", async () => {
@@ -84,10 +84,34 @@ test("relationship dispositions are scoped to their evidence version", async () 
   for (const outcome of ["accepted", "rejected", "unreviewed"] as const) {
     const record = new DependencyReview({ sourceVersion: version, taskIds: ["a", "b"], basis: "Reviewed source", exceptions: [], reviewedAt: "2026-10-02T12:00:00Z", reviewer: "Example",
       decisions: [new ReviewDecision({ blocker: "a", dependent: "b", outcome, note: "Recorded evidence" })] });
-    expect(service.state(record, version, original.dag)).toBe(outcome === "accepted" ? "reviewed" : "exceptions");
+    expect(service.state(record, version, original)).toBe(outcome === "accepted" ? "reviewed" : "exceptions");
     const changed = await identity.identify(analyzer.analyse([task.with({ description: "New evidence" }), consumer], "synthetic"));
-    expect(service.state(record, changed, original.dag)).toBe("stale");
+    expect(service.state(record, changed, original)).toBe("stale");
   }
   const incomplete = new DependencyReview({ sourceVersion: version, taskIds: ["a", "b"], basis: "Only task descriptions", exceptions: [], reviewedAt: "2026-10-02T12:00:00Z", reviewer: "Example" });
-  expect(service.state(incomplete, version, original.dag)).toBe("exceptions");
+  expect(service.state(incomplete, version, original)).toBe("exceptions");
+});
+
+test("imported matching review cannot hide known canceled prerequisite uncertainty", async () => {
+  // oracle: a source-matching imported claim with no declared exceptions cannot erase a known missing output.
+  const current = analyzer.analyse([task.with({ status: "canceled" }), consumer], "synthetic");
+  const version = await identity.identify(current);
+  const imported = new DependencyReviewCodec().decode(new DependencyReviewCodec().encode(review(version)));
+  expect(service.state(imported, version, current)).toBe("exceptions");
+});
+
+
+test("matching claims retain cycles, missing and unknown blockers, and source warnings", async () => {
+  // oracle: current observed uncertainty is never erased by an imported empty exception list.
+  const cases = [analyzer.analyse([task.with({ blockedBy: ["b"] }), consumer], "synthetic"),
+    analyzer.analyse([task, consumer.with({ blockedBy: ["missing"] })], "synthetic"),
+    analyzer.analyse([task.with({ status: "unknown" }), consumer], "synthetic"),
+    analyzer.analyse([task, consumer], "synthetic", { warnings: ["Captured source uncertainty"] })];
+  for (const current of cases) {
+    const version = await identity.identify(current);
+    const decisions = current.dag.tasks.flatMap(t => t.blockedBy.map(blocker => new ReviewDecision({ blocker, dependent: t.id, outcome: "accepted", note: "Imported claim" })));
+    const record = new DependencyReview({ sourceVersion: version, taskIds: ["a", "b"], basis: "Imported claim", exceptions: [], reviewedAt: "2026-10-02", reviewer: "Example", decisions });
+    expect(service.state(record, version, current)).toBe("exceptions");
+    expect(service.knownExceptions(current).length).toBeGreaterThan(0);
+  }
 });

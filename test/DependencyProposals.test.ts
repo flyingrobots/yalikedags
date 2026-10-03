@@ -47,7 +47,7 @@ test("weak, negated, and reverse references stay uncertain and rejected candidat
 test("accepted review produces a version-guarded relation-only plan and a verified receipt", async () => {
   // oracle: one accepted edge leads to one independently verified addition, leaving the source capture intact.
   const record = await review();
-  expect(new DependencyReviewService().state(record, record.sourceVersion, analysis.dag)).toBe("reviewed");
+  expect(new DependencyReviewService().state(record, record.sourceVersion, analysis)).toBe("reviewed");
   const plan = new PlanJsonCodec().decode(new PlanJsonCodec().encode(new DependencyProposalService().plan(analysis, record, record.sourceVersion)));
   expect(plan.prerequisiteVersion).toBe(record.sourceVersion);
   expect(plan.mutations.map(m => m.kind)).toEqual(["add-blocking-relation"]);

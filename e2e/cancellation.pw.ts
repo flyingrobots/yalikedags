@@ -30,3 +30,20 @@ test("offline viewer exposes canceled prerequisite obligations without offering 
   await page.getByRole("button", { name: "Findings", exact: true }).click();
   await expect(page.locator("#findings")).toContainText("Canceled prerequisite schema");
 });
+
+test("in-progress task details retain execution status and unresolved canceled output", async ({ page }) => {
+  // oracle: execution status is preserved, but starting work does not satisfy a canceled prerequisite.
+  const a = new AnalysisService(new FixedClockAdapter("2026-10-02")).analyse([
+    new Task({ id: "schema", title: "Schema", status: "canceled" }),
+    new Task({ id: "working", title: "Working consumer", status: "in-progress", blockedBy: ["schema"] }),
+  ], "Synthetic in-progress cancellation");
+  mkdirSync("dist", { recursive: true });
+  writeFileSync("dist/cancellation-working.html", new HtmlRendererAdapter().render(a));
+  await page.goto(pathToFileURL(resolve("dist/cancellation-working.html")).href);
+  await expect(page.locator("body")).toHaveAttribute("data-ready", "true");
+  await page.getByRole("button", { name: "Tasks", exact: true }).click();
+  await page.locator('.task-title[data-task="working"]').click();
+  await expect(page.locator("#detail")).toContainText("in-progress");
+  await expect(page.locator("#detail")).toContainText("Unresolved prerequisite obligations");
+  await expect(page.locator("#detail")).toContainText("schema");
+});

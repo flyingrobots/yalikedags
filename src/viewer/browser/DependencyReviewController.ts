@@ -53,9 +53,7 @@ export class DependencyReviewController {
   current(): DependencyReview | undefined { return this.review; }
 
   private record(): void {
-    const known = [...this.analysis.warnings,
-      ...this.analysis.findings.filter(finding => ["cycle", "dangling-blocker", "canceled-blocker"].includes(finding.kind)).map(finding => finding.detail),
-      ...this.analysis.dag.tasks.filter(task => this.analysis.stateOf(task.id) === "unresolved").map(task => `Unresolved task: ${task.key}`)];
+    const known = new DependencyReviewService().knownExceptions(this.analysis);
     const exceptions = [...new Set([...this.field("review-exceptions").value.split("\n").map(value => value.trim()).filter(Boolean), ...known])];
     const review = new DependencyReview({ sourceVersion: this.sourceVersion, taskIds: this.analysis.dag.tasks.map(task => task.id),
       basis: this.field("review-basis").value.trim(), exceptions, reviewedAt: new Date().toISOString(), reviewer: this.field("reviewer-name").value.trim(), decisions: this.draftDecisions() });
@@ -69,15 +67,16 @@ export class DependencyReviewController {
   }
 
   private render(): void {
-    const status = new DependencyReviewService().state(this.review, this.sourceVersion, this.analysis.dag);
+    const status = new DependencyReviewService().state(this.review, this.sourceVersion, this.analysis);
     const heading = document.createElement("strong");
     heading.textContent = { unreviewed: "Dependency review is incomplete.", reviewed: "Reviewed for this source version", exceptions: "Reviewed with exceptions", stale: "Dependency review is stale" }[status];
     const target = element("dependency-review-status");
     target.replaceChildren(heading);
     this.paragraph("A review records evidence checked for this scope; it does not prove that every real-world dependency was discovered.");
     if (this.review === undefined) { return; }
+    const exceptions = [...new Set([...this.review.exceptions, ...new DependencyReviewService().knownExceptions(this.analysis)])];
     const undecided = this.review.decisions.filter(decision => decision.outcome !== "accepted").length;
-    this.paragraph(`${String(this.review.taskIds.length)} captured tasks · ${String(this.review.exceptions.length)} exceptions · ${String(undecided)} rejected or unreviewed relationships.`);
+    this.paragraph(`${String(this.review.taskIds.length)} captured tasks · ${String(exceptions.length)} exceptions · ${String(undecided)} rejected or unreviewed relationships.`);
     if (status === "stale") { this.paragraph("Task scope or prerequisite evidence changed. Previous decisions are historical; review this capture again before relying on them."); }
     const details = document.createElement("details");
     const summary = document.createElement("summary"); summary.textContent = "Review evidence, scope and exceptions";
@@ -86,7 +85,7 @@ export class DependencyReviewController {
     details.append(summary, scope, version);
     this.paragraph(`${this.origin}. ${this.review.reviewer} · ${this.review.reviewedAt}.`, details);
     this.paragraph(`Basis: ${this.review.basis}`, details);
-    for (const exception of this.review.exceptions) { this.paragraph(`Unresolved exception: ${exception}`, details); }
+    for (const exception of exceptions) { this.paragraph(`Unresolved exception: ${exception}`, details); }
     if (status === "exceptions") { this.paragraph("Resolve listed exceptions and review every recorded relationship and discovered candidate before claiming complete coverage.", details); }
     for (const decision of this.review.decisions) {
       const row = document.createElement("p"); row.textContent = `${decision.blocker} → ${decision.dependent}: ${decision.outcome}${status === "stale" ? " (historical)" : ""}. ${decision.note}`; details.append(row);
@@ -110,7 +109,7 @@ export class DependencyReviewController {
   }
 
   private restoreDecisions(): void {
-    const current = new DependencyReviewService().state(this.review, this.sourceVersion, this.analysis.dag) !== "stale";
+    const current = new DependencyReviewService().state(this.review, this.sourceVersion, this.analysis) !== "stale";
     const decisions = new Map((current ? this.review?.decisions ?? [] : []).map(decision => [ReviewDecision.key(decision.blocker, decision.dependent), decision]));
     document.querySelectorAll<HTMLSelectElement>("[data-review-edge]").forEach(control => {
       const decision = decisions.get(ReviewDecision.key(control.dataset["blocker"] ?? "", control.dataset["dependent"] ?? ""));
