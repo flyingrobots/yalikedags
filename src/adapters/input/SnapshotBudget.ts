@@ -18,12 +18,23 @@ export class SnapshotBudget {
       }, 0);
       if (edges > SnapshotBudget.edges) { this.fail("maximum blocker reference count is 20000"); }
     }
-    this.inspect(value);
+    this.inspectSnapshot(value);
     return value;
   }
 
-  private inspect(raw: unknown): void {
-    const stack = [{ value: raw, depth: 0 }];
+  private inspectSnapshot(value: unknown): void {
+    const snapshot = rec(value);
+    if (snapshot["schema"] === "yalikedags/snapshot/2" && rec(snapshot["planning"])["schema"] === "yalikedags/planning/1") {
+      const { planning, ...captured } = snapshot;
+      this.inspect(captured, 0);
+      this.inspect(planning, 1);
+      return;
+    }
+    this.inspect(value, 0);
+  }
+
+  private inspect(raw: unknown, depth: number): void {
+    const stack = [{ value: raw, depth }];
     let nodes = 0;
     while (stack.length > 0) {
       const entry = stack.pop();

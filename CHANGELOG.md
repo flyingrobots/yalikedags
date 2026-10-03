@@ -4,7 +4,7 @@ All notable changes to this project are documented here. The format follows Keep
 
 ## [Unreleased]
 
-- Validate exact Kahn wave positions, planning coverage, and the displayed wave grid against the captured graph, expose unresolved work separately from shared prerequisites and temporary workstreams, and retain exact topology/state evidence in snapshot exports. Reuse computed waves for shared prerequisites and groups while retaining independent boundary validation. Preserve full-analysis task state when filtering the displayed graph.
+- Validate exact Kahn wave positions, planning coverage, and the displayed wave grid against the captured graph, expose unresolved work separately from shared prerequisites and temporary workstreams, and retain exact topology/state evidence in snapshot exports. Bound additive planning evidence separately from captured data so previously admissible large exports remain usable. Reuse computed waves for shared prerequisites and groups while retaining independent boundary validation. Preserve full-analysis task state when filtering the displayed graph.
 
 - Record a manual dependency review with explicit source scope, evidence basis, relationship dispositions, and unresolved exceptions. Recompute structural uncertainty from captured task facts even when imported claims or derived metadata omit it. Refuse unreopenable combined review exports and served viewer payloads with visible recovery limits, including derived HTML snapshot data. Disclose missing relationship decisions and out-of-capture claims explicitly. Detect changed prerequisite evidence, distinguish local records from imported claims, preserve reviews in full exports, and omit them from structure-only exports.
 
