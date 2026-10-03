@@ -7,6 +7,7 @@ export class GridRow {
     /** `cells[i]` is this row's members of wave `i`. Same length for every row. */
     readonly cells: readonly (readonly string[])[],
   ) {
+    this.cells = Object.freeze(cells.map(cell => Object.freeze([...cell])));
     Object.freeze(this);
   }
 }
@@ -17,6 +18,7 @@ export class Grid {
     readonly waves: number,
     readonly rows: readonly GridRow[],
   ) {
+    this.rows = Object.freeze([...rows]);
     Object.freeze(this);
   }
 }

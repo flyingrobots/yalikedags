@@ -435,6 +435,8 @@ footer:has(#selection-status:empty):has(#viewer-notice[hidden]) {display:var(--u
 .graph-region-label {fill:var(--muted);font-size:var(--graph-region-font)}
 .planning-warning {padding:var(--snapshot-summary-padding);background:var(--snapshot-summary-background);border-bottom:var(--snapshot-summary-border);font-size:var(--snapshot-summary-font)}
 
+#planning-coverage { max-height: 20rem; overflow: auto; }
+
 /* Review is an explicit disclosure; long evidence stays within the workspace. */
 #dependency-review-form { display: grid; gap: 0.75rem; max-width: 48rem; margin-block: 1rem; }
 #dependency-review-form[hidden] { display: none; }

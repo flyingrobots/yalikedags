@@ -24,7 +24,7 @@ Written by `sync` and `render --format json`; read by `--snapshot` and served at
 
 ## Import budgets
 
-The reader rejects snapshots above 8 MiB, 5,000 tasks, or 20,000 blocker references. Any string is limited to 65,536 UTF-16 code units. The JSON structure is limited to 100,000 values and 32 nesting levels, including ignored fields. These are simultaneous limits, not a guarantee that every graph below the task ceiling is inexpensive to analyze. Limit failures report `snapshot_limit`; split an oversized export at meaningful project boundaries.
+The reader rejects snapshots above 8 MiB, 5,000 tasks, or 20,000 blocker references. Any string is limited to 65,536 UTF-16 code units. The captured snapshot, including review evidence and ignored fields, is limited to 100,000 JSON values. Schema-tagged `planning` metadata has a separate 100,000-value allowance so additive planning evidence does not consume the captured-data allowance; both parts together permit at most 200,000 values. The whole file remains limited to 8 MiB and 32 nesting levels, and every subtree is inspected. Unrecognized planning schemas receive no separate allowance. These are simultaneous limits, not a guarantee that every graph below the task ceiling is inexpensive to analyze. Limit failures report `snapshot_limit`; split an oversized export at meaningful project boundaries.
 
 ## Task fields
 
@@ -90,3 +90,9 @@ Choose **Structure only** in Import/Export, or pass `--redact` to `sync` or `ren
 - Recomputed: all derived views and findings. Effort defaults to one, due dates are absent, `asOf` is the placeholder `1970-01-01`, `capturedAt` is `null`, and a fixed warning describes the reduction. Resource conflicts and urgency cannot preserve their original meaning.
 
 Full export remains the default and preserves all snapshot fields. Neither choice modifies the loaded project. The regression tests in `test/Redaction.test.ts` verify content removal and relation preservation through CLI JSON/HTML exports; `e2e/export-privacy.pw.ts` verifies both browser choices and unchanged task content in served and offline viewers.
+
+## Planning coverage
+
+The additive `planning` field uses `yalikedags/planning/1`. Its `graph.nodes` is the canonical sorted list of task IDs, statuses, and sorted `blockedBy` references: the exact supplied topology and state behind the partition, not a claim that dependency discovery is complete. `included` lists active cards; `excluded` lists completed/canceled cards; `containers` annotates labeled tracking containers. `shared`, `workstreams[].tasks`, and `exceptions` partition `included` without duplication or omission. `crossGroupEdges` retains dependencies across shared/group boundaries. Exceptions have no wave or group. Imported waves must match the recomputed earliest Kahn layer for each scheduled task; a merely topologically valid delayed partition is rejected.
+
+Workstream IDs use the smallest current member ID, are not unique across graph versions, and are not durable ownership identities. A refresh can change membership and IDs. This is a temporary analytical grouping, not a promise of cohesive deliverables. Like other derived fields, planning evidence is recomputed when importing a snapshot.

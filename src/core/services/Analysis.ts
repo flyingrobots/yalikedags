@@ -7,6 +7,7 @@ import type { Workstream } from "./WavesService.ts";
 import type { CriticalPath } from "./CriticalPathService.ts";
 import type { Finding } from "./AuditService.ts";
 import type { Grid } from "./GridService.ts";
+import { PlanningCoverage } from "./PlanningCoverage.ts";
 
 export interface AnalysisFields {
   review?: DependencyReview | undefined;
@@ -30,6 +31,7 @@ export interface AnalysisFields {
 
 /** Everything the renderers and the viewer need, computed once from a Dag. Read-only. */
 export class Analysis {
+  readonly planning: PlanningCoverage;
   readonly review: DependencyReview | undefined;
   readonly dag: Dag;
   readonly source: string;
@@ -49,6 +51,7 @@ export class Analysis {
   readonly grid: Grid;
 
   constructor(f: AnalysisFields) {
+    this.planning = new PlanningCoverage({ dag: f.dag, waves: f.waves, shared: f.gatekeepers, workstreams: f.workstreams, grid: f.grid });
     this.review = f.review;
     this.dag = f.dag;
     this.source = f.source;
@@ -59,9 +62,9 @@ export class Analysis {
     this.states = f.states;
     this.frontier = f.frontier;
     this.conflicts = f.conflicts;
-    this.waves = f.waves;
-    this.gatekeepers = f.gatekeepers;
-    this.workstreams = f.workstreams;
+    this.waves = Object.freeze(f.waves.map(wave => Object.freeze([...wave])));
+    this.gatekeepers = this.planning.shared;
+    this.workstreams = this.planning.workstreams;
     this.criticalByDepth = f.criticalByDepth;
     this.criticalByEffort = f.criticalByEffort;
     this.findings = f.findings;

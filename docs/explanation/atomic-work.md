@@ -48,7 +48,7 @@ Antichain waves contain tasks with no prerequisite reachability between them in 
 
 Workstreams should partition the executable planning scope without duplicate ownership or missing work: mutually exclusive, collectively exhaustive (MECE). Declare shared prerequisites and unresolved exceptions explicitly. Preserve dependencies across workstreams; a partition does not mean every workstream can start immediately.
 
-The current implementation uses connected components after removing shared gatekeepers. That provides a topological partition of the remaining open tasks, but does not by itself establish cohesive PR-sized deliverables. See [derived views](derived-views.md) for the implemented algorithm.
+The current implementation uses connected components after removing shared gatekeepers. That provides a validated topological partition of schedulable tasks, with shared prerequisites and unschedulable exceptions separately accounted for, but does not by itself establish cohesive PR-sized deliverables. See [derived views](derived-views.md) for the implemented algorithm.
 
 ## Why the mainline should be bisectable
 

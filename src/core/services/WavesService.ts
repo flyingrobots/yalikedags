@@ -3,10 +3,11 @@ import { StateService } from "./StateService.ts";
 
 export class Workstream {
   constructor(
-    /** Stable name derived from the smallest member id. */
+    /** Deterministic for this member set, not a durable identity across captures. */
     readonly id: string,
     readonly tasks: readonly string[],
   ) {
+    this.tasks = Object.freeze([...tasks]);
     Object.freeze(this);
   }
 }
@@ -17,9 +18,9 @@ export class Workstream {
  * unsatisfied edges remain barriers to scheduling their dependents.
  *
  * Waves are Kahn layers, a forecast of parallelism, never a barrier.
- * Gatekeepers are open tasks with two or more open dependents: the shared
+ * Gatekeepers are schedulable tasks with two or more schedulable dependents: the shared
  * prerequisites. Workstreams are the connected components that remain once
- * gatekeepers are cut out. Every open non-gatekeeper task is in exactly
+ * gatekeepers are cut out. Every schedulable non-gatekeeper task is in exactly
  * one workstream, which is what MECE means here.
  */
 export class WavesService {
@@ -61,14 +62,14 @@ export class WavesService {
     return freed;
   }
 
-  gatekeepers(dag: Dag): string[] {
-    const open = new Set(this.state.open(dag));
+  gatekeepers(dag: Dag, waves: readonly (readonly string[])[] = this.waves(dag)): string[] {
+    const open = new Set(waves.flat());
     return [...open].filter((id) => dag.dependents(id).filter((d) => open.has(d)).length >= 2).sort();
   }
 
-  workstreams(dag: Dag): Workstream[] {
-    const open = new Set(this.state.open(dag));
-    const gates = new Set(this.gatekeepers(dag));
+  workstreams(dag: Dag, waves: readonly (readonly string[])[] = this.waves(dag)): Workstream[] {
+    const open = new Set(waves.flat());
+    const gates = new Set(this.gatekeepers(dag, waves));
     const members = [...open].filter((id) => !gates.has(id));
     const seen = new Set<string>();
     const streams: Workstream[] = [];

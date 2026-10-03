@@ -20,6 +20,9 @@ test("offline viewer exposes canceled prerequisite obligations without offering 
   await expect(page.locator("body")).toHaveAttribute("data-ready", "true");
   await expect(page.locator("#frontier [data-task]")).toHaveCount(0);
   await page.getByRole("button", { name: "Waves", exact: true }).click();
+  await page.locator("#planning-coverage summary").click();
+  await expect(page.locator("#planning-coverage")).toContainText("2 active cards · 2 outside waves");
+  await expect(page.locator("#planning-coverage")).toContainText("Exceptions: consumer, downstream");
   await expect(page.locator("#unscheduled summary")).toContainText("2 tasks");
   await page.locator('#unscheduled [data-task="downstream"]').click();
   await expect(page.locator("#detail")).toContainText("Unresolved prerequisite obligations");

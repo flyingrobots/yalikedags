@@ -1,5 +1,6 @@
 import { PlanningEvidence } from "../core/services/PlanningEvidence.ts";
 import { PrerequisiteService } from "../core/services/PrerequisiteService.ts";
+import { PlanningCoverageMarkup } from "./PlanningCoverageMarkup.ts";
 import { viewerMetadata } from "./ViewerMetadata.ts";
 import { ImpactMarkup } from "./ImpactMarkup.ts";
 import { ChangesMarkup } from "./ChangesMarkup.ts";
@@ -26,7 +27,7 @@ export class ViewerPanels {
       <div class="graph-legend" aria-label="Task states and dependency notation"><span class="legend-state ready">Ready</span><span class="legend-state in-progress">In progress</span><span class="legend-state blocked">Blocked</span><span class="legend-state unresolved">Unresolved</span><span class="legend-state done">Done</span><span class="legend-guide">→ blocker to dependent · Bold: critical path · Dashed: shared prerequisite</span></div></section>
       ${taskTableMarkup()}
       ${this.changePanel()}
-      <section id="grid-panel" class="panel scroll-panel"><div class="view-filter">${this.ownerControls("grid")}</div><p class="panel-intro">Workstreams × waves. A forecast of parallel work, not a schedule. Wave counts refer to the recorded graph, including containers; these are not executable PR counts or proof of independence.</p><div id="grid">${this.grid()}${this.unscheduled()}</div></section>
+      <section id="grid-panel" class="panel scroll-panel"><div class="view-filter">${this.ownerControls("grid")}</div><p class="panel-intro">Workstreams × waves. A forecast of parallel work, not a schedule. Wave counts refer to the recorded graph, including containers; these are not executable PR counts or proof of independence.</p>${new PlanningCoverageMarkup().render(this.analysis)}<div id="grid">${this.grid()}${this.unscheduled()}</div></section>
       <section id="details-panel" class="panel scroll-panel"><div id="detail"><p class="empty">Select a task to see its details and dependencies.</p></div></section>
       <section id="ready-panel" class="panel scroll-panel">${new OverviewMarkup(this.analysis).header()}<div class="overview-columns"><div class="ready-section"><div class="section-heading"><div><h3>No recorded open blockers</h3></div></div><div class="view-filter">${this.ownerControls("ready")}</div><ol id="frontier" class="task-list">${this.frontier()}</ol></div>${new OverviewMarkup(this.analysis).path()}</div></section>
       <section id="findings-panel" class="panel scroll-panel"><p class="panel-intro">${String(this.analysis.findings.length)} findings in this snapshot.</p><div id="findings">${new FindingsMarkup().render(this.analysis)}</div></section>
@@ -86,7 +87,7 @@ export class ViewerPanels {
     const unresolved = t.isDone() ? [] : new PrerequisiteService().unresolved(a.dag, t.id);
     const fields = [["Work kind (source evidence)", new PlanningEvidence().kind(t)], ["Dependency readiness", "Recorded blockers only; implementation readiness not verified"], ["State", a.stateOf(t.id)], ["Status", t.status], ["Priority", t.priority], ["Effort", t.effort],
       ["Assignee", t.assignee ?? "Unassigned"], ["Milestone", t.milestone], ["Due", t.due], ["Labels", t.labels.join(", ")],
-      ["Workstream", a.workstreamOf(t.id)]];
+      ["Analytical group (this capture only)", a.workstreamOf(t.id)]];
     const rows = fields.filter(([, value]) => value !== undefined && value !== "")
       .map(([label, value]) => `<dt>${esc(String(label))}</dt><dd>${esc(String(value))}</dd>`).join("");
     const link = t.url !== undefined && /^https?:\/\//i.test(t.url)

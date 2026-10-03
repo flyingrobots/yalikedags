@@ -15,7 +15,7 @@ import type { ViewerOptions } from "./ViewerMetadata.ts";
 const STATES: readonly TaskState[] = ["ready", "blocked", "in-progress", "done", "unresolved"];
 const FINDINGS: readonly FindingKind[] = ["isolated", "redundant-edge", "stale-blocker", "canceled-blocker", "dangling-blocker", "cycle", "split-candidate"];
 
-/** Decode server-derived analysis without rerunning scheduling or audit in the browser. */
+/** Decode supplied analysis and independently validate its planning before display. */
 export class ViewerDataCodec {
   async decode(text: string): Promise<{ analysis: Analysis; options: ViewerOptions }> {
     const raw: unknown = JSON.parse(text);
