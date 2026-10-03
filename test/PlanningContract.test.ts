@@ -49,6 +49,11 @@ test("invalid proposed partitions are rejected at the planning boundary", async 
   expect(() => new PlanningCoverage({ ...valid, waves: [["a"]] })).toThrow("omitted schedulable work");
   expect(() => new PlanningCoverage({ ...valid, workstreams: [] })).toThrow("group coverage");
   expect(() => new PlanningCoverage({ ...valid, workstreams: [new Workstream("a", ["a", "b"]), new Workstream("b", ["b"])] })).toThrow("duplicate");
+  expect(() => new PlanningCoverage({ ...valid, shared: ["missing"] })).toThrow("invalid shared prerequisite");
+  expect(() => new PlanningCoverage({ ...valid, shared: ["a"], workstreams: [new Workstream("b", ["b"])] })).toThrow("shared prerequisite rule mismatch");
+  expect(() => new PlanningCoverage({ ...valid, workstreams: [new Workstream("wrong", ["a", "b"])] })).toThrow("analytical group identity");
+  const disconnected = analyzer.analyse([task("a"), task("b")], "synthetic");
+  expect(() => new PlanningCoverage({ dag: disconnected.dag, grid: disconnected.grid, waves: disconnected.waves, shared: [], workstreams: [new Workstream("a", ["a", "b"])] })).toThrow("disconnected tasks");
 });
 
 test("cycles and disconnected work retain explicit coverage without invented ownership", () => {
