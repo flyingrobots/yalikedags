@@ -115,3 +115,24 @@ test("matching claims retain cycles, missing and unknown blockers, and source wa
     expect(service.knownExceptions(current).length).toBeGreaterThan(0);
   }
 });
+
+test("viewer uncertainty is derived from task facts instead of embedded derived metadata", async () => {
+  // oracle: editing serialized states/findings cannot erase captured canceled, missing, unknown, or cyclic obligations.
+  const { rec } = await import("../src/adapters/linear/GraphqlJson.ts");
+  const cases = [[task.with({ status: "canceled" }), consumer], [task, consumer.with({ blockedBy: ["missing"] })],
+    [task.with({ status: "unknown" }), consumer], [task.with({ blockedBy: ["b"] }), consumer]];
+  for (const tasks of cases) {
+    const a = analyzer.analyse(tasks, "synthetic");
+    const version = await identity.identify(a);
+    const record = new DependencyReview({ sourceVersion: version, taskIds: ["a", "b"], basis: "Imported assertion", exceptions: [], reviewer: "Example", reviewedAt: "2026-10-02",
+      decisions: tasks.flatMap(t => t.blockedBy.map(blocker => new ReviewDecision({ blocker, dependent: t.id, outcome: "accepted", note: "Imported assertion" }))) });
+    const data = rec(JSON.parse(new ViewerData().render(analyzer.analyse(tasks, "synthetic", { review: record }))));
+    const snapshot = rec(data["snapshot"]); snapshot["findings"] = [];
+    const rows = snapshot["tasks"];
+    if (!Array.isArray(rows)) { throw new Error("Invalid fixture tasks"); }
+    rows.forEach((row: unknown) => { rec(row)["state"] = "blocked"; });
+    const decoded = await new ViewerDataCodec().decode(JSON.stringify(data));
+    expect(await identity.identify(decoded.analysis)).toBe(version);
+    expect(service.state(decoded.analysis.review, version, decoded.analysis)).toBe("exceptions");
+  }
+});

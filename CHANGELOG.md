@@ -4,7 +4,7 @@ All notable changes to this project are documented here. The format follows Keep
 
 ## [Unreleased]
 
-- Record a manual dependency review with explicit source scope, evidence basis, relationship dispositions, and unresolved exceptions. Keep current structural uncertainty visible even when imported claims omit it. Detect changed prerequisite evidence, distinguish local records from imported claims, preserve reviews in full exports, and omit them from structure-only exports.
+- Record a manual dependency review with explicit source scope, evidence basis, relationship dispositions, and unresolved exceptions. Recompute structural uncertainty from captured task facts even when imported claims or derived metadata omit it. Detect changed prerequisite evidence, distinguish local records from imported claims, preserve reviews in full exports, and omit them from structure-only exports.
 
 - Keep canceled prerequisites unresolved instead of declaring their dependents ready. Exclude affected chains from waves and critical paths, preserve canceled tasks as inactive history, and expose the unresolved obligation in findings and task details without changing Linear.
 

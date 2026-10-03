@@ -111,3 +111,32 @@ test("imported review cannot hide known source uncertainty", async ({ page }) =>
   await expect(page.locator("#dependency-review-status")).toContainText("Reviewed with exceptions");
   await expect(page.locator("#dependency-review-status")).not.toContainText("Reviewed for this source version");
 });
+
+test("offline inconsistent derived metadata cannot erase a captured obligation", async ({ page }, info) => {
+  // oracle: an offline payload with forged derived fields still exposes the obligation encoded in captured task facts.
+  const { writeFileSync } = await import("node:fs");
+  const { pathToFileURL } = await import("node:url");
+  const { rec } = await import("../src/adapters/linear/GraphqlJson.ts");
+  const { Task } = await import("../src/core/domain/Task.ts");
+  const { AnalysisService } = await import("../src/core/services/AnalysisService.ts");
+  const { DependencyReview } = await import("../src/core/domain/DependencyReview.ts");
+  const { ReviewDecision } = await import("../src/core/domain/ReviewDecision.ts");
+  const { ReviewIdentityAdapter } = await import("../src/adapters/review/ReviewIdentityAdapter.ts");
+  const { ViewerData } = await import("../src/viewer/ViewerData.ts");
+  const { viewerPage } = await import("../src/viewer/ViewerPage.ts");
+  const analyzer = new AnalysisService({ today: (): string => "2026-10-02" });
+  const tasks = [new Task({ id: "a", title: "Canceled output", status: "canceled" }), new Task({ id: "b", title: "Consumer", blockedBy: ["a"] })];
+  const source = analyzer.analyse(tasks, "Offline inconsistent evidence");
+  const review = new DependencyReview({ sourceVersion: await new ReviewIdentityAdapter().identify(source), taskIds: ["a", "b"], basis: "Imported complete claim", exceptions: [], reviewer: "Imported reviewer", reviewedAt: "2026-10-02",
+    decisions: [new ReviewDecision({ blocker: "a", dependent: "b", outcome: "accepted", note: "Imported assertion" })] });
+  const data = rec(JSON.parse(new ViewerData().render(analyzer.analyse(tasks, source.source, { review }))));
+  const snapshot = rec(data["snapshot"]); snapshot["findings"] = [];
+  const rows = snapshot["tasks"];
+  if (!Array.isArray(rows)) { throw new Error("Invalid fixture tasks"); }
+  rows.forEach((row: unknown) => { rec(row)["state"] = "blocked"; });
+  const path = info.outputPath("inconsistent-review.html"); writeFileSync(path, viewerPage(JSON.stringify(data)));
+  await page.context().setOffline(true);
+  await page.goto(pathToFileURL(path).href);
+  await expect(page.locator("#dependency-review-status")).toContainText("Reviewed with exceptions");
+  await expect(page.locator("#dependency-review-status")).toContainText("Canceled prerequisite a");
+});

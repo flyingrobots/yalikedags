@@ -1,6 +1,8 @@
 import type { DependencyReview } from "../domain/DependencyReview.ts";
 import type { Analysis } from "./Analysis.ts";
 import { ReviewDecision } from "../domain/ReviewDecision.ts";
+import { AuditService } from "./AuditService.ts";
+import { StateService } from "./StateService.ts";
 
 export type DependencyReviewState = "unreviewed" | "reviewed" | "exceptions" | "stale";
 
@@ -18,9 +20,11 @@ export class DependencyReviewService {
   }
 
   knownExceptions(analysis: Analysis): string[] {
+    const findings = new AuditService().audit(analysis.dag);
+    const states = new StateService().states(analysis.dag);
     return [...new Set([...analysis.warnings,
-      ...analysis.findings.filter(finding => ["cycle", "dangling-blocker", "canceled-blocker"].includes(finding.kind)).map(finding => finding.detail),
-      ...analysis.dag.tasks.filter(task => analysis.stateOf(task.id) === "unresolved").map(task => `Unresolved task: ${task.key}`)])];
+      ...findings.filter(finding => ["cycle", "dangling-blocker", "canceled-blocker"].includes(finding.kind)).map(finding => finding.detail),
+      ...analysis.dag.tasks.filter(task => states.get(task.id) === "unresolved").map(task => `Unresolved task: ${task.key}`)])];
   }
 
 }
